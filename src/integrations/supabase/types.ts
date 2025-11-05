@@ -14,13 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      enrollments: {
+        Row: {
+          address: string
+          city: string
+          country: string
+          created_at: string
+          dob: string
+          email: string
+          enrollment_id: string
+          full_name: string
+          gender: string
+          id: string
+          id_proof_url: string | null
+          mobile: string
+          payment_amount: number
+          payment_id: string | null
+          payment_status: string
+          qualification: string
+          referral_code: string | null
+          state: string
+          updated_at: string
+          working_in_solar: boolean
+        }
+        Insert: {
+          address: string
+          city: string
+          country?: string
+          created_at?: string
+          dob: string
+          email: string
+          enrollment_id: string
+          full_name: string
+          gender: string
+          id?: string
+          id_proof_url?: string | null
+          mobile: string
+          payment_amount?: number
+          payment_id?: string | null
+          payment_status?: string
+          qualification: string
+          referral_code?: string | null
+          state: string
+          updated_at?: string
+          working_in_solar: boolean
+        }
+        Update: {
+          address?: string
+          city?: string
+          country?: string
+          created_at?: string
+          dob?: string
+          email?: string
+          enrollment_id?: string
+          full_name?: string
+          gender?: string
+          id?: string
+          id_proof_url?: string | null
+          mobile?: string
+          payment_amount?: number
+          payment_id?: string | null
+          payment_status?: string
+          qualification?: string
+          referral_code?: string | null
+          state?: string
+          updated_at?: string
+          working_in_solar?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_enrollment_id: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
