@@ -41,6 +41,7 @@ export const EnrollmentForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     // API Required Fields
     first_name: "",
@@ -626,11 +627,16 @@ export const EnrollmentForm = () => {
         )}
 
         <div className="pt-4">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || isProcessingPayment}>
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Submitting...
+              </>
+            ) : isProcessingPayment ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing Payment...
               </>
             ) : (
               'Submit Application'
