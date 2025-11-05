@@ -18,11 +18,13 @@ APP_URL=http://localhost:8080
 # Get these from: https://dashboard.cashfree.com/
 # For testing, use Sandbox credentials
 
-# Cashfree App ID (Client ID)
-CASHFREE_APP_ID=your_cashfree_app_id_here
+# Cashfree App ID (Client ID) - Frontend Safe
+VITE_CASHFREE_APP_ID=your_cashfree_app_id_here
 
-# Cashfree Secret Key (Client Secret)
-CASHFREE_SECRET_KEY=your_cashfree_secret_key_here
+# Cashfree API URL
+# Sandbox: https://sandbox.cashfree.com/pg/orders
+# Production: https://api.cashfree.com/pg/orders
+VITE_CASHFREE_API_URL=https://sandbox.cashfree.com/pg/orders
 
 # Cashfree API URL
 # Sandbox: https://sandbox.cashfree.com/pg/orders

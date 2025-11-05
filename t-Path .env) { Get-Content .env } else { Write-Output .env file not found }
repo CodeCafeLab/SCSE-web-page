@@ -1,0 +1,31 @@
+[1mdiff --git a/src/components/EnrollmentForm.tsx b/src/components/EnrollmentForm.tsx[m
+[1mindex 4789211..4fbcd4b 100644[m
+[1m--- a/src/components/EnrollmentForm.tsx[m
+[1m+++ b/src/components/EnrollmentForm.tsx[m
+[36m@@ -41,6 +41,7 @@[m [mexport const EnrollmentForm = () => {[m
+   const [isLoading, setIsLoading] = useState(false);[m
+   const [error, setError] = useState("");[m
+   const [success, setSuccess] = useState("");[m
+[32m+[m[32m  const [isProcessingPayment, setIsProcessingPayment] = useState(false);[m
+   const [formData, setFormData] = useState<FormData>({[m
+     // API Required Fields[m
+     first_name: "",[m
+[36m@@ -626,12 +627,17 @@[m [mexport const EnrollmentForm = () => {[m
+         )}[m
+ [m
+         <div className="pt-4">[m
+[31m-          <Button type="submit" className="w-full" disabled={isLoading}>[m
+[32m+[m[32m          <Button type="submit" className="w-full" disabled={isLoading || isProcessingPayment}>[m
+             {isLoading ? ([m
+               <>[m
+                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />[m
+                 Submitting...[m
+               </>[m
+[32m+[m[32m            ) : isProcessingPayment ? ([m
+[32m+[m[32m              <>[m
+[32m+[m[32m                <Loader2 className="w-4 h-4 mr-2 animate-spin" />[m
+[32m+[m[32m                Processing Payment...[m
+[32m+[m[32m              </>[m
+             ) : ([m
+               'Submit Application'[m
+             )}[m
