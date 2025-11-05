@@ -89,6 +89,9 @@ export const EnrollmentForm = () => {
     try {
       // Create payment session (using Vite proxy or direct API URL)
       const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      
+      console.log('Creating payment session...', { orderId, amount, apiUrl });
+      
       const response = await fetch(`${apiUrl}/payment/create-session`, {
         method: 'POST',
         headers: {
@@ -105,46 +108,45 @@ export const EnrollmentForm = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || 'Failed to create payment session';
+        const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
+        console.error('Payment session creation failed:', errorData);
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Payment session created:', data);
 
       if (!data.paymentSessionId) {
-        throw new Error('Payment session ID not received');
+        throw new Error('Payment session ID not received from server');
       }
 
-      // Wait for Cashfree SDK to be available
-      let retries = 0;
-      const maxRetries = 10;
-      while (!window.Cashfree && retries < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        retries++;
-      }
-
-      if (!window.Cashfree) {
-        // Load Cashfree SDK if not already loaded
+      // Ensure Cashfree SDK is loaded
+      const loadCashfreeSDK = (): Promise<void> => {
         return new Promise((resolve, reject) => {
+          // Check if already loaded
+          if (window.Cashfree) {
+            resolve();
+            return;
+          }
+
+          // Check if script is already being loaded
+          const existingScript = document.querySelector('script[src="https://sdk.cashfree.com/js/v3/cashfree.js"]');
+          if (existingScript) {
+            // Wait for existing script to load
+            existingScript.addEventListener('load', () => resolve());
+            existingScript.addEventListener('error', () => reject(new Error('Failed to load Cashfree SDK')));
+            return;
+          }
+
+          // Load the SDK
           const script = document.createElement('script');
           script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
           script.async = true;
           script.onload = () => {
-            try {
-              const cashfree = new window.Cashfree();
-              cashfree.drop({
-                paymentSessionId: data.paymentSessionId,
-                redirectTarget: "_self",
-                theme: {
-                  backgroundColor: "#ffffff",
-                  buttonColor: "#2563eb",
-                  buttonTextColor: "#ffffff",
-                  buttonRadius: "6px",
-                },
-              });
-              resolve(true);
-            } catch (error) {
-              reject(error);
+            if (window.Cashfree) {
+              resolve();
+            } else {
+              reject(new Error('Cashfree SDK loaded but not available'));
             }
           };
           script.onerror = () => {
@@ -152,13 +154,25 @@ export const EnrollmentForm = () => {
           };
           document.body.appendChild(script);
         });
+      };
+
+      // Load SDK and initialize payment
+      await loadCashfreeSDK();
+
+      // Wait a bit for SDK to be fully ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (!window.Cashfree) {
+        throw new Error('Cashfree SDK is not available');
       }
 
+      console.log('Initializing Cashfree payment...');
+      
       // Initialize Cashfree payment
       const cashfree = new window.Cashfree();
       cashfree.drop({
         paymentSessionId: data.paymentSessionId,
-        redirectTarget: "_self",
+        redirectTarget: "_self", // Redirect in same window
         theme: {
           backgroundColor: "#ffffff",
           buttonColor: "#2563eb",
@@ -166,6 +180,8 @@ export const EnrollmentForm = () => {
           buttonRadius: "6px",
         },
       });
+
+      console.log('Cashfree payment initialized successfully');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
