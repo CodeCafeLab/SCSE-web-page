@@ -50,7 +50,7 @@ export const EnrollmentForm = () => {
     mobile_no: "",
     advisor_id: "advisor1",
     course: "Solar Panel Technology: From Basics to Installation",
-    amount: 2999,
+    amount: 11700,
     currency: "INR",
     address: "",
     city: "",
@@ -82,6 +82,95 @@ export const EnrollmentForm = () => {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const initiatePayment = async (orderId: string, amount: number) => {
+    try {
+      // Create payment session (using Vite proxy or direct API URL)
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      const response = await fetch(`${apiUrl}/payment/create-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          amount,
+          customerName: formData.first_name,
+          customerEmail: formData.email,
+          customerPhone: formData.mobile_no.replace(/\D/g, ''),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || 'Failed to create payment session';
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+
+      if (!data.paymentSessionId) {
+        throw new Error('Payment session ID not received');
+      }
+
+      // Wait for Cashfree SDK to be available
+      let retries = 0;
+      const maxRetries = 10;
+      while (!window.Cashfree && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        retries++;
+      }
+
+      if (!window.Cashfree) {
+        // Load Cashfree SDK if not already loaded
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+          script.async = true;
+          script.onload = () => {
+            try {
+              const cashfree = new window.Cashfree();
+              cashfree.drop({
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: "_self",
+                theme: {
+                  backgroundColor: "#ffffff",
+                  buttonColor: "#2563eb",
+                  buttonTextColor: "#ffffff",
+                  buttonRadius: "6px",
+                },
+              });
+              resolve(true);
+            } catch (error) {
+              reject(error);
+            }
+          };
+          script.onerror = () => {
+            reject(new Error('Failed to load Cashfree SDK'));
+          };
+          document.body.appendChild(script);
+        });
+      }
+
+      // Initialize Cashfree payment
+      const cashfree = new window.Cashfree();
+      cashfree.drop({
+        paymentSessionId: data.paymentSessionId,
+        redirectTarget: "_self",
+        theme: {
+          backgroundColor: "#ffffff",
+          buttonColor: "#2563eb",
+          buttonTextColor: "#ffffff",
+          buttonRadius: "6px",
+        },
+      });
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
+      console.error('Payment error:', err);
+      throw new Error(errorMessage);
+    }
   };
 
   const formatDateForAPI = (dateString: string): string => {
@@ -178,55 +267,73 @@ export const EnrollmentForm = () => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          responseData.message || 
-          responseData.exception || 
-          `API request failed with status ${response.status}`
-        );
+        // Safely extract error message - handle both string and object
+        let errorMessage = 'API request failed';
+        if (responseData.message) {
+          errorMessage = typeof responseData.message === 'string' 
+            ? responseData.message 
+            : JSON.stringify(responseData.message);
+        } else if (responseData.exception) {
+          errorMessage = typeof responseData.exception === 'string'
+            ? responseData.exception
+            : JSON.stringify(responseData.exception);
+        } else {
+          errorMessage = `API request failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
+
+      // Safely extract success message
+      const successMessage = responseData.message 
+        ? (typeof responseData.message === 'string' 
+            ? responseData.message 
+            : "Your enrollment has been submitted successfully.")
+        : "Your enrollment has been submitted successfully.";
 
       // Show success message
       toast({
         title: "Enrollment Successful!",
-        description: responseData.message || "Your enrollment has been submitted successfully.",
+        description: "Redirecting to payment...",
         variant: "default",
       });
-      
-      // Reset form on success
-      setFormData({
-        first_name: "",
-        email: "",
-        gender: "",
-        birth_date: "",
-        mobile_no: "",
-        advisor_id: "advisor1",
-        course: "Solar Panel Technology: From Basics to Installation",
-        amount: 2999,
-        currency: "INR",
-        address: "",
-        city: "",
-        address_type: "Billing",
-        fathersName: "",
-        qualification: "",
-        state: "",
-        pincode: "",
-        presentOccupation: "",
-        hasSolarExperience: "",
-        reasonForJoining: "",
-        heardAboutProgram: "",
-        declaration: false
-      });
 
-      setSuccess("Form submitted successfully!");
+      // Generate unique order ID
+      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const paymentAmount = 11700; // ₹11,700
+
+      // Initiate payment flow
+      setIsLoading(false); // Reset loading state
+      setIsProcessingPayment(true);
+      
+      try {
+        await initiatePayment(orderId, paymentAmount);
+      } catch (paymentError) {
+        console.error('Payment initiation error:', paymentError);
+        const paymentErrorMessage = paymentError instanceof Error 
+          ? paymentError.message 
+          : 'Payment initialization failed';
+        
+        toast({
+          title: "Payment Error",
+          description: paymentErrorMessage,
+          variant: "destructive",
+        });
+        setIsProcessingPayment(false);
+        // Don't reset form on payment error - let user try again
+      }
       
     } catch (err) {
+      console.error('Form submission error:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
+      // Ensure errorMessage is always a string
+      const safeErrorMessage = typeof errorMessage === 'string' ? errorMessage : String(errorMessage);
+      setError(safeErrorMessage);
       toast({
         title: "Error",
-        description: errorMessage,
+        description: safeErrorMessage,
         variant: "destructive",
       });
+      setIsProcessingPayment(false);
     } finally {
       setIsLoading(false);
     }
