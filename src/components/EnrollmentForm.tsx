@@ -5,12 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const EnrollmentForm = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [enrollmentId, setEnrollmentId] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -31,7 +34,9 @@ export const EnrollmentForm = () => {
     setIsSubmitting(true);
 
     // Validation
-    if (!formData.fullName || !formData.email || !formData.mobile) {
+    if (!formData.fullName || !formData.email || !formData.mobile || !formData.dob || 
+        !formData.gender || !formData.qualification || !formData.city || !formData.state || 
+        !formData.address || !formData.workingInSolar) {
       toast({
         title: "Required fields missing",
         description: "Please fill all required fields",
@@ -41,15 +46,121 @@ export const EnrollmentForm = () => {
       return;
     }
 
-    // Simulate payment flow
-    setTimeout(() => {
+    try {
+      // Call the create-payment edge function
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          enrollmentData: {
+            fullName: formData.fullName,
+            email: formData.email,
+            mobile: formData.mobile,
+            dob: formData.dob,
+            gender: formData.gender,
+            qualification: formData.qualification,
+            city: formData.city,
+            state: formData.state,
+            country: formData.country,
+            address: formData.address,
+            workingInSolar: formData.workingInSolar === 'yes',
+            referralCode: formData.referralCode,
+          },
+        },
+      });
+
+      if (error) {
+        console.error('Payment creation error:', error);
+        throw error;
+      }
+
+      console.log('Payment response:', data);
+
+      // Load Cashfree SDK and initiate payment
+      const cashfree = (window as any).Cashfree({
+        mode: "sandbox" // Change to "production" for live
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: data.paymentSessionId,
+        redirectTarget: "_self",
+      };
+
+      cashfree.checkout(checkoutOptions).then((result: any) => {
+        if (result.error) {
+          console.error('Payment error:', result.error);
+          toast({
+            title: "Payment failed",
+            description: result.error.message || "Payment could not be processed",
+            variant: "destructive",
+          });
+        } else if (result.paymentDetails) {
+          // Payment successful - verify it
+          verifyPayment(data.orderId, data.enrollmentId);
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Enrollment error:', error);
       toast({
-        title: "Redirecting to payment",
-        description: "Please complete payment to confirm enrollment",
+        title: "Enrollment failed",
+        description: error.message || "An error occurred during enrollment",
+        variant: "destructive",
       });
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
+
+  const verifyPayment = async (orderId: string, enrollmentIdValue: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { orderId },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setPaymentSuccess(true);
+        setEnrollmentId(enrollmentIdValue);
+        toast({
+          title: "Payment Successful! 🎉",
+          description: `Your enrollment ID is: ${enrollmentIdValue}`,
+        });
+      } else {
+        toast({
+          title: "Payment verification failed",
+          description: "Please contact support",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      toast({
+        title: "Verification failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (paymentSuccess) {
+    return (
+      <div className="text-center py-12 space-y-6">
+        <CheckCircle className="w-20 h-20 mx-auto text-green-500" />
+        <h2 className="text-3xl font-bold text-primary">Payment Successful!</h2>
+        <div className="bg-accent/10 border-2 border-accent rounded-xl p-6 max-w-md mx-auto">
+          <p className="text-lg mb-2">Your Enrollment ID:</p>
+          <p className="text-3xl font-bold text-accent">{enrollmentId}</p>
+        </div>
+        <p className="text-muted-foreground">
+          A confirmation email and SMS has been sent to your registered contact details.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Please save your Enrollment ID for future reference.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
