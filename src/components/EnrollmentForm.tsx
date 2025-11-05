@@ -4,348 +4,533 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Upload, Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/WhatsApp Image 2025-11-05 at 14.24.02_49170dee.jpg";
+
+interface FormData {
+  // API Required Fields
+  first_name: string;
+  email: string;
+  gender: string;
+  birth_date: string;
+  mobile_no: string;
+  advisor_id: string;
+  course: string;
+  amount: number;
+  currency: string;
+  address: string;
+  city: string;
+  address_type: string;
+  
+  // Optional Fields (not sent to API)
+  fathersName: string;
+  qualification: string;
+  state: string;
+  pincode: string;
+  presentOccupation: string;
+  hasSolarExperience: string;
+  reasonForJoining: string;
+  heardAboutProgram: string;
+  declaration: boolean;
+  referralCode?: string;
+}
 
 export const EnrollmentForm = () => {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [enrollmentId, setEnrollmentId] = useState("");
-  const [formData, setFormData] = useState({
-    fullName: "",
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [formData, setFormData] = useState<FormData>({
+    // API Required Fields
+    first_name: "",
     email: "",
-    mobile: "",
-    dob: "",
     gender: "",
-    qualification: "",
-    city: "",
-    state: "",
-    country: "India",
+    birth_date: "",
+    mobile_no: "",
+    advisor_id: "advisor1",
+    course: "Solar Panel Technology: From Basics to Installation",
+    amount: 2999,
+    currency: "INR",
     address: "",
-    workingInSolar: "",
-    referralCode: "",
+    city: "",
+    address_type: "Billing",
+    
+    // Optional Fields
+    fathersName: "",
+    qualification: "",
+    state: "",
+    pincode: "",
+    presentOccupation: "",
+    hasSolarExperience: "",
+    reasonForJoining: "",
+    heardAboutProgram: "",
+    declaration: false
   });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+      return;
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const formatDateForAPI = (dateString: string): string => {
+    // Convert YYYY-MM-DD to DD-MM-YYYY
+    const [year, month, day] = dateString.split('-');
+    return `${day}-${month}-${year}`;
+  };
+
+  const validateForm = (): string | null => {
+    const requiredFields = [
+      { field: 'first_name', name: 'Full Name' },
+      { field: 'email', name: 'Email' },
+      { field: 'gender', name: 'Gender' },
+      { field: 'birth_date', name: 'Date of Birth' },
+      { field: 'mobile_no', name: 'Mobile Number' },
+      { field: 'address', name: 'Address' },
+      { field: 'city', name: 'City' },
+    ];
+
+    for (const { field, name } of requiredFields) {
+      const value = formData[field as keyof FormData];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        return `${name} is required`;
+      }
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      return 'Please enter a valid email address.';
+    }
+
+    // Validate mobile number (Indian format: 10 digits starting with 6-9)
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(formData.mobile_no.replace(/\D/g, ''))) {
+      return 'Please enter a valid 10-digit Indian mobile number.';
+    }
+
+    // Validate date of birth (should be in the past)
+    const today = new Date();
+    const birthDate = new Date(formData.birth_date);
+    if (birthDate >= today) {
+      return 'Date of birth must be in the past.';
+    }
+
+    // Validate declaration
+    if (!formData.declaration) {
+      return 'You must agree to the declaration.';
+    }
+
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // Validation
-    if (!formData.fullName || !formData.email || !formData.mobile || !formData.dob || 
-        !formData.gender || !formData.qualification || !formData.city || !formData.state || 
-        !formData.address || !formData.workingInSolar) {
-      toast({
-        title: "Required fields missing",
-        description: "Please fill all required fields",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      // Call the create-payment edge function
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          enrollmentData: {
-            fullName: formData.fullName,
-            email: formData.email,
-            mobile: formData.mobile,
-            dob: formData.dob,
-            gender: formData.gender,
-            qualification: formData.qualification,
-            city: formData.city,
-            state: formData.state,
-            country: formData.country,
-            address: formData.address,
-            workingInSolar: formData.workingInSolar === 'yes',
-            referralCode: formData.referralCode,
-          },
-        },
-      });
-
-      if (error) {
-        console.error('Payment creation error:', error);
-        throw error;
+      // Validate all required fields
+      const validationError = validateForm();
+      if (validationError) {
+        throw new Error(validationError);
       }
 
-      console.log('Payment response:', data);
-
-      // Load Cashfree SDK and initiate payment
-      const cashfree = (window as any).Cashfree({
-        mode: "sandbox" // Change to "production" for live
-      });
-
-      const checkoutOptions = {
-        paymentSessionId: data.paymentSessionId,
-        redirectTarget: "_self",
+      // Prepare API payload with required fields only
+      const apiPayload = {
+        first_name: formData.first_name.trim(),
+        email: formData.email.trim(),
+        gender: formData.gender,
+        birth_date: formatDateForAPI(formData.birth_date),
+        mobile_no: formData.mobile_no.replace(/\D/g, ''), // Remove any non-digit characters
+        advisor_id: formData.advisor_id,
+        course: formData.course,
+        amount: formData.amount,
+        currency: formData.currency,
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        address_type: formData.address_type,
       };
 
-      cashfree.checkout(checkoutOptions).then((result: any) => {
-        if (result.error) {
-          console.error('Payment error:', result.error);
-          toast({
-            title: "Payment failed",
-            description: result.error.message || "Payment could not be processed",
-            variant: "destructive",
-          });
-        } else if (result.paymentDetails) {
-          // Payment successful - verify it
-          verifyPayment(data.orderId, data.enrollmentId);
-        }
+      console.log('Sending payload:', apiPayload); // For debugging
+
+      // Make API call with JSON payload
+      const response = await fetch('https://erp.suncitysolar.in/api/method/lms_enrollment_api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload),
       });
 
-    } catch (error: any) {
-      console.error('Enrollment error:', error);
-      toast({
-        title: "Enrollment failed",
-        description: error.message || "An error occurred during enrollment",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-    }
-  };
+      const responseData = await response.json();
 
-  const verifyPayment = async (orderId: string, enrollmentIdValue: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: { orderId },
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        setPaymentSuccess(true);
-        setEnrollmentId(enrollmentIdValue);
-        toast({
-          title: "Payment Successful! 🎉",
-          description: `Your enrollment ID is: ${enrollmentIdValue}`,
-        });
-      } else {
-        toast({
-          title: "Payment verification failed",
-          description: "Please contact support",
-          variant: "destructive",
-        });
+      if (!response.ok) {
+        throw new Error(
+          responseData.message || 
+          responseData.exception || 
+          `API request failed with status ${response.status}`
+        );
       }
-    } catch (error: any) {
-      console.error('Verification error:', error);
+
+      // Show success message
       toast({
-        title: "Verification failed",
-        description: error.message,
+        title: "Enrollment Successful!",
+        description: responseData.message || "Your enrollment has been submitted successfully.",
+        variant: "default",
+      });
+      
+      // Reset form on success
+      setFormData({
+        first_name: "",
+        email: "",
+        gender: "",
+        birth_date: "",
+        mobile_no: "",
+        advisor_id: "advisor1",
+        course: "Solar Panel Technology: From Basics to Installation",
+        amount: 2999,
+        currency: "INR",
+        address: "",
+        city: "",
+        address_type: "Billing",
+        fathersName: "",
+        qualification: "",
+        state: "",
+        pincode: "",
+        presentOccupation: "",
+        hasSolarExperience: "",
+        reasonForJoining: "",
+        heardAboutProgram: "",
+        declaration: false
+      });
+
+      setSuccess("Form submitted successfully!");
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  if (paymentSuccess) {
+  if (success) {
     return (
       <div className="text-center py-12 space-y-6">
         <CheckCircle className="w-20 h-20 mx-auto text-green-500" />
-        <h2 className="text-3xl font-bold text-primary">Payment Successful!</h2>
-        <div className="bg-accent/10 border-2 border-accent rounded-xl p-6 max-w-md mx-auto">
-          <p className="text-lg mb-2">Your Enrollment ID:</p>
-          <p className="text-3xl font-bold text-accent">{enrollmentId}</p>
-        </div>
-        <p className="text-muted-foreground">
-          A confirmation email and SMS has been sent to your registered contact details.
+        <h2 className="text-3xl font-bold text-primary">Enrollment Submitted!</h2>
+        <p className="text-lg text-muted-foreground">
+          {success}
         </p>
-        <p className="text-sm text-muted-foreground">
-          Please save your Enrollment ID for future reference.
-        </p>
+        <Button onClick={() => window.location.reload()}>Submit Another Enrollment</Button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name *</Label>
-          <Input
-            id="fullName"
-            required
-            value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            placeholder="Enter your full name"
-            className="rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            required
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="your.email@example.com"
-            className="rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="mobile">Mobile Number *</Label>
-          <Input
-            id="mobile"
-            type="tel"
-            required
-            value={formData.mobile}
-            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-            placeholder="+91 XXXXX XXXXX"
-            className="rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dob">Date of Birth *</Label>
-          <Input
-            id="dob"
-            type="date"
-            required
-            value={formData.dob}
-            onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-            className="rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Gender *</Label>
-          <RadioGroup
-            value={formData.gender}
-            onValueChange={(value) => setFormData({ ...formData, gender: value })}
-            className="flex gap-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="male" id="male" />
-              <Label htmlFor="male" className="font-normal">Male</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="female" id="female" />
-              <Label htmlFor="female" className="font-normal">Female</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="other" id="other" />
-              <Label htmlFor="other" className="font-normal">Other</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="qualification">Education Qualification *</Label>
-          <Select
-            value={formData.qualification}
-            onValueChange={(value) => setFormData({ ...formData, qualification: value })}
-          >
-            <SelectTrigger className="rounded-xl">
-              <SelectValue placeholder="Select qualification" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10th">10th Pass</SelectItem>
-              <SelectItem value="12th">12th Pass</SelectItem>
-              <SelectItem value="diploma">Diploma</SelectItem>
-              <SelectItem value="graduate">Graduate</SelectItem>
-              <SelectItem value="postgraduate">Post Graduate</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="city">City *</Label>
-          <Input
-            id="city"
-            required
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            placeholder="Your city"
-            className="rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="state">State *</Label>
-          <Input
-            id="state"
-            required
-            value={formData.state}
-            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-            placeholder="Your state"
-            className="rounded-xl"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="address">Address *</Label>
-        <Textarea
-          id="address"
-          required
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          placeholder="Enter your complete address"
-          className="rounded-xl min-h-24"
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="flex flex-col items-center mb-8">
+        <img 
+          src={logo} 
+          alt="Sun City Solar Logo" 
+          className="h-24 w-auto mb-4"
         />
+        <h1 className="text-2xl font-bold text-primary">DISCOVERY OF SUCCESS (DOS)</h1>
+        <h2 className="text-xl font-semibold text-gray-700">Application Form – 21 Days Online Solar Business Training</h2>
       </div>
 
-      <div className="space-y-2">
-        <Label>Are you already working in Solar industry? *</Label>
-        <RadioGroup
-          value={formData.workingInSolar}
-          onValueChange={(value) => setFormData({ ...formData, workingInSolar: value })}
-          className="flex gap-6"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="yes" id="yes" />
-            <Label htmlFor="yes" className="font-normal">Yes</Label>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name">Full Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="first_name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleInputChange}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email ID <span className="text-red-500">*</span></Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="no" id="no" />
-            <Label htmlFor="no" className="font-normal">No</Label>
-          </div>
-        </RadioGroup>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="idProof">Upload ID Proof (Aadhar/PAN/Driving License) *</Label>
-        <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-accent transition-colors cursor-pointer">
-          <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Click to upload or drag and drop</p>
-          <p className="text-xs text-muted-foreground mt-1">PDF, JPG, PNG (Max 5MB)</p>
-          <input type="file" id="idProof" className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="birth_date">Date of Birth <span className="text-red-500">*</span></Label>
+              <Input
+                id="birth_date"
+                name="birth_date"
+                type="date"
+                value={formData.birth_date}
+                onChange={handleInputChange}
+                required
+                max={new Date().toISOString().split('T')[0]} // Prevent future dates
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Gender <span className="text-red-500">*</span></Label>
+              <Select
+                value={formData.gender}
+                onValueChange={(value) => handleSelectChange('gender', value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mobile_no">Mobile Number <span className="text-red-500">*</span></Label>
+              <Input
+                id="mobile_no"
+                name="mobile_no"
+                type="tel"
+                value={formData.mobile_no}
+                onChange={handleInputChange}
+                placeholder="98XXXXXXXX"
+                pattern="[6-9]\d{9}"
+                title="Please enter a valid 10-digit Indian mobile number"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address <span className="text-red-500">*</span></Label>
+            <Textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Enter your complete address"
+              required
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City <span className="text-red-500">*</span></Label>
+              <Input
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                placeholder="Enter your city"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleInputChange}
+                placeholder="Enter your state"
+              />
+            </div>
+          </div>
+
+          {/* Optional Fields (Not required for API) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fathersName">Father's / Mother's Name</Label>
+              <Input
+                id="fathersName"
+                name="fathersName"
+                value={formData.fathersName}
+                onChange={handleInputChange}
+                placeholder="Parent's Name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode</Label>
+              <Input
+                id="pincode"
+                name="pincode"
+                type="text"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                placeholder="Pincode"
+                maxLength={6}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="qualification">Educational Qualification</Label>
+              <Input
+                id="qualification"
+                name="qualification"
+                value={formData.qualification}
+                onChange={handleInputChange}
+                placeholder="e.g., 10th, 12th, Graduation, etc."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="presentOccupation">Present Occupation</Label>
+              <Input
+                id="presentOccupation"
+                name="presentOccupation"
+                value={formData.presentOccupation}
+                onChange={handleInputChange}
+                placeholder="e.g., Student, Business, Job, etc."
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Prior Experience in Solar Business?</Label>
+            <div className="flex gap-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="solarExpYes"
+                  name="hasSolarExperience"
+                  value="yes"
+                  checked={formData.hasSolarExperience === 'yes'}
+                  onChange={(e) => handleSelectChange('hasSolarExperience', e.target.value)}
+                  className="h-4 w-4 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="solarExpYes" className="font-normal">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="solarExpNo"
+                  name="hasSolarExperience"
+                  value="no"
+                  checked={formData.hasSolarExperience === 'no'}
+                  onChange={(e) => handleSelectChange('hasSolarExperience', e.target.value)}
+                  className="h-4 w-4 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="solarExpNo" className="font-normal">No</Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reasonForJoining">Reason for Joining the Course</Label>
+            <Textarea
+              id="reasonForJoining"
+              name="reasonForJoining"
+              value={formData.reasonForJoining}
+              onChange={handleInputChange}
+              placeholder="Please share your motivation for joining this course"
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="heardAboutProgram">How did you hear about the program?</Label>
+            <Select
+              value={formData.heardAboutProgram}
+              onValueChange={(value) => handleSelectChange('heardAboutProgram', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="social_media">Social Media (Facebook, Instagram, etc.)</SelectItem>
+                <SelectItem value="friend">Friend/Family</SelectItem>
+                <SelectItem value="newspaper">Newspaper/Advertisement</SelectItem>
+                <SelectItem value="search_engine">Search Engine (Google, etc.)</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="referralCode">Referred By (Advisor Code, if any)</Label>
+            <Input
+              id="referralCode"
+              name="referralCode"
+              value={formData.referralCode || ''}
+              onChange={handleInputChange}
+              placeholder="Enter referral code if any"
+            />
+          </div>
+
+          <div className="space-y-4 pt-4 border-t mt-6">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-700 mb-4">
+                I hereby declare that all information provided above is true and correct to the best of my knowledge. I agree to abide by the rules and regulations of Discovery of Success.
+              </p>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="declaration"
+                  name="declaration"
+                  checked={formData.declaration}
+                  onChange={(e) => setFormData(prev => ({ ...prev, declaration: e.target.checked }))}
+                  className="h-4 w-4 text-primary focus:ring-primary rounded"
+                  required
+                />
+                <Label htmlFor="declaration" className="font-normal text-sm">
+                  I agree to the above declaration <span className="text-red-500">*</span>
+                </Label>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="referralCode">Referral Code (Optional)</Label>
-        <Input
-          id="referralCode"
-          value={formData.referralCode}
-          onChange={(e) => setFormData({ ...formData, referralCode: e.target.value })}
-          placeholder="Enter referral code if any"
-          className="rounded-xl"
-        />
-      </div>
-
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full h-14 text-lg rounded-xl bg-gradient-to-r from-accent to-[hsl(35,100%,55%)] hover:shadow-[var(--shadow-glow)] transition-all duration-300"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Processing...
-          </>
-        ) : (
-          "Proceed to Payment - ₹11,700"
+        {error && (
+          <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg">
+            {error}
+          </div>
         )}
-      </Button>
-    </form>
+
+        <div className="pt-4">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              'Submit Application'
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };

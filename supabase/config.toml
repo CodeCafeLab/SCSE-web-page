@@ -1,7 +1,0 @@
-project_id = "phbrgtebakvmbblrpwnw"
-
-[functions.create-payment]
-verify_jwt = false
-
-[functions.verify-payment]
-verify_jwt = false

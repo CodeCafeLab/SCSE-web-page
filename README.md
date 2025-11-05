@@ -1,73 +1,97 @@
-# Welcome to your Lovable project
+# SunCity Enrollment Flow
 
-## Project info
+This project is a web application for enrolling in the SunCity program. It includes a frontend built with React and Vite, and a backend using Supabase for database, authentication, and serverless functions.
 
-**URL**: https://lovable.dev/projects/9e5d3877-1c02-473a-8116-17d40017f994
+## Getting Started
 
-## How can I edit this code?
+### Prerequisites
 
-There are several ways of editing your application.
+- Node.js and npm
+- Supabase account
 
-**Use Lovable**
+### Installation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9e5d3877-1c02-473a-8116-17d40017f994) and start prompting.
+1.  Clone the repository:
 
-Changes made via Lovable will be committed automatically to this repo.
+    ```bash
+    git clone https://github.com/your-username/suncity-enroll-flow.git
+    cd suncity-enroll-flow
+    ```
 
-**Use your preferred IDE**
+2.  Install the dependencies:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+    ```bash
+    npm install
+    ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3.  Create a `.env` file in the root of the project and add the following environment variables:
 
-Follow these steps:
+    ```
+    VITE_SUPABASE_PROJECT_ID="your-supabase-project-id"
+    VITE_SUPABASE_PUBLISHABLE_KEY="your-supabase-publishable-key"
+    VITE_SUPABASE_URL="https://your-supabase-project-id.supabase.co"
+    ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Supabase Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1.  **Create a new Supabase project.**
 
-# Step 3: Install the necessary dependencies.
-npm i
+2.  **Create the `enrollments` table:**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+    Go to the SQL Editor in your Supabase dashboard and run the following query:
+
+    ```sql
+    CREATE TABLE enrollments (
+      enrollment_id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      address TEXT NOT NULL,
+      working_in_solar BOOLEAN NOT NULL,
+      referral_code TEXT,
+      payment_status TEXT NOT NULL DEFAULT 'pending',
+      payment_id TEXT,
+      id_proof_path TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    ```
+
+3.  **Create the `enrollment-id-proofs` storage bucket:**
+
+    - Go to the Storage section in your Supabase dashboard.
+    - Click on "New bucket".
+    - Enter `enrollment-id-proofs` as the bucket name.
+    - Make the bucket **public**.
+
+4.  **Set up storage policies:**
+
+    Go to `Storage` > `Policies` and add the following policies for the `enrollment-id-proofs` bucket:
+
+    - **Allow public read access:**
+
+      ```sql
+      CREATE POLICY "Public read access" ON storage.objects FOR SELECT USING ( bucket_id = 'enrollment-id-proofs' );
+      ```
+
+    - **Allow authenticated users to upload:**
+
+      ```sql
+      CREATE POLICY "Allow authenticated uploads" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'enrollment-id-proofs' AND auth.role() = 'authenticated' );
+      ```
+
+5.  **Set up environment variables for Supabase Functions:**
+
+    Go to `Settings` > `Functions` in your Supabase dashboard and add the following environment variables:
+
+    - `SUPABASE_URL`: The URL of your Supabase project.
+    - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase project's service role key.
+    - `CASHFREE_APP_ID`: Your Cashfree application ID.
+    - `CASHFREE_SECRET_KEY`: Your Cashfree secret key.
+
+### Running the Application
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/9e5d3877-1c02-473a-8116-17d40017f994) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This will start the development server at `http://localhost:5173`.
