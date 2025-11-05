@@ -106,133 +106,116 @@ export const EnrollmentForm = () => {
 
   const initiatePayment = async (orderId: string, amount: number) => {
     try {
-      // Call Cashfree API directly (no backend needed)
-      const cashfreeApiUrl = import.meta.env.VITE_CASHFREE_API_URL || 'https://sandbox.cashfree.com/pg/orders';
+      // Cashfree API requires backend due to CORS restrictions
+      // Use backend API endpoint (must be running on same domain or CORS-enabled)
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const clientId = import.meta.env.VITE_CASHFREE_APP_ID || '';
       
-      console.log('Creating Cashfree order...', { orderId, amount, clientId });
+      console.log('Creating Cashfree order via backend...', { orderId, amount, clientId, apiUrl });
 
       if (!clientId) {
         throw new Error('Cashfree Client ID not configured. Please set VITE_CASHFREE_APP_ID in your .env file');
       }
 
-      // Use production domain for callbacks
-      const baseUrl = window.location.origin; // Will be https://dos.suncitysolar.in in production
-      const returnUrl = `${baseUrl}/payment/callback?order_id={order_id}`;
-
-      console.log('Calling Cashfree API directly...', { cashfreeApiUrl, returnUrl });
-      
-      // Create order directly with Cashfree API
-      const response = await fetch(cashfreeApiUrl, {
+      // Call backend API (which calls Cashfree API server-side to avoid CORS)
+      const response = await fetch(`${apiUrl}/payment/create-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-client-id': clientId,
-          'x-api-version': '2023-08-01',
         },
         body: JSON.stringify({
-          order_id: orderId,
-          order_amount: amount,
-          order_currency: 'INR',
-          order_note: 'Course Enrollment Fee - Discovery of Success',
-          customer_details: {
-            customer_id: formData.email,
-            customer_name: formData.first_name,
-            customer_email: formData.email,
-            customer_phone: formData.mobile_no.replace(/\D/g, ''),
-          },
-          order_meta: {
-            return_url: returnUrl,
-            notify_url: `${baseUrl}/api/payment/webhook`,
-          },
+          orderId,
+          amount,
+          customerName: formData.first_name,
+          customerEmail: formData.email,
+          customerPhone: formData.mobile_no.replace(/\D/g, ''),
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || `Failed to create order (${response.status})`;
+        const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
+        console.error('Payment session creation failed:', errorData);
         
-        // Check if it's an authentication error
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 0 || response.status === 500) {
           throw new Error(
-            'Cashfree authentication failed. Please check your VITE_CASHFREE_APP_ID in .env file. ' +
-            'Note: Cashfree API requires Client Secret for order creation. ' +
-            'You may need to use Cashfree Payment Links or configure your Cashfree dashboard settings.'
+            'Cannot connect to payment server. Please ensure backend server is running and ' +
+            'CASHFREE_SECRET_KEY is configured in server .env file.'
           );
         }
         
-        console.error('Cashfree order creation failed:', errorData);
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      console.log('Cashfree order created:', data);
+      console.log('Payment session created:', data);
 
-      // Handle payment_link (hosted checkout) - redirect immediately
+      if (!data.paymentSessionId && !data.payment_session_id) {
+        throw new Error('Payment session ID not received from server');
+      }
+
+      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
+
+      // Handle payment_link if available (redirect immediately)
       if (data.payment_link) {
         console.log('Redirecting to Cashfree payment page...');
         window.location.href = data.payment_link;
         return;
       }
 
-      // Handle payment_session_id (SDK-based checkout)
-      if (data.payment_session_id) {
-        // Ensure Cashfree SDK is loaded
-        const loadCashfreeSDK = (): Promise<void> => {
-          return new Promise((resolve, reject) => {
+      // Ensure Cashfree SDK is loaded
+      const loadCashfreeSDK = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          if (window.Cashfree) {
+            resolve();
+            return;
+          }
+
+          const existingScript = document.querySelector('script[src="https://sdk.cashfree.com/js/v3/cashfree.js"]');
+          if (existingScript) {
+            existingScript.addEventListener('load', () => resolve());
+            existingScript.addEventListener('error', () => reject(new Error('Failed to load Cashfree SDK')));
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+          script.async = true;
+          script.onload = () => {
             if (window.Cashfree) {
               resolve();
-              return;
+            } else {
+              reject(new Error('Cashfree SDK loaded but not available'));
             }
-
-            const existingScript = document.querySelector('script[src="https://sdk.cashfree.com/js/v3/cashfree.js"]');
-            if (existingScript) {
-              existingScript.addEventListener('load', () => resolve());
-              existingScript.addEventListener('error', () => reject(new Error('Failed to load Cashfree SDK')));
-              return;
-            }
-
-            const script = document.createElement('script');
-            script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
-            script.async = true;
-            script.onload = () => {
-              if (window.Cashfree) {
-                resolve();
-              } else {
-                reject(new Error('Cashfree SDK loaded but not available'));
-              }
-            };
-            script.onerror = () => {
-              reject(new Error('Failed to load Cashfree SDK'));
-            };
-            document.body.appendChild(script);
-          });
-        };
-
-        await loadCashfreeSDK();
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        if (!window.Cashfree) {
-          throw new Error('Cashfree SDK is not available');
-        }
-
-        console.log('Initializing Cashfree payment...');
-        const cashfree = new window.Cashfree();
-        cashfree.drop({
-          paymentSessionId: data.payment_session_id,
-          redirectTarget: "_self",
-          theme: {
-            backgroundColor: "#ffffff",
-            buttonColor: "#2563eb",
-            buttonTextColor: "#ffffff",
-            buttonRadius: "6px",
-          },
+          };
+          script.onerror = () => {
+            reject(new Error('Failed to load Cashfree SDK'));
+          };
+          document.body.appendChild(script);
         });
+      };
 
-        console.log('Cashfree payment initialized successfully');
-      } else {
-        throw new Error('No payment link or session ID received from Cashfree');
+      await loadCashfreeSDK();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (!window.Cashfree) {
+        throw new Error('Cashfree SDK is not available');
       }
+
+      console.log('Initializing Cashfree payment...');
+      const cashfree = new window.Cashfree();
+      cashfree.drop({
+        paymentSessionId: paymentSessionId,
+        redirectTarget: "_self",
+        theme: {
+          backgroundColor: "#ffffff",
+          buttonColor: "#2563eb",
+          buttonTextColor: "#ffffff",
+          buttonRadius: "6px",
+        },
+      });
+
+      console.log('Cashfree payment initialized successfully');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';

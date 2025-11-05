@@ -13,9 +13,11 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://dos.suncitysolar.in', 'https://www.dos.suncitysolar.in']
-    : ['http://localhost:8080', 'http://localhost:5173'],
+    : ['http://localhost:8080', 'http://localhost:5173', 'https://dos.suncitysolar.in'],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
 app.use(express.json());
