@@ -32,10 +32,14 @@ export const ThankYou = () => {
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'pending' | 'failed'>('pending');
 
   useEffect(() => {
+    // This function will be called when the component mounts
     const processPayment = async () => {
       try {
+        console.log('Processing payment...');
+        
         // Get all URL parameters
         const params = Object.fromEntries(searchParams.entries());
+        console.log('URL Params:', params);
         
         // Extract form data from URL parameters
         const formData: FormData = {
@@ -55,6 +59,8 @@ export const ThankYou = () => {
           currency: params.currency || "INR"
         };
 
+        console.log('Form Data:', formData);
+
         // Check payment status from URL parameters
         const paymentStatus = params.payment_status || 
                             params.txStatus || 
@@ -64,43 +70,36 @@ export const ThankYou = () => {
         setPaymentStatus(status);
         setFormData(formData);
 
-        // If we have enough data, try to submit to the API
-        if (formData.email && formData.mobile_no) {
-          await submitEnrollment(formData, params, status);
-        }
-      } catch (error) {
-        console.error('Error processing payment:', error);
-        setApiError(error instanceof Error ? error.message : 'An unknown error occurred');
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
+        console.log('Payment Status:', status);
+        console.log('Email and Mobile Check:', { 
+          hasEmail: !!formData.email, 
+          hasMobile: !!formData.mobile_no 
+        });
 
-    const submitEnrollment = async (formData: FormData, params: Record<string, string>, currentStatus: 'success' | 'pending' | 'failed') => {
-      try {
-        // Prepare the API payload
+        // Submit to the enrollment API
         const apiPayload = {
-          first_name: formData.first_name?.trim() || '',
-          email: formData.email?.trim() || '',
+          first_name: formData.first_name || '',
+          email: formData.email || '',
           gender: formData.gender || '',
           birth_date: formData.birth_date || '',
-          mobile_no: formData.mobile_no?.replace(/\D/g, '') || '',
+          mobile_no: formData.mobile_no ? formData.mobile_no.replace(/\D/g, '') : '',
           advisor_id: "advisor1",
           course: formData.course || "Solar Panel Technology: From Basics to Installation",
-          amount: formData.amount || 11700,
+          amount: formData.amount ? parseInt(formData.amount) : 11700,
           currency: formData.currency || 'INR',
-          address: formData.address?.trim() || '',
-          city: formData.city?.trim() || '',
+          address: formData.address ? formData.address.trim() : '',
+          city: formData.city ? formData.city.trim() : '',
           state: formData.state || '',
           pincode: formData.pincode || '',
           qualification: formData.qualification || '',
           present_occupation: formData.present_occupation || '',
           address_type: "Billing",
           payment_id: params.payment_id || params.cf_payment_id || `pending_${Date.now()}`,
-          payment_status: currentStatus
+          payment_status: status
         };
 
-        // Submit to the enrollment API
+        console.log('API Payload:', apiPayload);
+
         const response = await fetch(
           "https://erp.suncitysolar.in/api/method/lms_enrollment_api",
           {
@@ -118,15 +117,29 @@ export const ThankYou = () => {
         }
 
         // If we get here, the API call was successful
-        setPaymentStatus('success');
+        console.log('Enrollment successful');
+        
       } catch (error) {
-        console.error('Enrollment error:', error);
-        throw error; // Re-throw to be caught by the outer try-catch
+        console.error('Error processing payment:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        setApiError(errorMessage);
+        
+        toast({
+          title: "Error",
+          description: `Failed to process enrollment: ${errorMessage}`,
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
+    // Call the function immediately when the component mounts
     processPayment();
-  }, [searchParams, paymentStatus]);
+    
+    // We only want this to run once when the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array means this runs once on mount
 
   // If still submitting, show loading state
   if (isSubmitting) {
@@ -134,8 +147,8 @@ export const ThankYou = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900">Processing Your Payment</h2>
-          <p className="mt-2 text-gray-600">Please wait while we verify your payment details...</p>
+          <h2 className="text-2xl font-semibold text-gray-900">Processing Your Enrollment</h2>
+          <p className="mt-2 text-gray-600">Please wait while we process your enrollment...</p>
         </div>
       </div>
     );
