@@ -71,32 +71,69 @@ export const ThankYou = () => {
         setFormData(formData);
 
         console.log('Payment Status:', status);
-        console.log('Email and Mobile Check:', { 
+        console.log('Form Data Check:', { 
+          hasFirstName: !!formData.first_name,
           hasEmail: !!formData.email, 
-          hasMobile: !!formData.mobile_no 
+          hasMobile: !!formData.mobile_no,
+          hasCourse: !!formData.course
         });
+        
+        // Validate required fields before proceeding
+        if (!formData.first_name || !formData.email || !formData.course) {
+          const missingFields = [];
+          if (!formData.first_name) missingFields.push('first_name');
+          if (!formData.email) missingFields.push('email');
+          if (!formData.course) missingFields.push('course');
+          
+          throw new Error(`Missing required fields in URL parameters: ${missingFields.join(', ')}`);
+        }
 
-        // Submit to the enrollment API
+        // Log the form data from URL params for debugging
+        console.log('Form Data from URL:', formData);
+        
+        // Create the API payload with all required fields
+        // Use the formData object that was created from URL parameters
         const apiPayload = {
-          first_name: formData.first_name || '',
-          email: formData.email || '',
-          gender: formData.gender || '',
+          // Required fields
+          first_name: formData.first_name || 'Not Provided',
+          email: formData.email || 'not-provided@example.com',
+          course: formData.course || "Solar Panel Technology: From Basics to Installation",
+          
+          // Personal Information
+          gender: formData.gender || 'Not Specified',
           birth_date: formData.birth_date || '',
           mobile_no: formData.mobile_no ? formData.mobile_no.replace(/\D/g, '') : '',
+          
+          // System Fields
           advisor_id: "advisor1",
-          course: formData.course || "Solar Panel Technology: From Basics to Installation",
+          
+          // Payment Information
           amount: formData.amount ? parseInt(formData.amount) : 11700,
           currency: formData.currency || 'INR',
-          address: formData.address ? formData.address.trim() : '',
-          city: formData.city ? formData.city.trim() : '',
-          state: formData.state || '',
-          pincode: formData.pincode || '',
-          qualification: formData.qualification || '',
-          present_occupation: formData.present_occupation || '',
-          address_type: "Billing",
           payment_id: params.payment_id || params.cf_payment_id || `pending_${Date.now()}`,
-          payment_status: status
+          payment_status: status,
+          
+          // Address Information
+          address: formData.address ? formData.address.trim() : 'Not Provided',
+          city: formData.city ? formData.city.trim() : 'Not Specified',
+          state: formData.state || 'Not Specified',
+          pincode: formData.pincode || '000000',
+          
+          // Education & Career
+          qualification: formData.qualification || 'Not Specified',
+          present_occupation: formData.present_occupation || 'Not Specified',
+          
+          // Additional required fields
+          address_type: "Billing",
+          
+          // Add any other fields that might be required by the API
+          country: 'India',
+          source: 'Website',
+          enrollment_date: new Date().toISOString().split('T')[0]
         };
+        
+        // Log the payload for debugging
+        console.log('Sending payload to API:', JSON.stringify(apiPayload, null, 2));
 
         console.log('API Payload:', apiPayload);
 
