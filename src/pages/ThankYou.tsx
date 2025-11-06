@@ -6,20 +6,20 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 
 type FormData = {
-  first_name: string;
-  email: string;
-  gender: string;
-  birth_date: string;
-  mobile_no: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  qualification: string;
-  present_occupation: string;
-  course: string;
-  amount: string;
-  currency: string;
+  first_name?: string;
+  email?: string;
+  gender?: string;
+  birth_date?: string;
+  mobile_no?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  qualification?: string;
+  present_occupation?: string;
+  course?: string;
+  amount?: string;
+  currency?: string;
 };
 
 export const ThankYou = () => {
@@ -27,40 +27,77 @@ export const ThankYou = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(true);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'success' | 'pending' | 'failed'>('pending');
 
   useEffect(() => {
-    const submitEnrollment = async () => {
+    const processPayment = async () => {
       try {
-        const formData = Object.fromEntries(searchParams.entries()) as unknown as FormData;
+        // Get all URL parameters
+        const params = Object.fromEntries(searchParams.entries());
         
-        // Check if we have a payment_id to confirm payment was successful
-        const paymentId = searchParams.get('payment_id');
-        if (!paymentId) {
-          throw new Error('Payment verification failed: No payment ID found');
-        }
+        // Extract form data from URL parameters
+        const formData: FormData = {
+          first_name: params.first_name,
+          email: params.email,
+          gender: params.gender,
+          birth_date: params.birth_date,
+          mobile_no: params.mobile_no,
+          address: params.address,
+          city: params.city,
+          state: params.state,
+          pincode: params.pincode,
+          qualification: params.qualification,
+          present_occupation: params.present_occupation,
+          course: params.course || "Solar Panel Technology: From Basics to Installation",
+          amount: params.amount || "11700",
+          currency: params.currency || "INR"
+        };
 
+        // Check payment status from URL parameters
+        const paymentStatus = params.payment_status || 
+                            params.txStatus || 
+                            (params.payment_id ? 'success' : 'pending');
+        
+        const status = paymentStatus.toLowerCase() as 'success' | 'pending' | 'failed';
+        setPaymentStatus(status);
+        setFormData(formData);
+
+        // If we have enough data, try to submit to the API
+        if (formData.email && formData.mobile_no) {
+          await submitEnrollment(formData, params, status);
+        }
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        setApiError(error instanceof Error ? error.message : 'An unknown error occurred');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const submitEnrollment = async (formData: FormData, params: Record<string, string>, currentStatus: 'success' | 'pending' | 'failed') => {
+      try {
         // Prepare the API payload
         const apiPayload = {
-          first_name: formData.first_name.trim(),
-          email: formData.email.trim(),
-          gender: formData.gender,
-          birth_date: formData.birth_date,
-          mobile_no: formData.mobile_no.replace(/\D/g, ''),
+          first_name: formData.first_name?.trim() || '',
+          email: formData.email?.trim() || '',
+          gender: formData.gender || '',
+          birth_date: formData.birth_date || '',
+          mobile_no: formData.mobile_no?.replace(/\D/g, '') || '',
           advisor_id: "advisor1",
           course: formData.course || "Solar Panel Technology: From Basics to Installation",
           amount: formData.amount || 11700,
           currency: formData.currency || 'INR',
-          address: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state,
-          pincode: formData.pincode,
-          qualification: formData.qualification,
-          present_occupation: formData.present_occupation,
+          address: formData.address?.trim() || '',
+          city: formData.city?.trim() || '',
+          state: formData.state || '',
+          pincode: formData.pincode || '',
+          qualification: formData.qualification || '',
+          present_occupation: formData.present_occupation || '',
           address_type: "Billing",
-          payment_id: paymentId,
-          payment_status: 'completed'
+          payment_id: params.payment_id || params.cf_payment_id || `pending_${Date.now()}`,
+          payment_status: currentStatus
         };
 
         // Submit to the enrollment API
@@ -80,26 +117,16 @@ export const ThankYou = () => {
           throw new Error(errorData.message || 'Failed to process enrollment');
         }
 
-        // Store the form data for display
-        setFormData(formData);
-        setSubmissionError(null);
+        // If we get here, the API call was successful
+        setPaymentStatus('success');
       } catch (error) {
         console.error('Enrollment error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        setSubmissionError(errorMessage);
-        
-        toast({
-          title: "Enrollment Error",
-          description: `We received your payment but encountered an issue with your enrollment: ${errorMessage}`,
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
+        throw error; // Re-throw to be caught by the outer try-catch
       }
     };
 
-    submitEnrollment();
-  }, [searchParams, toast]);
+    processPayment();
+  }, [searchParams, paymentStatus]);
 
   // If still submitting, show loading state
   if (isSubmitting) {
@@ -107,15 +134,15 @@ export const ThankYou = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900">Processing Your Enrollment</h2>
-          <p className="mt-2 text-gray-600">Please wait while we confirm your payment and complete your enrollment...</p>
+          <h2 className="text-2xl font-semibold text-gray-900">Processing Your Payment</h2>
+          <p className="mt-2 text-gray-600">Please wait while we verify your payment details...</p>
         </div>
       </div>
     );
   }
 
-  // If there was an error, show error state
-  if (submissionError || !formData) {
+  // If there was an API error, show error state
+  if (apiError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
@@ -124,11 +151,10 @@ export const ThankYou = () => {
           </div>
           <h2 className="mt-3 text-2xl font-semibold text-gray-900">Enrollment Incomplete</h2>
           <p className="mt-2 text-gray-600">
-            {submissionError || 'We encountered an issue processing your enrollment.'}
+            {apiError}
           </p>
           <p className="mt-4 text-sm text-gray-500">
-            Your payment was successful, but we couldn't complete your enrollment. 
-            Our team has been notified and will contact you shortly.
+            We're having trouble processing your enrollment. Please contact support with your payment details.
           </p>
           <div className="mt-6">
             <Button onClick={() => navigate('/')}>
@@ -141,7 +167,8 @@ export const ThankYou = () => {
   }
 
   // Format amount for display
-  const formatAmount = (amount: string | number) => {
+  const formatAmount = (amount: string | number | undefined) => {
+    if (amount === undefined || amount === '') return '₹0';
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return isNaN(num) ? '₹0' : num.toLocaleString('en-IN', {
       style: 'currency',
@@ -151,6 +178,7 @@ export const ThankYou = () => {
     });
   };
 
+  // Always show the success page, even if we don't have form data
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -161,13 +189,17 @@ export const ThankYou = () => {
               <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {paymentStatus === 'success' ? 'Payment Successful!' : 'Thank You!'}
+          </h1>
           <p className="text-lg text-gray-600">
-            Thank you for              {formData.course || 'the course'}
+            {formData?.course ? `Thank you for enrolling in ${formData.course}` : 'Thank you for your payment'}
           </p>
-          <p className="text-gray-500 mt-2">
-            A confirmation has been sent to {formData.email}
-          </p>
+          {formData?.email && (
+            <p className="text-gray-500 mt-2">
+              A confirmation has been sent to {formData.email}
+            </p>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -176,42 +208,48 @@ export const ThankYou = () => {
           
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="font-medium text-gray-900">{formData.course || 'Course Enrollment'}</h3>
-              <span className="font-medium text-gray-900">{formatAmount(formData.amount)}</span>
+              <h3 className="font-medium text-gray-900">{formData?.course || 'Course Enrollment'}</h3>
+              <span className="font-medium text-gray-900">{formatAmount(formData?.amount)}</span>
             </div>
             <div className="text-sm text-gray-500">
-              <p>Payment ID: {searchParams.get('payment_id') || searchParams.get('cf_payment_id') || 'N/A'}</p>
+              <p>Payment Status: {paymentStatus === 'success' ? 'Completed' : 'Processing'}</p>
               <p>Date: {new Date().toLocaleDateString()}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">STUDENT DETAILS</h3>
-              <div className="space-y-1 text-sm">
-                <p className="text-gray-900">{formData.first_name}</p>
-                <p className="text-gray-600">{formData.email}</p>
-                <p className="text-gray-600">+91 {formData.mobile_no}</p>
-                {formData.qualification && (
-                  <p className="text-gray-600">Qualification: {formData.qualification}</p>
-                )}
-                {formData.present_occupation && (
-                  <p className="text-gray-600">Occupation: {formData.present_occupation}</p>
-                )}
+          {formData && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">STUDENT DETAILS</h3>
+                <div className="space-y-1 text-sm">
+                  {formData.first_name && <p className="text-gray-900">{formData.first_name}</p>}
+                  {formData.email && <p className="text-gray-600">{formData.email}</p>}
+                  {formData.mobile_no && <p className="text-gray-600">+91 {formData.mobile_no}</p>}
+                  {formData.qualification && (
+                    <p className="text-gray-600">Qualification: {formData.qualification}</p>
+                  )}
+                  {formData.present_occupation && (
+                    <p className="text-gray-600">Occupation: {formData.present_occupation}</p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">BILLING ADDRESS</h3>
-              <div className="space-y-1 text-sm">
-                <p className="text-gray-900">{formData.first_name}</p>
-                <p className="text-gray-600">{formData.address}</p>
-                <p className="text-gray-600">
-                  {formData.city}, {formData.state} {formData.pincode}
-                </p>
-              </div>
+              {(formData.address || formData.city || formData.state || formData.pincode) && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">BILLING ADDRESS</h3>
+                  <div className="space-y-1 text-sm">
+                    {formData.first_name && <p className="text-gray-900">{formData.first_name}</p>}
+                    {formData.address && <p className="text-gray-600">{formData.address}</p>}
+                    {(formData.city || formData.state || formData.pincode) && (
+                      <p className="text-gray-600">
+                        {[formData.city, formData.state, formData.pincode].filter(Boolean).join(', ')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Next Steps */}
