@@ -1,11 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, CreditCard } from "lucide-react";
+import { ArrowRight, Star, Calendar, Award, Clock, CreditCard, Check } from "lucide-react";
 import { useState, useEffect } from "react";
-
+import { cn } from "@/lib/utils";
+  
 export const HeroSection = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 5, hours: 12, minutes: 30, seconds: 45 });
-
+  const [isMobile, setIsMobile] = useState(false);
+  
   useEffect(() => {
+    // Check if mobile on mount
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Timer effect
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev.seconds > 0) {
@@ -21,7 +32,10 @@ export const HeroSection = () => {
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('resize', checkIfMobile);
+    };
   }, []);
 
   const scrollToForm = () => {
@@ -29,83 +43,151 @@ export const HeroSection = () => {
   };
 
   const handlePayment = () => {
-    // Replace with your actual Cashfree form URL
     const paymentFormUrl = 'https://payments.cashfree.com/forms/solar-training-jan2026';
-    
-    // Open in new tab (recommended)
     window.open(paymentFormUrl, '_blank', 'noopener,noreferrer');
-    
-    // Alternative: Redirect in same tab
-    // window.location.href = paymentFormUrl;
   };
 
+  const features = [
+    { text: 'Lifetime Access', icon: Clock },
+    { text: 'Certificate on Completion', icon: Award },
+    { text: 'Flexible Payment Options', icon: CreditCard },
+  ];
+
   return (
-    <section className="relative bg-gradient-to-br from-primary via-primary to-[hsl(210,65%,35%)] text-white py-16 md:py-24 overflow-hidden">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
+    <section id="home" className="relative w-full bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 text-white py-12 sm:py-16 md:py-20 lg:py-28 overflow-x-hidden">
+      {/* Background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80)',
+          backgroundAttachment: 'fixed'
+        }}
+        aria-hidden="true"
+      ></div>
       
-      <div className="container mx-auto px-4 relative">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
-            <Clock className="w-5 h-5 text-accent" />
-            <span className="text-sm font-semibold">Admissions Closing In:</span>
-            <div className="flex gap-2 ml-2">
-              <div className="bg-white/20 px-3 py-1 rounded-lg">
-                <span className="font-bold">{timeLeft.days}d</span>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/30"></div>
+      
+      <div className="w-full max-w-full px-4 sm:px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium text-white/90 mb-6 sm:mb-8">
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 text-yellow-300 fill-yellow-300 flex-shrink-0" />
+            <span>Rated 4.9/5 by 500+ Students</span>
+          </div>  
+          
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left Column - Content */}
+            <div className="text-center lg:text-left space-y-4 sm:space-y-5 md:space-y-6">
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+                Become a Certified Solar Expert & Build a Rewarding Career
+              </h1>
+              
+              <p className="text-sm xs:text-base sm:text-lg text-white/90 max-w-2xl mx-auto lg:mx-0">
+                Join India's most comprehensive solar training program and get certified in just 6 weeks. Limited seats available for the upcoming batch!
+              </p>
+              
+              {/* Features List */}
+              <div className="space-y-2.5 sm:space-y-3 pt-1">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon;
+                  return (
+                    <div key={index} className="flex items-center space-x-2 sm:space-x-3">
+                      <div className="flex-shrink-0 bg-white/20 p-1 rounded-full">
+                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-300" />
+                      </div>
+                      <span className="text-xs xs:text-sm sm:text-base">{feature.text}</span>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="bg-white/20 px-3 py-1 rounded-lg">
-                <span className="font-bold">{timeLeft.hours}h</span>
+              
+              {/* CTA Buttons */}
+              <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4 pt-2">
+                <Button 
+                  onClick={scrollToForm}
+                  size={isMobile ? 'default' : 'lg'}
+                  className="w-full xs:w-auto flex-1 sm:flex-none bg-white text-amber-700 hover:bg-amber-50 font-medium text-sm sm:text-base md:text-lg px-4 sm:px-6 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                >
+                  Enroll Now <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+                <Button 
+                  onClick={handlePayment}
+                  variant="outline" 
+                  size={isMobile ? 'default' : 'lg'}
+                  className="w-full xs:w-auto flex-1 sm:flex-none border-2 border-white/30 bg-transparent text-white hover:bg-white/10 font-medium text-sm sm:text-base md:text-lg px-4 sm:px-6 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl backdrop-blur-sm transition-all duration-300"
+                >
+                  Pay Now
+                </Button>
               </div>
-              <div className="bg-white/20 px-3 py-1 rounded-lg">
-                <span className="font-bold">{timeLeft.minutes}m</span>
-              </div>
-              <div className="bg-white/20 px-3 py-1 rounded-lg">
-                <span className="font-bold">{timeLeft.seconds}s</span>
+              
+              {/* Batch Info */}
+              <div className="pt-2">
+                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm md:text-base">
+                  <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1.5 sm:mr-2 text-yellow-300 flex-shrink-0" />
+                  Next batch starts: <span className="font-semibold ml-1">15th Jan 2025</span>
+                </div>
               </div>
             </div>
-          </div>
-
-          <h2 className="text-4xl md:text-6xl font-bold leading-tight">
-            Launch Your Career in
-            <span className="block bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">
-              Solar Energy
-            </span>
-          </h2>
-
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Join India's premier solar education program and become part of the renewable energy revolution
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button
-              onClick={scrollToForm}
-              size="lg"
-              className="h-14 px-8 text-lg rounded-xl bg-gradient-to-r from-accent to-[hsl(35,100%,55%)] hover:shadow-[var(--shadow-glow)] transition-all duration-300"
-            >
-              Enroll Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
             
-            {/* New Payment Button */}
-            <Button
-              onClick={handlePayment}
-              size="lg"
-              variant="outline"
-              className="h-14 px-8 text-lg rounded-xl border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary transition-all duration-300"
-            >
-              <CreditCard className="w-5 h-5 mr-2" />
-              Pay Now
-            </Button>
-            
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-xl">
-              <span className="text-sm">Course Fee:</span>
-              <span className="text-2xl font-bold text-accent">₹11,700</span>
+            {/* Right Column - Image */}
+            <div className="relative mt-8 lg:mt-0">
+              <div className="relative z-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 md:p-2 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80" 
+                  alt="Solar Panel Installation"
+                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
+                  width={600}
+                  height={400}
+                  loading="eager"
+                />
+                
+                {/* Floating Card */}
+                <div className="absolute -bottom-4 -right-3 sm:-bottom-5 sm:-right-5 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 shadow-xl">
+                  <div className="flex items-center">
+                    <div className="bg-amber-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
+                      <Award className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Certification</p>
+                      <p className="font-bold text-xs sm:text-sm md:text-base text-gray-800">Solar Expert</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative Elements */}
+              <div className="hidden sm:block absolute -top-5 -left-5 w-16 h-16 sm:w-20 sm:h-20 bg-yellow-400/20 rounded-full blur-xl"></div>
+              <div className="hidden sm:block absolute -bottom-5 -right-5 w-16 h-16 sm:w-24 sm:h-24 bg-amber-500/20 rounded-full blur-xl"></div>
             </div>
           </div>
-
-          {/* Additional payment info */}
-          <div className="text-sm text-white/70 flex items-center justify-center gap-2">
-            <CreditCard className="w-4 h-4" />
-            Secure payment powered by Cashfree • All major cards & UPI accepted
+          
+          {/* Floating Timer */}
+          <div className="mt-8 sm:mt-12 md:mt-16 bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg max-w-3xl mx-auto">
+            <div className="text-center">
+              <p className="text-xs sm:text-sm md:text-base font-medium mb-2 sm:mb-3">Offer ends in:</p>
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">
+                <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px]">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold">{timeLeft.days}</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm opacity-80">Days</span>
+                </div>
+                <div className="flex items-center text-xl sm:text-2xl md:text-3xl font-bold">:</div>
+                <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px]">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold">{timeLeft.hours.toString().padStart(2, '0')}</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm opacity-80">Hours</span>
+                </div>
+                <div className="flex items-center text-xl sm:text-2xl md:text-3xl font-bold">:</div>
+                <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px]">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold">{timeLeft.minutes.toString().padStart(2, '0')}</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm opacity-80">Minutes</span>
+                </div>
+                <div className="flex items-center text-xl sm:text-2xl md:text-3xl font-bold">:</div>
+                <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px]">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold">{timeLeft.seconds.toString().padStart(2, '0')}</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm opacity-80">Seconds</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

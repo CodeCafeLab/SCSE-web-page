@@ -1,469 +1,188 @@
 import { useState } from "react";
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/WhatsApp Image 2025-11-05 at 14.24.02_49170dee.jpg";
+import { Loader2, CheckCircle } from "lucide-react";
 
 interface FormData {
-  // API Required Fields
   first_name: string;
   email: string;
   gender: string;
   birth_date: string;
   mobile_no: string;
-  advisor_id: string;
-  course: string;
-  amount: number;
-  currency: string;
   address: string;
   city: string;
-  address_type: string;
-  
-  // Optional Fields (not sent to API)
-  fathersName: string;
-  qualification: string;
   state: string;
   pincode: string;
+  qualification: string;
   presentOccupation: string;
-  hasSolarExperience: string;
-  reasonForJoining: string;
-  heardAboutProgram: string;
-  declaration: boolean;
-  referralCode?: string;
 }
 
 export const EnrollmentForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
-    // API Required Fields
     first_name: "",
     email: "",
     gender: "",
     birth_date: "",
     mobile_no: "",
-    advisor_id: "advisor1",
-    course: "Solar Panel Technology: From Basics to Installation",
-    amount: 11700,
-    currency: "INR",
     address: "",
     city: "",
-    address_type: "Billing",
-    
-    // Optional Fields
-    fathersName: "",
-    qualification: "",
     state: "",
     pincode: "",
+    qualification: "",
     presentOccupation: "",
-    hasSolarExperience: "",
-    reasonForJoining: "",
-    heardAboutProgram: "",
-    declaration: false
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-      return;
-    }
-    
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handlePayNow = async () => {
-    setIsProcessingPayment(true);
-    setError('');
-
-    try {
-      // Get Cashfree payment form URL from environment variable
-      const paymentFormUrl = import.meta.env.VITE_CASHFREE_PAYMENT_FORM_URL || '';
-      
-      if (!paymentFormUrl) {
-        throw new Error('Payment form URL not configured. Please set VITE_CASHFREE_PAYMENT_FORM_URL in your .env file');
-      }
-
-      // Generate unique order ID
-      const newOrderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setOrderId(newOrderId);
-      const paymentAmount = 11700; // ₹11,700
-
-      // Store form data for after payment
-      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
-      sessionStorage.setItem('pendingOrderId', newOrderId);
-
-      // Build payment form URL with query parameters
-      const urlParams = new URLSearchParams();
-      
-      // Add order details
-      urlParams.append('order_id', newOrderId);
-      urlParams.append('order_amount', paymentAmount.toString());
-      urlParams.append('order_currency', 'INR');
-      
-      // Add customer details if available
-      const customerName = formData.first_name || '';
-      const customerEmail = formData.email || '';
-      const customerPhone = formData.mobile_no || '';
-      
-      if (customerName) {
-        urlParams.append('customer_name', customerName);
-      }
-      if (customerEmail) {
-        urlParams.append('customer_email', customerEmail);
-      }
-      if (customerPhone) {
-        urlParams.append('customer_phone', customerPhone.replace(/\D/g, ''));
-      }
-
-      // Add return URL for callback after payment
-      const baseUrl = window.location.origin;
-      urlParams.append('return_url', `${baseUrl}/payment/callback?order_id=${newOrderId}`);
-
-      // Construct final payment form URL
-      const separator = paymentFormUrl.includes('?') ? '&' : '?';
-      const finalPaymentUrl = `${paymentFormUrl}${separator}${urlParams.toString()}`;
-      
-      console.log('Opening Cashfree Payment Form...', finalPaymentUrl);
-      
-      // Redirect to Cashfree payment form
-      window.location.href = finalPaymentUrl;
-
-    } catch (err) {
-      console.error('Payment initiation error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
-      setError(errorMessage);
-      toast({
-        title: "Payment Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
-    }
-  };
-
-  /* COMMENTED OUT - OLD PAYMENT FLOW WITH SERVER
-  const initiatePayment = async (orderId: string, amount: number) => {
-    try {
-      // Store form data in sessionStorage before redirecting to payment
-      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
-      sessionStorage.setItem('pendingOrderId', orderId);
-      
-      const apiUrl = import.meta.env.VITE_API_URL || '/api';
-      const clientId = import.meta.env.VITE_CASHFREE_APP_ID || '';
-      
-      console.log('Creating Cashfree payment session...', { orderId, amount, clientId, apiUrl });
-
-      if (!clientId) {
-        throw new Error('Cashfree Client ID not configured. Please set VITE_CASHFREE_APP_ID in your .env file');
-      }
-
-      // Call backend API to create payment session (backend handles Cashfree API call)
-      const response = await fetch(`${apiUrl}/payment/create-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId,
-          amount,
-          customerName: formData.first_name,
-          customerEmail: formData.email,
-          customerPhone: formData.mobile_no.replace(/\D/g, ''),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
-        console.error('Payment session creation failed:', errorData);
-        
-        // Clear stored data on error
-        sessionStorage.removeItem('pendingEnrollmentForm');
-        sessionStorage.removeItem('pendingOrderId');
-        
-        if (response.status === 0 || response.status === 500) {
-          throw new Error(
-            'Cannot connect to payment server. Please ensure backend server is running and ' +
-            'CASHFREE_SECRET_KEY is configured in server .env file.'
-          );
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
-      console.log('Payment session created:', data);
-
-      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
-
-      if (!paymentSessionId) {
-        sessionStorage.removeItem('pendingEnrollmentForm');
-        sessionStorage.removeItem('pendingOrderId');
-        throw new Error('Payment session ID not received from server');
-      }
-
-      // Redirect to Cashfree's hosted checkout page with payment_session_id
-      const cashfreeCheckoutUrl = `https://payments.cashfree.com/order/#${paymentSessionId}`;
-      console.log('Redirecting to Cashfree hosted checkout page...', cashfreeCheckoutUrl);
-      
-      // Redirect to Cashfree's hosted checkout page
-      window.location.href = cashfreeCheckoutUrl;
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
-      console.error('Payment error:', err);
-      throw new Error(errorMessage);
-    }
-  };
-
-  const handlePayNow = async () => {
-    setIsProcessingPayment(true);
-    setError('');
-
-    try {
-      // No validation required - just create payment session
-      // Use form data if available, otherwise use defaults
-      const customerName = formData.first_name || 'Customer';
-      const customerEmail = formData.email || `customer${Date.now()}@example.com`;
-      const customerPhone = formData.mobile_no || '9999999999';
-
-      // Generate unique order ID
-      const newOrderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setOrderId(newOrderId);
-      const paymentAmount = 11700; // ₹11,700
-
-      // Store minimal payment info
-      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
-      sessionStorage.setItem('pendingOrderId', newOrderId);
-
-      // Call backend API to create payment session
-      const apiUrl = import.meta.env.VITE_API_URL || '/api';
-      const clientId = import.meta.env.VITE_CASHFREE_APP_ID || '';
-      
-      console.log('Creating Cashfree payment session...', { newOrderId, paymentAmount, clientId, apiUrl });
-
-      if (!clientId) {
-        throw new Error('Cashfree Client ID not configured. Please set VITE_CASHFREE_APP_ID in your .env file');
-      }
-
-      const response = await fetch(`${apiUrl}/payment/create-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId: newOrderId,
-          amount: paymentAmount,
-          customerName,
-          customerEmail,
-          customerPhone: customerPhone.replace(/\D/g, ''),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
-        console.error('Payment session creation failed:', errorData);
-        
-        sessionStorage.removeItem('pendingEnrollmentForm');
-        sessionStorage.removeItem('pendingOrderId');
-        
-        if (response.status === 0 || response.status === 500) {
-          throw new Error(
-            'Cannot connect to payment server. Please ensure backend server is running and ' +
-            'CASHFREE_SECRET_KEY is configured in server .env file.'
-          );
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
-      console.log('Payment session created:', data);
-
-      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
-
-      if (!paymentSessionId) {
-        sessionStorage.removeItem('pendingEnrollmentForm');
-        sessionStorage.removeItem('pendingOrderId');
-        throw new Error('Payment session ID not received from server');
-      }
-
-      // Redirect to Cashfree's hosted checkout page
-      const cashfreeCheckoutUrl = `https://payments.cashfree.com/order/#${paymentSessionId}`;
-      console.log('Redirecting to Cashfree hosted checkout page...', cashfreeCheckoutUrl);
-      
-      window.location.href = cashfreeCheckoutUrl;
-
-    } catch (err) {
-      console.error('Payment initiation error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
-      setError(errorMessage);
-      toast({
-        title: "Payment Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      setIsProcessingPayment(false);
-    }
-  };
-  END COMMENTED OUT */
 
   const formatDateForAPI = (dateString: string): string => {
-    // Convert YYYY-MM-DD to DD-MM-YYYY
-    const [year, month, day] = dateString.split('-');
+    const [year, month, day] = dateString.split("-");
     return `${day}-${month}-${year}`;
   };
 
-  // Full validation for enrollment submission - all required fields
   const validateForm = (): string | null => {
     const requiredFields = [
-      { field: 'first_name', name: 'Full Name' },
-      { field: 'email', name: 'Email' },
-      { field: 'gender', name: 'Gender' },
-      { field: 'birth_date', name: 'Date of Birth' },
-      { field: 'mobile_no', name: 'Mobile Number' },
-      { field: 'address', name: 'Address' },
-      { field: 'city', name: 'City' },
+      { field: "first_name", name: "Full Name" },
+      { field: "email", name: "Email" },
+      { field: "gender", name: "Gender" },
+      { field: "birth_date", name: "Date of Birth" },
+      { field: "mobile_no", name: "Mobile Number" },
+      { field: "address", name: "Address" },
+      { field: "city", name: "City" },
+      { field: "state", name: "State" },
+      { field: "pincode", name: "Pincode" },
     ];
 
     for (const { field, name } of requiredFields) {
       const value = formData[field as keyof FormData];
-      if (!value || (typeof value === 'string' && value.trim() === '')) {
+      if (!value || (typeof value === "string" && value.trim() === "")) {
         return `${name} is required`;
       }
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      return 'Please enter a valid email address.';
+      return "Please enter a valid email address.";
     }
 
-    // Validate mobile number (Indian format: 10 digits starting with 6-9)
     const mobileRegex = /^[6-9]\d{9}$/;
-    if (!mobileRegex.test(formData.mobile_no.replace(/\D/g, ''))) {
-      return 'Please enter a valid 10-digit Indian mobile number.';
+    if (!mobileRegex.test(formData.mobile_no.replace(/\D/g, ""))) {
+      return "Please enter a valid 10-digit Indian mobile number.";
     }
 
-    // Validate date of birth (should be in the past)
     const today = new Date();
     const birthDate = new Date(formData.birth_date);
     if (birthDate >= today) {
-      return 'Date of birth must be in the past.';
-    }
-
-    // Validate declaration
-    if (!formData.declaration) {
-      return 'You must agree to the declaration.';
+      return "Date of birth must be in the past.";
     }
 
     return null;
   };
 
-  // Function to submit enrollment form (called after payment success)
-  const submitEnrollmentForm = async (formDataToSubmit: FormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const validationError = validateForm();
+    if (validationError) {
+      toast({
+        title: "Validation Error",
+        description: validationError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    setError('');
 
     try {
-      // Validate all required fields before submission
-      const validationError = validateForm();
-      if (validationError) {
-        throw new Error(validationError);
-      }
-
-      // Prepare API payload with required fields only
       const apiPayload = {
-        first_name: formDataToSubmit.first_name.trim(),
-        email: formDataToSubmit.email.trim(),
-        gender: formDataToSubmit.gender,
-        birth_date: formatDateForAPI(formDataToSubmit.birth_date),
-        mobile_no: formDataToSubmit.mobile_no.replace(/\D/g, ''), // Remove any non-digit characters
-        advisor_id: formDataToSubmit.advisor_id,
-        course: formDataToSubmit.course,
-        amount: formDataToSubmit.amount,
-        currency: formDataToSubmit.currency,
-        address: formDataToSubmit.address.trim(),
-        city: formDataToSubmit.city.trim(),
-        address_type: formDataToSubmit.address_type,
+        first_name: formData.first_name.trim(),
+        email: formData.email.trim(),
+        gender: formData.gender,
+        birth_date: formatDateForAPI(formData.birth_date),
+        mobile_no: formData.mobile_no.replace(/\D/g, ""),
+        advisor_id: "advisor1",
+        course: "Solar Panel Technology: From Basics to Installation",
+        amount: 11700,
+        currency: "INR",
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        address_type: "Billing",
       };
 
-      console.log('Submitting enrollment after payment success:', apiPayload);
-
-      // Make API call with JSON payload
-      const response = await fetch('https://erp.suncitysolar.in/api/method/lms_enrollment_api', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiPayload),
-      });
+      const response = await fetch(
+        "https://erp.suncitysolar.in/api/method/lms_enrollment_api",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
 
       const responseData = await response.json();
 
       if (!response.ok) {
-        // Safely extract error message - handle both string and object
-        let errorMessage = 'API request failed';
+        let errorMessage = "API request failed";
         if (responseData.message) {
-          errorMessage = typeof responseData.message === 'string' 
-            ? responseData.message 
-            : JSON.stringify(responseData.message);
-        } else if (responseData.exception) {
-          errorMessage = typeof responseData.exception === 'string'
-            ? responseData.exception
-            : JSON.stringify(responseData.exception);
-        } else {
-          errorMessage = `API request failed with status ${response.status}`;
+          errorMessage =
+            typeof responseData.message === "string"
+              ? responseData.message
+              : JSON.stringify(responseData.message);
         }
         throw new Error(errorMessage);
       }
 
-      // Safely extract success message
-      const successMessage = responseData.message 
-        ? (typeof responseData.message === 'string' 
-            ? responseData.message 
-            : "Your enrollment has been submitted successfully.")
-        : "Your enrollment has been submitted successfully.";
-
-      setSuccess(successMessage);
-      setPaymentCompleted(true);
-      
-      // Clear stored form data
-      sessionStorage.removeItem('pendingEnrollmentForm');
-      sessionStorage.removeItem('pendingOrderId');
-      
+      setSuccess(true);
       toast({
         title: "Enrollment Successful!",
-        description: successMessage,
+        description: "Your enrollment has been submitted successfully.",
         variant: "default",
       });
-      
+
+      // Reset form
+      setFormData({
+        first_name: "",
+        email: "",
+        gender: "",
+        birth_date: "",
+        mobile_no: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        qualification: "",
+        presentOccupation: "",
+      });
     } catch (err) {
-      console.error('Form submission error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      const safeErrorMessage = typeof errorMessage === 'string' ? errorMessage : String(errorMessage);
-      setError(safeErrorMessage);
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
       toast({
         title: "Error",
-        description: safeErrorMessage,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -471,363 +190,211 @@ export const EnrollmentForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Form submission is now handled after payment success
-    // This handler is kept for form validation but won't submit
-    toast({
-      title: "Payment Required",
-      description: "Please complete payment first by clicking 'Pay Now' button.",
-      variant: "default",
-    });
-  };
-
-  // Check if there's pending form data from payment callback
-  React.useEffect(() => {
-    const checkPaymentStatus = () => {
-      const pendingFormData = sessionStorage.getItem('pendingEnrollmentForm');
-      const pendingOrderId = sessionStorage.getItem('pendingOrderId');
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentStatus = urlParams.get('payment_status');
-      
-      if (pendingFormData && pendingOrderId && paymentStatus === 'SUCCESS') {
-        // Payment was successful, restore form and submit
-        try {
-          const restoredFormData = JSON.parse(pendingFormData) as FormData;
-          setFormData(restoredFormData);
-          setOrderId(pendingOrderId);
-          setPaymentCompleted(true);
-          // Auto-submit enrollment form
-          submitEnrollmentForm(restoredFormData);
-        } catch (err) {
-          console.error('Error restoring form data:', err);
-          setError('Failed to restore form data. Please try again.');
-        }
-      } else if (paymentStatus === 'FAILED') {
-        // Payment failed, restore form for retry
-        try {
-          const pendingFormData = sessionStorage.getItem('pendingEnrollmentForm');
-          if (pendingFormData) {
-            const restoredFormData = JSON.parse(pendingFormData) as FormData;
-            setFormData(restoredFormData);
-          }
-          setError('Payment failed. Please try again.');
-        } catch (err) {
-          console.error('Error restoring form data:', err);
-        }
-      }
-    };
-    
-    checkPaymentStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (success && paymentCompleted) {
+  if (success) {
     return (
-      <div className="text-center py-12 space-y-6">
+      <div className="max-w-md mx-auto text-center py-12 space-y-6">
         <CheckCircle className="w-20 h-20 mx-auto text-green-500" />
-        <h2 className="text-3xl font-bold text-primary">Payment & Enrollment Successful!</h2>
+        <h2 className="text-3xl font-bold text-primary">
+          Enrollment Successful!
+        </h2>
         <p className="text-lg text-muted-foreground">
-          {success}
+          Your enrollment has been submitted successfully.
         </p>
-        {orderId && (
-          <p className="text-sm text-muted-foreground">
-            Order ID: {orderId}
-          </p>
-        )}
-        <Button onClick={() => window.location.reload()}>Submit Another Enrollment</Button>
+        <Button onClick={() => setSuccess(false)}>
+          Submit Another Enrollment
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="flex flex-col items-center mb-8">
-        <img 
-          src={logo} 
-          alt="Sun City Solar Logo" 
-          className="h-24 w-auto mb-4"
-        />
-        <h1 className="text-2xl font-bold text-primary">DISCOVERY OF SUCCESS (DOS)</h1>
-        <h2 className="text-xl font-semibold text-gray-700">Application Form – 21 Days Online Solar Business Training</h2>
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-primary">Enrollment Form</h1>
+        <p className="text-gray-600">
+          Please fill in your details to enroll in the course
+        </p>
       </div>
 
+      {/* Personal Information */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
+          Personal Information
+        </h2>
 
-      {/* Enrollment Form */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-primary mb-6">Enrollment Form</h3>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="first_name">Full Name <span className="text-red-500">*</span></Label>
-              <Input
-                id="first_name"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email ID <span className="text-red-500">*</span></Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="birth_date">Date of Birth <span className="text-red-500">*</span></Label>
-              <Input
-                id="birth_date"
-                name="birth_date"
-                type="date"
-                value={formData.birth_date}
-                onChange={handleInputChange}
-                max={new Date().toISOString().split('T')[0]} // Prevent future dates
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Gender <span className="text-red-500">*</span></Label>
-              <Select
-                value={formData.gender}
-                onValueChange={(value) => handleSelectChange('gender', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="mobile_no">Mobile Number <span className="text-red-500">*</span></Label>
-              <Input
-                id="mobile_no"
-                name="mobile_no"
-                type="tel"
-                value={formData.mobile_no}
-                onChange={handleInputChange}
-                placeholder="98XXXXXXXX"
-                pattern="[6-9]\d{9}"
-                title="Please enter a valid 10-digit Indian mobile number"
-                required
-              />
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="address">Address <span className="text-red-500">*</span></Label>
-            <Textarea
-              id="address"
-              name="address"
-              value={formData.address}
+            <Label htmlFor="first_name">Full Name *</Label>
+            <Input
+              id="first_name"
+              name="first_name"
+              value={formData.first_name}
               onChange={handleInputChange}
-              placeholder="Enter your complete address"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City <span className="text-red-500">*</span></Label>
-              <Input
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                placeholder="Enter your city"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                name="state"
-                value={formData.state}
-                onChange={handleInputChange}
-                placeholder="Enter your state"
-              />
-            </div>
-          </div>
-
-          {/* Optional Fields (Not required for API) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fathersName">Father's / Mother's Name</Label>
-              <Input
-                id="fathersName"
-                name="fathersName"
-                value={formData.fathersName}
-                onChange={handleInputChange}
-                placeholder="Parent's Name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pincode">Pincode</Label>
-              <Input
-                id="pincode"
-                name="pincode"
-                type="text"
-                value={formData.pincode}
-                onChange={handleInputChange}
-                placeholder="Pincode"
-                maxLength={6}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="qualification">Educational Qualification</Label>
-              <Input
-                id="qualification"
-                name="qualification"
-                value={formData.qualification}
-                onChange={handleInputChange}
-                placeholder="e.g., 10th, 12th, Graduation, etc."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="presentOccupation">Present Occupation</Label>
-              <Input
-                id="presentOccupation"
-                name="presentOccupation"
-                value={formData.presentOccupation}
-                onChange={handleInputChange}
-                placeholder="e.g., Student, Business, Job, etc."
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Prior Experience in Solar Business?</Label>
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="solarExpYes"
-                  name="hasSolarExperience"
-                  value="yes"
-                  checked={formData.hasSolarExperience === 'yes'}
-                  onChange={(e) => handleSelectChange('hasSolarExperience', e.target.value)}
-                  className="h-4 w-4 text-primary focus:ring-primary"
-                />
-                <Label htmlFor="solarExpYes" className="font-normal">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id="solarExpNo"
-                  name="hasSolarExperience"
-                  value="no"
-                  checked={formData.hasSolarExperience === 'no'}
-                  onChange={(e) => handleSelectChange('hasSolarExperience', e.target.value)}
-                  className="h-4 w-4 text-primary focus:ring-primary"
-                />
-                <Label htmlFor="solarExpNo" className="font-normal">No</Label>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="reasonForJoining">Reason for Joining the Course</Label>
-            <Textarea
-              id="reasonForJoining"
-              name="reasonForJoining"
-              value={formData.reasonForJoining}
-              onChange={handleInputChange}
-              placeholder="Please share your motivation for joining this course"
-              rows={3}
+              required
+              placeholder="Enter your full name"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="heardAboutProgram">How did you hear about the program?</Label>
+            <Label htmlFor="email">Email *</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              placeholder="your.email@example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mobile_no">Mobile Number *</Label>
+            <Input
+              id="mobile_no"
+              name="mobile_no"
+              type="tel"
+              value={formData.mobile_no}
+              onChange={handleInputChange}
+              required
+              placeholder="Enter 10-digit mobile number"
+              maxLength={10}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Gender *</Label>
             <Select
-              value={formData.heardAboutProgram}
-              onValueChange={(value) => handleSelectChange('heardAboutProgram', value)}
+              value={formData.gender}
+              onValueChange={(value) => handleSelectChange("gender", value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select an option" />
+                <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="social_media">Social Media (Facebook, Instagram, etc.)</SelectItem>
-                <SelectItem value="friend">Friend/Family</SelectItem>
-                <SelectItem value="newspaper">Newspaper/Advertisement</SelectItem>
-                <SelectItem value="search_engine">Search Engine (Google, etc.)</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="referralCode">Referred By (Advisor Code, if any)</Label>
+            <Label htmlFor="birth_date">Date of Birth *</Label>
             <Input
-              id="referralCode"
-              name="referralCode"
-              value={formData.referralCode || ''}
+              id="birth_date"
+              name="birth_date"
+              type="date"
+              value={formData.birth_date}
               onChange={handleInputChange}
-              placeholder="Enter referral code if any"
+              required
+              max={new Date().toISOString().split("T")[0]}
             />
           </div>
 
-          <div className="space-y-4 pt-4 border-t mt-6">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-700 mb-4">
-                I hereby declare that all information provided above is true and correct to the best of my knowledge. I agree to abide by the rules and regulations of Discovery of Success.
-              </p>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="declaration"
-                  name="declaration"
-                  checked={formData.declaration}
-                  onChange={(e) => setFormData(prev => ({ ...prev, declaration: e.target.checked }))}
-                  className="h-4 w-4 text-primary focus:ring-primary rounded"
-                />
-                <Label htmlFor="declaration" className="font-normal text-sm">
-                  I agree to the above declaration <span className="text-red-500">*</span>
-                </Label>
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="qualification">Qualification</Label>
+            <Input
+              id="qualification"
+              name="qualification"
+              value={formData.qualification}
+              onChange={handleInputChange}
+              placeholder="e.g., B.Tech, BBA, 12th, etc."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="presentOccupation">Present Occupation</Label>
+            <Input
+              id="presentOccupation"
+              name="presentOccupation"
+              value={formData.presentOccupation}
+              onChange={handleInputChange}
+              placeholder="e.g., Student, Business, Job, etc."
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Address Information */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
+          Address Information
+        </h2>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="address">Full Address *</Label>
+            <Textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              required
+              placeholder="Enter your complete address"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter your city"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="state">State *</Label>
+              <Input
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter your state"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode *</Label>
+              <Input
+                id="pincode"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                required
+                placeholder="Enter 6-digit pincode"
+                maxLength={6}
+              />
             </div>
           </div>
         </div>
-
-          <div className="pt-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={!paymentCompleted || isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting Enrollment...
-                </>
-              ) : paymentCompleted ? (
-                'Submit Application'
-              ) : (
-                'Complete Payment Above First'
-              )}
-            </Button>
-          </div>
-        </form>
       </div>
-    </div>
+
+      {/* Submit Button */}
+      <div className="flex justify-center pt-6">
+        <Button
+          type="submit"
+          className="w-full md:w-auto px-8 py-3 text-lg"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit Enrollment"
+          )}
+        </Button>
+      </div>
+    </form>
   );
 };
