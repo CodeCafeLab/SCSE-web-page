@@ -4,11 +4,11 @@ import { ImageCarousel } from "@/components/ImageCarousel";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-// Import images
-import image1 from "../assets/0D4A8808.jpg";
-import image2 from "../assets/0D4A8821.jpg";
-import image3 from "../assets/0D4A8874.jpg";
-import image4 from "../assets/0D4A8955.jpg";
+// Import images using relative paths
+const image1 = new URL('../assets/0D4A8808.jpg', import.meta.url).href;
+const image2 = new URL('../assets/0D4A8821.jpg', import.meta.url).href;
+const image3 = new URL('../assets/0D4A8874.jpg', import.meta.url).href;
+const image4 = new URL('../assets/0D4A8955.jpg', import.meta.url).href;
   
 interface HeroSectionProps {
   timeLeft: {
