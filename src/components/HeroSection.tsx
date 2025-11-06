@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, CreditCard } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export const HeroSection = () => {
@@ -26,6 +26,17 @@ export const HeroSection = () => {
 
   const scrollToForm = () => {
     document.getElementById("enrollment-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handlePayment = () => {
+    // Replace with your actual Cashfree form URL
+    const paymentFormUrl = 'https://payments.cashfree.com/forms/solar-training-jan2026';
+    
+    // Open in new tab (recommended)
+    window.open(paymentFormUrl, '_blank', 'noopener,noreferrer');
+    
+    // Alternative: Redirect in same tab
+    // window.location.href = paymentFormUrl;
   };
 
   return (
@@ -73,10 +84,28 @@ export const HeroSection = () => {
               Enroll Now
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
+            
+            {/* New Payment Button */}
+            <Button
+              onClick={handlePayment}
+              size="lg"
+              variant="outline"
+              className="h-14 px-8 text-lg rounded-xl border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary transition-all duration-300"
+            >
+              <CreditCard className="w-5 h-5 mr-2" />
+              Pay Now
+            </Button>
+            
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-xl">
               <span className="text-sm">Course Fee:</span>
               <span className="text-2xl font-bold text-accent">₹11,700</span>
             </div>
+          </div>
+
+          {/* Additional payment info */}
+          <div className="text-sm text-white/70 flex items-center justify-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            Secure payment powered by Cashfree • All major cards & UPI accepted
           </div>
         </div>
       </div>

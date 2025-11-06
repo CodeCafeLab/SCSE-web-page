@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +43,8 @@ export const EnrollmentForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     // API Required Fields
     first_name: "",
@@ -85,12 +88,83 @@ export const EnrollmentForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePayNow = async () => {
+    setIsProcessingPayment(true);
+    setError('');
+
+    try {
+      // Get Cashfree payment form URL from environment variable
+      const paymentFormUrl = import.meta.env.VITE_CASHFREE_PAYMENT_FORM_URL || '';
+      
+      if (!paymentFormUrl) {
+        throw new Error('Payment form URL not configured. Please set VITE_CASHFREE_PAYMENT_FORM_URL in your .env file');
+      }
+
+      // Generate unique order ID
+      const newOrderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setOrderId(newOrderId);
+      const paymentAmount = 11700; // ₹11,700
+
+      // Store form data for after payment
+      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
+      sessionStorage.setItem('pendingOrderId', newOrderId);
+
+      // Build payment form URL with query parameters
+      const urlParams = new URLSearchParams();
+      
+      // Add order details
+      urlParams.append('order_id', newOrderId);
+      urlParams.append('order_amount', paymentAmount.toString());
+      urlParams.append('order_currency', 'INR');
+      
+      // Add customer details if available
+      const customerName = formData.first_name || '';
+      const customerEmail = formData.email || '';
+      const customerPhone = formData.mobile_no || '';
+      
+      if (customerName) {
+        urlParams.append('customer_name', customerName);
+      }
+      if (customerEmail) {
+        urlParams.append('customer_email', customerEmail);
+      }
+      if (customerPhone) {
+        urlParams.append('customer_phone', customerPhone.replace(/\D/g, ''));
+      }
+
+      // Add return URL for callback after payment
+      const baseUrl = window.location.origin;
+      urlParams.append('return_url', `${baseUrl}/payment/callback?order_id=${newOrderId}`);
+
+      // Construct final payment form URL
+      const separator = paymentFormUrl.includes('?') ? '&' : '?';
+      const finalPaymentUrl = `${paymentFormUrl}${separator}${urlParams.toString()}`;
+      
+      console.log('Opening Cashfree Payment Form...', finalPaymentUrl);
+      
+      // Redirect to Cashfree payment form
+      window.location.href = finalPaymentUrl;
+
+    } catch (err) {
+      console.error('Payment initiation error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
+      setError(errorMessage);
+      toast({
+        title: "Payment Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
+
+  /* COMMENTED OUT - OLD PAYMENT FLOW WITH SERVER
   const initiatePayment = async (orderId: string, amount: number) => {
     try {
-      // Cashfree requires order creation via API first (needs backend for secret key)
-      // Then redirect to checkout page with payment_session_id
-      // Use relative URL in production (Nginx will proxy to backend)
-      // Use full URL only if explicitly set in env
+      // Store form data in sessionStorage before redirecting to payment
+      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
+      sessionStorage.setItem('pendingOrderId', orderId);
+      
       const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const clientId = import.meta.env.VITE_CASHFREE_APP_ID || '';
       
@@ -120,6 +194,10 @@ export const EnrollmentForm = () => {
         const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
         console.error('Payment session creation failed:', errorData);
         
+        // Clear stored data on error
+        sessionStorage.removeItem('pendingEnrollmentForm');
+        sessionStorage.removeItem('pendingOrderId');
+        
         if (response.status === 0 || response.status === 500) {
           throw new Error(
             'Cannot connect to payment server. Please ensure backend server is running and ' +
@@ -136,17 +214,13 @@ export const EnrollmentForm = () => {
       const paymentSessionId = data.paymentSessionId || data.payment_session_id;
 
       if (!paymentSessionId) {
+        sessionStorage.removeItem('pendingEnrollmentForm');
+        sessionStorage.removeItem('pendingOrderId');
         throw new Error('Payment session ID not received from server');
       }
 
-      // Get return URL
-      const baseUrl = window.location.origin;
-      const returnUrl = `${baseUrl}/payment/callback?order_id={order_id}`;
-
       // Redirect to Cashfree's hosted checkout page with payment_session_id
-      // Format: https://payments.cashfree.com/order/#{payment_session_id}
       const cashfreeCheckoutUrl = `https://payments.cashfree.com/order/#${paymentSessionId}`;
-
       console.log('Redirecting to Cashfree hosted checkout page...', cashfreeCheckoutUrl);
       
       // Redirect to Cashfree's hosted checkout page
@@ -159,12 +233,106 @@ export const EnrollmentForm = () => {
     }
   };
 
+  const handlePayNow = async () => {
+    setIsProcessingPayment(true);
+    setError('');
+
+    try {
+      // No validation required - just create payment session
+      // Use form data if available, otherwise use defaults
+      const customerName = formData.first_name || 'Customer';
+      const customerEmail = formData.email || `customer${Date.now()}@example.com`;
+      const customerPhone = formData.mobile_no || '9999999999';
+
+      // Generate unique order ID
+      const newOrderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setOrderId(newOrderId);
+      const paymentAmount = 11700; // ₹11,700
+
+      // Store minimal payment info
+      sessionStorage.setItem('pendingEnrollmentForm', JSON.stringify(formData));
+      sessionStorage.setItem('pendingOrderId', newOrderId);
+
+      // Call backend API to create payment session
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      const clientId = import.meta.env.VITE_CASHFREE_APP_ID || '';
+      
+      console.log('Creating Cashfree payment session...', { newOrderId, paymentAmount, clientId, apiUrl });
+
+      if (!clientId) {
+        throw new Error('Cashfree Client ID not configured. Please set VITE_CASHFREE_APP_ID in your .env file');
+      }
+
+      const response = await fetch(`${apiUrl}/payment/create-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: newOrderId,
+          amount: paymentAmount,
+          customerName,
+          customerEmail,
+          customerPhone: customerPhone.replace(/\D/g, ''),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to create payment session (${response.status})`;
+        console.error('Payment session creation failed:', errorData);
+        
+        sessionStorage.removeItem('pendingEnrollmentForm');
+        sessionStorage.removeItem('pendingOrderId');
+        
+        if (response.status === 0 || response.status === 500) {
+          throw new Error(
+            'Cannot connect to payment server. Please ensure backend server is running and ' +
+            'CASHFREE_SECRET_KEY is configured in server .env file.'
+          );
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('Payment session created:', data);
+
+      const paymentSessionId = data.paymentSessionId || data.payment_session_id;
+
+      if (!paymentSessionId) {
+        sessionStorage.removeItem('pendingEnrollmentForm');
+        sessionStorage.removeItem('pendingOrderId');
+        throw new Error('Payment session ID not received from server');
+      }
+
+      // Redirect to Cashfree's hosted checkout page
+      const cashfreeCheckoutUrl = `https://payments.cashfree.com/order/#${paymentSessionId}`;
+      console.log('Redirecting to Cashfree hosted checkout page...', cashfreeCheckoutUrl);
+      
+      window.location.href = cashfreeCheckoutUrl;
+
+    } catch (err) {
+      console.error('Payment initiation error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
+      setError(errorMessage);
+      toast({
+        title: "Payment Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
+  END COMMENTED OUT */
+
   const formatDateForAPI = (dateString: string): string => {
     // Convert YYYY-MM-DD to DD-MM-YYYY
     const [year, month, day] = dateString.split('-');
     return `${day}-${month}-${year}`;
   };
 
+  // Full validation for enrollment submission - all required fields
   const validateForm = (): string | null => {
     const requiredFields = [
       { field: 'first_name', name: 'Full Name' },
@@ -210,14 +378,13 @@ export const EnrollmentForm = () => {
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Function to submit enrollment form (called after payment success)
+  const submitEnrollmentForm = async (formDataToSubmit: FormData) => {
     setIsLoading(true);
     setError('');
-    setSuccess('');
 
     try {
-      // Validate all required fields
+      // Validate all required fields before submission
       const validationError = validateForm();
       if (validationError) {
         throw new Error(validationError);
@@ -225,21 +392,21 @@ export const EnrollmentForm = () => {
 
       // Prepare API payload with required fields only
       const apiPayload = {
-        first_name: formData.first_name.trim(),
-        email: formData.email.trim(),
-        gender: formData.gender,
-        birth_date: formatDateForAPI(formData.birth_date),
-        mobile_no: formData.mobile_no.replace(/\D/g, ''), // Remove any non-digit characters
-        advisor_id: formData.advisor_id,
-        course: formData.course,
-        amount: formData.amount,
-        currency: formData.currency,
-        address: formData.address.trim(),
-        city: formData.city.trim(),
-        address_type: formData.address_type,
+        first_name: formDataToSubmit.first_name.trim(),
+        email: formDataToSubmit.email.trim(),
+        gender: formDataToSubmit.gender,
+        birth_date: formatDateForAPI(formDataToSubmit.birth_date),
+        mobile_no: formDataToSubmit.mobile_no.replace(/\D/g, ''), // Remove any non-digit characters
+        advisor_id: formDataToSubmit.advisor_id,
+        course: formDataToSubmit.course,
+        amount: formDataToSubmit.amount,
+        currency: formDataToSubmit.currency,
+        address: formDataToSubmit.address.trim(),
+        city: formDataToSubmit.city.trim(),
+        address_type: formDataToSubmit.address_type,
       };
 
-      console.log('Sending payload:', apiPayload); // For debugging
+      console.log('Submitting enrollment after payment success:', apiPayload);
 
       // Make API call with JSON payload
       const response = await fetch('https://erp.suncitysolar.in/api/method/lms_enrollment_api', {
@@ -276,42 +443,22 @@ export const EnrollmentForm = () => {
             : "Your enrollment has been submitted successfully.")
         : "Your enrollment has been submitted successfully.";
 
-      // Show success message
+      setSuccess(successMessage);
+      setPaymentCompleted(true);
+      
+      // Clear stored form data
+      sessionStorage.removeItem('pendingEnrollmentForm');
+      sessionStorage.removeItem('pendingOrderId');
+      
       toast({
         title: "Enrollment Successful!",
-        description: "Redirecting to payment...",
+        description: successMessage,
         variant: "default",
       });
-
-      // Generate unique order ID
-      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const paymentAmount = 11700; // ₹11,700
-
-      // Initiate payment flow
-      setIsLoading(false); // Reset loading state
-      setIsProcessingPayment(true);
-      
-      try {
-        await initiatePayment(orderId, paymentAmount);
-      } catch (paymentError) {
-        console.error('Payment initiation error:', paymentError);
-        const paymentErrorMessage = paymentError instanceof Error 
-          ? paymentError.message 
-          : 'Payment initialization failed';
-        
-        toast({
-          title: "Payment Error",
-          description: paymentErrorMessage,
-          variant: "destructive",
-        });
-        setIsProcessingPayment(false);
-        // Don't reset form on payment error - let user try again
-      }
       
     } catch (err) {
       console.error('Form submission error:', err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      // Ensure errorMessage is always a string
       const safeErrorMessage = typeof errorMessage === 'string' ? errorMessage : String(errorMessage);
       setError(safeErrorMessage);
       toast({
@@ -319,27 +466,83 @@ export const EnrollmentForm = () => {
         description: safeErrorMessage,
         variant: "destructive",
       });
-      setIsProcessingPayment(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (success) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Form submission is now handled after payment success
+    // This handler is kept for form validation but won't submit
+    toast({
+      title: "Payment Required",
+      description: "Please complete payment first by clicking 'Pay Now' button.",
+      variant: "default",
+    });
+  };
+
+  // Check if there's pending form data from payment callback
+  React.useEffect(() => {
+    const checkPaymentStatus = () => {
+      const pendingFormData = sessionStorage.getItem('pendingEnrollmentForm');
+      const pendingOrderId = sessionStorage.getItem('pendingOrderId');
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment_status');
+      
+      if (pendingFormData && pendingOrderId && paymentStatus === 'SUCCESS') {
+        // Payment was successful, restore form and submit
+        try {
+          const restoredFormData = JSON.parse(pendingFormData) as FormData;
+          setFormData(restoredFormData);
+          setOrderId(pendingOrderId);
+          setPaymentCompleted(true);
+          // Auto-submit enrollment form
+          submitEnrollmentForm(restoredFormData);
+        } catch (err) {
+          console.error('Error restoring form data:', err);
+          setError('Failed to restore form data. Please try again.');
+        }
+      } else if (paymentStatus === 'FAILED') {
+        // Payment failed, restore form for retry
+        try {
+          const pendingFormData = sessionStorage.getItem('pendingEnrollmentForm');
+          if (pendingFormData) {
+            const restoredFormData = JSON.parse(pendingFormData) as FormData;
+            setFormData(restoredFormData);
+          }
+          setError('Payment failed. Please try again.');
+        } catch (err) {
+          console.error('Error restoring form data:', err);
+        }
+      }
+    };
+    
+    checkPaymentStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (success && paymentCompleted) {
     return (
       <div className="text-center py-12 space-y-6">
         <CheckCircle className="w-20 h-20 mx-auto text-green-500" />
-        <h2 className="text-3xl font-bold text-primary">Enrollment Submitted!</h2>
+        <h2 className="text-3xl font-bold text-primary">Payment & Enrollment Successful!</h2>
         <p className="text-lg text-muted-foreground">
           {success}
         </p>
+        {orderId && (
+          <p className="text-sm text-muted-foreground">
+            Order ID: {orderId}
+          </p>
+        )}
         <Button onClick={() => window.location.reload()}>Submit Another Enrollment</Button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      {/* Header */}
       <div className="flex flex-col items-center mb-8">
         <img 
           src={logo} 
@@ -350,7 +553,12 @@ export const EnrollmentForm = () => {
         <h2 className="text-xl font-semibold text-gray-700">Application Form – 21 Days Online Solar Business Training</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+
+      {/* Enrollment Form */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-xl font-bold text-primary mb-6">Enrollment Form</h3>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -387,7 +595,6 @@ export const EnrollmentForm = () => {
                 type="date"
                 value={formData.birth_date}
                 onChange={handleInputChange}
-                required
                 max={new Date().toISOString().split('T')[0]} // Prevent future dates
               />
             </div>
@@ -396,7 +603,6 @@ export const EnrollmentForm = () => {
               <Select
                 value={formData.gender}
                 onValueChange={(value) => handleSelectChange('gender', value)}
-                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Gender" />
@@ -432,7 +638,6 @@ export const EnrollmentForm = () => {
               value={formData.address}
               onChange={handleInputChange}
               placeholder="Enter your complete address"
-              required
               rows={3}
             />
           </div>
@@ -446,7 +651,6 @@ export const EnrollmentForm = () => {
                 value={formData.city}
                 onChange={handleInputChange}
                 placeholder="Enter your city"
-                required
               />
             </div>
             <div className="space-y-2">
@@ -595,7 +799,6 @@ export const EnrollmentForm = () => {
                   checked={formData.declaration}
                   onChange={(e) => setFormData(prev => ({ ...prev, declaration: e.target.checked }))}
                   className="h-4 w-4 text-primary focus:ring-primary rounded"
-                  required
                 />
                 <Label htmlFor="declaration" className="font-normal text-sm">
                   I agree to the above declaration <span className="text-red-500">*</span>
@@ -605,30 +808,26 @@ export const EnrollmentForm = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-            {error}
+          <div className="pt-4">
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={!paymentCompleted || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting Enrollment...
+                </>
+              ) : paymentCompleted ? (
+                'Submit Application'
+              ) : (
+                'Complete Payment Above First'
+              )}
+            </Button>
           </div>
-        )}
-
-        <div className="pt-4">
-          <Button type="submit" className="w-full" disabled={isLoading || isProcessingPayment}>
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : isProcessingPayment ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing Payment...
-              </>
-            ) : (
-              'Submit Application'
-            )}
-          </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

@@ -64,7 +64,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
           customer_phone: customerPhone,
         },
         order_meta: {
-          return_url: `${baseUrl}/payment/callback?order_id={order_id}`,
+          return_url: `${baseUrl}/payment/callback?order_id={order_id}&payment_status={payment_status}`,
           notify_url: `${baseUrl}/api/payment/webhook`,
         },
       },
@@ -91,6 +91,59 @@ router.post('/create-session', async (req: Request, res: Response) => {
         error: errorMessage 
       });
     }
+    return res.status(500).json({ 
+      error: 'An unexpected error occurred' 
+    });
+  }
+});
+
+// Verify payment status endpoint
+router.get('/verify', async (req: Request, res: Response) => {
+  try {
+    const orderId = req.query.order_id as string;
+    
+    if (!orderId) {
+      return res.status(400).json({ error: 'order_id is required' });
+    }
+
+    const clientId = process.env.CASHFREE_APP_ID || '';
+    const secretKey = process.env.CASHFREE_SECRET_KEY || '';
+    const cashfreeApiUrl = process.env.CASHFREE_API_URL || 'https://sandbox.cashfree.com/pg/orders';
+
+    if (!clientId || !secretKey) {
+      return res.status(500).json({ error: 'Cashfree credentials not configured' });
+    }
+
+    // Verify payment status with Cashfree
+    try {
+      const response = await axios.get(
+        `${cashfreeApiUrl}/${orderId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-client-id': clientId,
+            'x-client-secret': secretKey,
+            'x-api-version': '2023-08-01',
+          },
+        }
+      );
+
+      const paymentStatus = response.data.payment_status || 'PENDING';
+      
+      return res.status(200).json({
+        order_id: orderId,
+        payment_status: paymentStatus,
+        order_amount: response.data.order_amount,
+        order_currency: response.data.order_currency,
+      });
+    } catch (error) {
+      console.error('Error verifying payment with Cashfree:', error);
+      return res.status(500).json({ 
+        error: 'Failed to verify payment status' 
+      });
+    }
+  } catch (error) {
+    console.error('Error in payment verification:', error);
     return res.status(500).json({ 
       error: 'An unexpected error occurred' 
     });

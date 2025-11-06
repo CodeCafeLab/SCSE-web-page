@@ -25,23 +25,49 @@ export const PaymentCallback = () => {
       // If payment status is in URL, use it
       if (paymentStatus === 'SUCCESS') {
         setStatus('success');
+        // Redirect to form with success status - form will auto-submit
+        setTimeout(() => {
+          navigate(`/?payment_status=SUCCESS&order_id=${orderIdParam}`);
+        }, 2000);
       } else if (paymentStatus === 'FAILED') {
         setStatus('failed');
+        // Redirect back to form on failure
+        setTimeout(() => {
+          navigate('/?payment_status=FAILED&order_id=' + orderIdParam);
+        }, 3000);
       } else {
         // Verify payment status with backend
         try {
-          // TODO: Call your backend API to verify payment status
-          // For now, check if order_id exists
-          setStatus('pending');
+          const apiUrl = import.meta.env.VITE_API_URL || '/api';
+          const response = await fetch(`${apiUrl}/payment/verify?order_id=${orderIdParam}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.payment_status === 'SUCCESS') {
+              setStatus('success');
+              setTimeout(() => {
+                navigate(`/?payment_status=SUCCESS&order_id=${orderIdParam}`);
+              }, 2000);
+            } else if (data.payment_status === 'FAILED') {
+              setStatus('failed');
+              setTimeout(() => {
+                navigate('/?payment_status=FAILED&order_id=' + orderIdParam);
+              }, 3000);
+            } else {
+              setStatus('pending');
+            }
+          } else {
+            setStatus('pending');
+          }
         } catch (error) {
           console.error('Error verifying payment:', error);
-          setStatus('failed');
+          setStatus('pending');
         }
       }
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   if (status === 'loading') {
     return (
