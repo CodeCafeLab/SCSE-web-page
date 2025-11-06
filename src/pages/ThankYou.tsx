@@ -41,23 +41,37 @@ export const ThankYou = () => {
         const params = Object.fromEntries(searchParams.entries());
         console.log('URL Params:', params);
         
-        // Extract form data from URL parameters
-        const formData: FormData = {
-          first_name: params.first_name,
-          email: params.email,
-          gender: params.gender,
-          birth_date: params.birth_date,
-          mobile_no: params.mobile_no,
-          address: params.address,
-          city: params.city,
-          state: params.state,
-          pincode: params.pincode,
-          qualification: params.qualification,
-          present_occupation: params.present_occupation,
-          course: params.course || "Solar Panel Technology: From Basics to Installation",
-          amount: params.amount || "11700",
-          currency: params.currency || "INR"
-        };
+        // Try to get form data from localStorage first
+        const storedFormData = localStorage.getItem('enrollmentFormData');
+        let formData: FormData;
+        
+        if (storedFormData) {
+          // Parse the stored form data
+          formData = JSON.parse(storedFormData);
+          console.log('Retrieved form data from localStorage:', formData);
+          
+          // Clean up by removing the stored data
+          localStorage.removeItem('enrollmentFormData');
+        } else {
+          // Fallback to URL parameters if no data in localStorage
+          console.log('No form data found in localStorage, falling back to URL params');
+          formData = {
+            first_name: params.first_name,
+            email: params.email,
+            gender: params.gender,
+            birth_date: params.birth_date,
+            mobile_no: params.mobile_no,
+            address: params.address,
+            city: params.city,
+            state: params.state,
+            pincode: params.pincode,
+            qualification: params.qualification,
+            present_occupation: params.present_occupation,
+            course: params.course || "Solar Panel Technology: From Basics to Installation",
+            amount: params.amount || "11700",
+            currency: params.currency || "INR"
+          };
+        }
 
         console.log('Form Data:', formData);
 
@@ -88,8 +102,8 @@ export const ThankYou = () => {
           throw new Error(`Missing required fields in URL parameters: ${missingFields.join(', ')}`);
         }
 
-        // Log the form data from URL params for debugging
-        console.log('Form Data from URL:', formData);
+        // Log the form data for debugging
+        console.log('Form Data to be used:', formData);
         
         // Create the API payload with all required fields
         // Use the formData object that was created from URL parameters

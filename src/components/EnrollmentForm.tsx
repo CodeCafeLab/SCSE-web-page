@@ -156,6 +156,15 @@ export const EnrollmentForm = () => {
       cashfreeUrl.searchParams.append('customerPhone', formData.mobile_no.replace(/\D/g, ''));
       cashfreeUrl.searchParams.append('amount', '11700');
       
+      // Save form data to localStorage before redirecting
+      const formDataForStorage = {
+        ...formPayload,
+        // Add any additional fields you want to store
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem('enrollmentFormData', JSON.stringify(formDataForStorage));
+      console.log('Form data saved to localStorage');
+      
       // Redirect to Cashfree payment page
       window.location.href = cashfreeUrl.toString();
     } catch (error) {
