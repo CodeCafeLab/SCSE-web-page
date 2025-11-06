@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Calendar, Award, Clock, CreditCard, Check, Zap, Users, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
-import { ImageCarousel } from './ImageCarousel';
+import { ImageCarousel } from "@/components/ImageCarousel";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+
+// Import images
+import image1 from "./../assets/0D4A8808.jpg";
+import image2 from "../assets/0D4A8821.jpg";
+import image3 from "../assets/0D4A8874.jpg";
+import image4 from "../assets/0D4A8955.jpg";
   
 interface HeroSectionProps {
   timeLeft: {
@@ -126,12 +132,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
             <div className="relative mt-8 lg:mt-0 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
               <div className="relative z-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 md:p-2 shadow-2xl h-full">
                 <ImageCarousel 
-                  images={[
-                    '/src/assets/0D4A8808.JPG',
-                    '/src/assets/0D4A8821.JPG',
-                    '/src/assets/0D4A8874.JPG',
-                    '/src/assets/0D4A8955.JPG'
-                  ]}
+                  images={[image1, image2, image3, image4]}
                   interval={3000}
                   className="h-full"
                 />

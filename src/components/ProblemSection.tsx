@@ -40,17 +40,6 @@ export const ProblemSection = () => {
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="pt-8">
-            <Button 
-              onClick={scrollToForm}
-              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-amber-200 transition-all duration-300 transform hover:scale-105"
-            >
-              ⚡ Be Part of the Revolution
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
-
           {/* Decorative Elements */}
           <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 -translate-x-10 -translate-y-10"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-amber-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 translate-x-10 translate-y-10"></div>

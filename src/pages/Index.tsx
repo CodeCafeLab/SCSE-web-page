@@ -29,18 +29,11 @@ const Index = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Calculate remaining time for the offer (until November 11th, 11:59:59 PM)
+  // Calculate remaining time for the offer (until December 12th, 2025, 11:59:59 PM)
   const calculateTimeLeft = () => {
     const now = new Date();
-    const currentYear = now.getFullYear();
-    
-    // Set offer end to November 11th, 11:59:59 PM of the current year
-    const offerEndDate = new Date(currentYear, 10, 11, 23, 59, 59); // Month is 0-indexed (10 = November)
-    
-    // If the offer date has passed this year, set it to next year
-    if (now > offerEndDate) {
-      offerEndDate.setFullYear(currentYear + 1);
-    }
+    // Set offer end to December 12th, 2025, 11:59:59 PM
+    const offerEndDate = new Date(2025, 11, 12, 23, 59, 59); // Month is 0-indexed (11 = December)
     
     const difference = offerEndDate.getTime() - now.getTime();
     
