@@ -8,6 +8,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import PurchaseTerms from "./pages/PurchaseTerms";
 import { Layout } from "./components/Layout";
 import { PaymentCallback } from "./components/PaymentCallback";
+import ThankYou from "./pages/ThankYou";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,11 @@ const App = () => (
           </Layout>
         } />
         <Route path="/payment/callback" element={<PaymentCallback />} />
+        <Route path="/thank-you" element={
+          <Layout className="bg-gray-50">
+            <ThankYou />
+          </Layout>
+        } />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={
           <Layout>

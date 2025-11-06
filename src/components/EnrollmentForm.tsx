@@ -117,72 +117,53 @@ export const EnrollmentForm = () => {
     setIsLoading(true);
 
     try {
-      const apiPayload = {
+      // Prepare form data for URL parameters
+      const formDataForUrl = new URLSearchParams();
+      const formPayload = {
         first_name: formData.first_name.trim(),
         email: formData.email.trim(),
         gender: formData.gender,
-        birth_date: formatDateForAPI(formData.birth_date),
-        mobile_no: formData.mobile_no.replace(/\D/g, ""),
-        advisor_id: "advisor1",
-        course: "Solar Panel Technology: From Basics to Installation",
-        amount: 11700,
-        currency: "INR",
+        birth_date: formData.birth_date,
+        mobile_no: formData.mobile_no.replace(/\D/g, ''),
         address: formData.address.trim(),
         city: formData.city.trim(),
-        address_type: "Billing",
+        state: formData.state,
+        pincode: formData.pincode,
+        qualification: formData.qualification,
+        present_occupation: formData.presentOccupation,
+        course: "Solar Panel Technology: From Basics to Installation",
+        amount: "11700",
+        currency: "INR"
       };
 
-      const response = await fetch(
-        "https://erp.suncitysolar.in/api/method/lms_enrollment_api",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        let errorMessage = "API request failed";
-        if (responseData.message) {
-          errorMessage =
-            typeof responseData.message === "string"
-              ? responseData.message
-              : JSON.stringify(responseData.message);
-        }
-        throw new Error(errorMessage);
-      }
-
-      setSuccess(true);
-      toast({
-        title: "Enrollment Successful!",
-        description: "Your enrollment has been submitted successfully.",
-        variant: "default",
+      // Add form data to URL parameters
+      Object.entries(formPayload).forEach(([key, value]) => {
+        if (value) formDataForUrl.append(key, value);
       });
 
-      // Reset form
-      setFormData({
-        first_name: "",
-        email: "",
-        gender: "",
-        birth_date: "",
-        mobile_no: "",
-        address: "",
-        city: "",
-        state: "",
-        pincode: "",
-        qualification: "",
-        presentOccupation: "",
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
+      // Create redirect URL with form data as query parameters
+      const baseUrl = `${window.location.origin}/thank-you`;
+      const redirectUrl = `${baseUrl}?${formDataForUrl.toString()}`;
+
+      // Redirect to Cashfree payment page with the redirect URL
+      const cashfreeUrl = new URL('https://payments.cashfree.com/forms/solar-training-jan2026');
+      cashfreeUrl.searchParams.append('redirect', 'true');
+      cashfreeUrl.searchParams.append('redirectUrl', redirectUrl);
+      
+      // Add any additional parameters required by Cashfree
+      cashfreeUrl.searchParams.append('customerName', formData.first_name.trim());
+      cashfreeUrl.searchParams.append('customerEmail', formData.email.trim());
+      cashfreeUrl.searchParams.append('customerPhone', formData.mobile_no.replace(/\D/g, ''));
+      cashfreeUrl.searchParams.append('amount', '11700');
+      
+      // Redirect to Cashfree payment page
+      window.location.href = cashfreeUrl.toString();
+    } catch (error) {
+      console.error('Error redirecting to payment:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast({
         title: "Error",
-        description: errorMessage,
+        description: `Failed to process payment: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
@@ -388,10 +369,10 @@ export const EnrollmentForm = () => {
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Submitting...
+              Processing...
             </>
           ) : (
-            "Submit Enrollment"
+            "Enroll Now"
           )}
         </Button>
       </div>
