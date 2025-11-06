@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 // Import images
-import image1 from "./../assets/0D4A8808.jpg";
+import image1 from "../assets/0D4A8808.jpg";
 import image2 from "../assets/0D4A8821.jpg";
 import image3 from "../assets/0D4A8874.jpg";
 import image4 from "../assets/0D4A8955.jpg";
