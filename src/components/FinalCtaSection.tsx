@@ -1,4 +1,4 @@
-import { ArrowRight, Phone, Clock, Users, CheckCircle, MapPin, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
+import { ArrowRight, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 
 export const FinalCtaSection = () => {
@@ -7,132 +7,134 @@ export const FinalCtaSection = () => {
   };
 
   return (
-    <section className="relative w-full py-16 md:py-20 bg-gradient-to-br from-blue-900 to-blue-800 text-white overflow-x-hidden">
-      {/* Decorative elements */}
-      <div className=" inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0dGVybiBpZD0icGF0dGVybi1iZyIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuMSIvPjwvcGF0dGVybj48L3N2Zz4=')]"></div>
-      </div>
-      
-      <div className="w-full max-w-none px-0 relative">
-        <div className="text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-            🚀 Limited Time Offer
-          </div>
-          
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Secure Your Spot in the Next Batch
-          </h2>
-          
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Limited seats available. Start your solar career journey today!
-          </p>
+    <section className="relative w-full bg-gradient-to-br from-blue-900 to-blue-800 text-white">
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          {/* Left Column - Contact Information */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold">
+                Get In Touch With Us
+              </h2>
+              <p className="text-blue-100 text-lg">
+                Have questions? Our team is here to help you with any inquiries about our solar training programs.
+              </p>
+            </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-              <div className="text-yellow-400 mb-2">
-                <Clock className="w-8 h-8 mx-auto" />
-              </div>
-              <div className="text-2xl font-bold">6 Weeks</div>
-              <div className="text-sm text-blue-100">Intensive Training</div>
-            </div>
-            
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-              <div className="text-yellow-400 mb-2">
-                <CheckCircle className="w-8 h-8 mx-auto" />
-              </div>
-              <div className="text-2xl font-bold">100%</div>
-              <div className="text-sm text-blue-100">Job Assistance</div>
-            </div>
-            
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-              <div className="text-yellow-400 mb-2">
-                <Users className="w-8 h-8 mx-auto" />
-              </div>
-              <div className="text-2xl font-bold">20 Seats</div>
-              <div className="text-sm text-blue-100">Only Per Batch</div>
-            </div>
-            
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-              <div className="text-yellow-400 mb-2">
-                <Phone className="w-8 h-8 mx-auto" />
-              </div>
-              <div className="text-2xl font-bold">24/7</div>
-              <div className="text-sm text-blue-100">Support</div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-            <Button 
-              onClick={scrollToForm}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 text-lg py-5 px-8 rounded-full font-semibold shadow-lg hover:shadow-yellow-200/30 transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
-            >
-              Secure My Spot Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            
-            <Button 
-              variant="outline"
-              className="border-2 border-white/30 text-white hover:bg-white/10 text-lg py-5 px-8 rounded-full font-semibold backdrop-blur-sm hover:scale-105 transition-all duration-300 w-full sm:w-auto"
-            >
-              <Phone className="w-5 h-5 mr-2" />
-              Talk to an Expert
-            </Button>
-          </div>
-
-          {/* Contact Info */}
-          <div className="border-t border-white/10 pt-8">
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
-              <div className="flex flex-col items-center">
-                <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
-                  <MapPin className="h-5 w-5 text-white" />
+            {/* Contact Cards */}
+            <div className="space-y-6">
+              {/* Email */}
+              <a 
+                href="mailto:info@suncitysolar.in" 
+                className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300 group"
+              >
+                <div className="bg-blue-800/50 p-3 rounded-lg group-hover:bg-blue-700/70 transition-colors">
+                  <Mail className="w-6 h-6 text-yellow-400" />
                 </div>
-                <h4 className="font-medium mb-1">Our Location</h4>
-                <p className="text-sm text-blue-100">
-                  Suncity Solar Education Center<br />
-                  Green Energy Park, Sector 62<br />
-                  Noida, Uttar Pradesh 201309
-                </p>
+                <div>
+                  <h3 className="font-medium text-lg">Email Us</h3>
+                  <p className="text-blue-100">info@suncitysolar.in</p>
+                </div>
+              </a>
+
+              {/* WhatsApp */}
+              <a 
+                href="https://wa.me/919587211700" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300 group"
+              >
+                <div className="bg-green-800/50 p-3 rounded-lg group-hover:bg-green-700/70 transition-colors">
+                  <Phone className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-lg">WhatsApp Us</h3>
+                  <p className="text-blue-100">+91 95872 11700</p>
+                </div>
+              </a>
+
+              {/* Address */}
+              <div className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
+                <div className="bg-amber-800/50 p-3 rounded-lg">
+                  <MapPin className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-lg">Our Office</h3>
+                  <address className="not-italic text-blue-100">
+                    3rd Floor, P.No. A-317A,<br />
+                    Dr. Rajendra Prasad Nagar,<br />
+                    Gopalpura Bypass, Mansarovar,<br />
+                    Jaipur, Rajasthan - 302020
+                  </address>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - CTA Form */}
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                Start Your Solar Career Today
+              </h2>
+              <p className="text-blue-100">
+                Limited seats available for the next batch. Enroll now to secure your spot!
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="block text-blue-100 text-sm font-medium">Full Name</label>
+                  <input 
+                    id="name" 
+                    type="text"
+                    placeholder="Your name" 
+                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="block text-blue-100 text-sm font-medium">Phone Number</label>
+                  <input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="Your phone number" 
+                    className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  />
+                </div>
               </div>
               
-              <div className="flex flex-col items-center">
-                <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
-                  <Phone className="h-5 w-5 text-white" />
-                </div>
-                <h4 className="font-medium mb-1">Call Us</h4>
-                <p className="text-sm text-blue-100">
-                  +91-XXXXXXXXXX<br />
-                  Mon-Sat: 9:00 AM - 7:00 PM
-                </p>
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-blue-100 text-sm font-medium">Email Address</label>
+                <input 
+                  id="email" 
+                  type="email" 
+                  placeholder="your.email@example.com" 
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                />
               </div>
               
-              <div className="flex flex-col items-center">
-                <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
-                  <Mail className="h-5 w-5 text-white" />
-                </div>
-                <h4 className="font-medium mb-1">Email Us</h4>
-                <p className="text-sm text-blue-100">
-                  info@solaredu.com<br />
-                  support@solaredu.com
-                </p>
+              <div className="space-y-2">
+                <label htmlFor="message" className="block text-blue-100 text-sm font-medium">Your Message</label>
+                <textarea 
+                  id="message" 
+                  rows={3} 
+                  placeholder="How can we help you?" 
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                />
               </div>
-            </div>
-
-            {/* Social Links */}
-            <div className="flex justify-center space-x-6">
-              <a href="#" className="text-blue-100 hover:text-white">
-                <span className="sr-only">Facebook</span>
-                <Facebook className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white">
-                <span className="sr-only">Instagram</span>
-                <Instagram className="h-6 w-6" />
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white">
-                <span className="sr-only">LinkedIn</span>
-                <Linkedin className="h-6 w-6" />
-              </a>
+              
+              <Button 
+                onClick={scrollToForm}
+                className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-semibold py-3 text-lg mt-4 transition-all duration-300 transform hover:scale-[1.02]"
+              >
+                Get More Information
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              
+              <p className="text-sm text-center text-blue-200/80 mt-4">
+                We respect your privacy. Your information is safe with us.
+              </p>
             </div>
           </div>
         </div>

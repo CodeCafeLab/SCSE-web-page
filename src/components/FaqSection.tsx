@@ -25,7 +25,7 @@ const faqs: FaqItem[] = [
   },
   {
     question: "How long is the course?",
-    answer: "4 weeks (Flexible schedule for working professionals)."
+    answer: "3 weeks (Flexible schedule for working professionals)."
   }
 ];
 

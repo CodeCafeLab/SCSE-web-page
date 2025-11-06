@@ -35,6 +35,7 @@ export const Header = ({ isMobile = false }: HeaderProps) => {
 
   const navItems = [
     { name: 'Home', id: 'home' },
+    { name: 'About Us', id: 'about' },
     { name: 'Curriculum', id: 'curriculum' },
     { name: 'Benefits', id: 'benefits' },
     { name: 'Testimonials', id: 'testimonials' },

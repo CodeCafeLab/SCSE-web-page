@@ -40,7 +40,7 @@ export const TestimonialSection = () => {
   };
 
   return (
-    <section id="testimonials" className="py-16 md:py-24 bg-gradient-to-br from-amber-50 to-white">
+    <section id="testimonials" className=" bg-gradient-to-br from-amber-50 to-white">
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto text-center">
           {/* Section Header */}
@@ -54,7 +54,7 @@ export const TestimonialSection = () => {
           </h2>
 
           {/* Testimonials Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <div 
                 key={index}
@@ -81,19 +81,6 @@ export const TestimonialSection = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Companies Section */}
-          <div className="mb-16">
-            <h3 className="text-lg font-medium text-gray-500 mb-6">Our students work at top companies</h3>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-              {companies.map((company, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className="text-4xl mb-2">{company.logo}</div>
-                  <span className="text-sm text-gray-500">{company.name}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* CTA */}

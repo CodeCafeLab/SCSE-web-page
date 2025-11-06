@@ -25,6 +25,7 @@ interface FormData {
   pincode: string;
   qualification: string;
   presentOccupation: string;
+  referralCode: string;
 }
 
 export const EnrollmentForm = () => {
@@ -44,6 +45,7 @@ export const EnrollmentForm = () => {
     pincode: "",
     qualification: "",
     presentOccupation: "",
+    referralCode: "",
   });
 
   const handleInputChange = (
@@ -131,6 +133,7 @@ export const EnrollmentForm = () => {
         pincode: formData.pincode,
         qualification: formData.qualification,
         present_occupation: formData.presentOccupation,
+        referral_code: formData.referralCode.trim(),
         course: "Solar Panel Technology: From Basics to Installation",
         amount: "11700",
         currency: "INR"
@@ -304,6 +307,37 @@ export const EnrollmentForm = () => {
               placeholder="e.g., Student, Business, Job, etc."
             />
           </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+              <span className="text-xs text-gray-500">Have a referral code?</span>
+            </div>
+            <div className="relative">
+              <Input
+                id="referralCode"
+                name="referralCode"
+                value={formData.referralCode}
+                onChange={handleInputChange}
+                placeholder="Enter referral code if any"
+                className="pr-24"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  // Add any referral code validation logic here
+                  toast({
+                    title: formData.referralCode ? "Referral code applied!" : "Please enter a referral code",
+                    variant: formData.referralCode ? "default" : "destructive",
+                  });
+                }}
+                disabled={!formData.referralCode}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -369,21 +403,47 @@ export const EnrollmentForm = () => {
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-center pt-6">
-        <Button
+      <div className="pt-6">
+        <button
           type="submit"
-          className="w-full md:w-auto px-8 py-3 text-lg"
           disabled={isLoading}
+          className={`
+            w-full py-4 px-6 text-lg font-semibold text-white rounded-xl
+            bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
+            shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+            disabled:opacity-80 disabled:cursor-not-allowed
+            relative overflow-hidden group
+          `}
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Enroll Now"
-          )}
-        </Button>
+          {/* Animated background effect */}
+          <span className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+          
+          {/* Button content */}
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-yellow-300">🎓</span>
+                <span>Enroll Now for Just ₹11,700</span>
+                <span className="ml-2 px-2 py-0.5 text-sm bg-yellow-400/20 text-yellow-100 rounded-full">
+                  Limited Seats
+                </span>
+                <span className="absolute -right-2 -top-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+                  SAVE 20%
+                </span>
+              </>
+            )}
+          </span>
+          
+          {/* Shine effect on hover */}
+          <span className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-white/20 -skew-x-12 transition-all duration-500 ease-in-out group-hover:left-full"></span>
+        </button>
+  
       </div>
     </form>
   );

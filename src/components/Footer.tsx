@@ -1,11 +1,27 @@
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
+import suncityLogo from "@/assets/suncity-logo.jpg";
 
 export const Footer = () => {
   return (
     <footer className="bg-primary text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="flex flex-col items-start">
+            <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100 mb-4">
+              <img
+                src={suncityLogo}
+                alt="Suncity Solar"
+                className="h-12 w-auto object-contain"
+                width={120}
+                height={48}
+              />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Discovery of Success</h3>
+            <p className="text-white/80 text-sm">
+              A Business School of Suncity Solar
+            </p>
+          </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">About Us</h3>
             <p className="text-white/80 text-sm">
@@ -62,7 +78,8 @@ export const Footer = () => {
         
         <Separator className="bg-white/20 mb-6" />
         
-        <div className="text-center text-sm text-white/60">
+        <div className="text-center text-sm text-white/60 mt-8 pt-6 border-t border-white/10">
+          <img src={suncityLogo} alt="Suncity Solar" className="h-12 w-auto object-contain mx-auto mb-4" />
           <p>&copy; {new Date().getFullYear()} Discovery of Success - Suncity Solar Learning Program. All rights reserved.</p>
           <div className="mt-2 flex justify-center space-x-4">
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>

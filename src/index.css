@@ -22,7 +22,33 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
 }
+
+/* Ensure all sections have consistent spacing */
+section {
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Container for content alignment */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Responsive typography */
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+/* Ensure images and media are responsive */
 
 img, video, svg {
   max-width: 100%;

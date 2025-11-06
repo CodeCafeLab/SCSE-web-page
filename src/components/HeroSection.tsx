@@ -1,10 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, Calendar, Award, Clock, CreditCard, Check } from "lucide-react";
+import { ArrowRight, Star, Calendar, Award, Clock, CreditCard, Check, Zap, Users, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { ImageCarousel } from './ImageCarousel';
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
   
-export const HeroSection = () => {
-  const [timeLeft, setTimeLeft] = useState({ days: 5, hours: 12, minutes: 30, seconds: 45 });
+interface HeroSectionProps {
+  timeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  };
+  offerEnded: boolean;
+}
+
+export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   const [isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
@@ -16,24 +26,7 @@ export const HeroSection = () => {
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     
-    // Timer effect
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else if (prev.days > 0) {
-          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-        }
-        return prev;
-      });
-    }, 1000);
-
     return () => {
-      clearInterval(timer);
       window.removeEventListener('resize', checkIfMobile);
     };
   }, []);
@@ -47,14 +40,20 @@ export const HeroSection = () => {
     window.open(paymentFormUrl, '_blank', 'noopener,noreferrer');
   };
 
+  // Format time left for display
+  const formatTimeLeft = () => {
+    if (!timeLeft) return '';
+    return `${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`;
+  };
+
   const features = [
-    { text: 'Lifetime Access', icon: Clock },
-    { text: 'Certificate on Completion', icon: Award },
-    { text: 'Flexible Payment Options', icon: CreditCard },
+    { text: '3 weeks training', icon: Clock },
+    { text: 'Entrepreneur certified', icon: Award },
+    { text: 'Eligible for advisory practical training', icon: Check },
   ];
 
   return (
-    <section id="home" className="relative w-full bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 text-white py-12 sm:py-16 md:py-20 lg:py-28 overflow-x-hidden">
+    <section id="home" className="relative w-full bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 text-white py-8 sm:py-10 md:py-12 lg:py-16 overflow-x-hidden">
       {/* Background image */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20"
@@ -80,11 +79,11 @@ export const HeroSection = () => {
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4 sm:space-y-5 md:space-y-6">
               <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                Become a Certified Solar Expert & Build a Rewarding Career
+                Join India's Leading Solar Business Team
               </h1>
-              
-              <p className="text-sm xs:text-base sm:text-lg text-white/90 max-w-2xl mx-auto lg:mx-0">
-                Join India's most comprehensive solar training program and get certified in just 6 weeks. Limited seats available for the upcoming batch!
+            
+              <p className="text-sm xs:text-base sm:text-lg text-white/90 max-w-2xl mx-auto lg:mx-0 pt-2">
+                Get certified in just 3 weeks and launch your career in the solar industry. Limited seats available!
               </p>
               
               {/* Features List */}
@@ -111,49 +110,36 @@ export const HeroSection = () => {
                 >
                   Enroll Now <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
-                <Button 
-                  onClick={handlePayment}
-                  variant="outline" 
-                  size={isMobile ? 'default' : 'lg'}
-                  className="w-full xs:w-auto flex-1 sm:flex-none border-2 border-white/30 bg-transparent text-white hover:bg-white/10 font-medium text-sm sm:text-base md:text-lg px-4 sm:px-6 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl backdrop-blur-sm transition-all duration-300"
-                >
-                  Pay Now
-                </Button>
+
               </div>
               
               {/* Batch Info */}
               <div className="pt-2">
                 <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm md:text-base">
                   <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1.5 sm:mr-2 text-yellow-300 flex-shrink-0" />
-                  Next batch starts: <span className="font-semibold ml-1">15th Jan 2025</span>
+                  Next batch starts: <span className="font-semibold ml-1">01 Jan 2026</span>
                 </div>
               </div>
             </div>
             
-            {/* Right Column - Image */}
-            <div className="relative mt-8 lg:mt-0">
-              <div className="relative z-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 md:p-2 shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80" 
-                  alt="Solar Panel Installation"
-                  className="w-full h-auto rounded-lg sm:rounded-xl shadow-lg"
-                  width={600}
-                  height={400}
-                  loading="eager"
+            {/* Right Column - Image Carousel */}
+            <div className="relative mt-8 lg:mt-0 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
+              <div className="relative z-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 md:p-2 shadow-2xl h-full">
+                <ImageCarousel 
+                  images={[
+                    '/src/assets/0D4A8808.JPG',
+                    '/src/assets/0D4A8821.JPG',
+                    '/src/assets/0D4A8874.JPG',
+                    '/src/assets/0D4A8955.JPG'
+                  ]}
+                  interval={3000}
+                  className="h-full"
                 />
+              
                 
-                {/* Floating Card */}
-                <div className="absolute -bottom-4 -right-3 sm:-bottom-5 sm:-right-5 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 shadow-xl">
-                  <div className="flex items-center">
-                    <div className="bg-amber-100 p-1.5 sm:p-2 rounded-lg mr-2 sm:mr-3">
-                      <Award className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Certification</p>
-                      <p className="font-bold text-xs sm:text-sm md:text-base text-gray-800">Solar Expert</p>
-                    </div>
-                  </div>
-                </div>
+                {/* Decorative Elements */}
+                <div className="hidden sm:block absolute -top-5 -left-5 w-16 h-16 sm:w-20 sm:h-20 bg-yellow-400/20 rounded-full blur-xl"></div>
+                <div className="hidden sm:block absolute -bottom-5 -right-5 w-16 h-16 sm:w-24 sm:h-24 bg-amber-500/20 rounded-full blur-xl"></div>
               </div>
               
               {/* Decorative Elements */}
