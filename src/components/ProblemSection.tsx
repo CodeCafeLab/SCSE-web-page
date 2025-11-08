@@ -7,7 +7,7 @@ export const ProblemSection = () => {
   };
 
   return (
-    <section className=" bg-gradient-to-b from-white to-gray-50">
+    <section className="py-10 overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto text-center mb-16 space-y-8">
           {/* Section Header */}
@@ -20,8 +20,8 @@ export const ProblemSection = () => {
               India Needs Solar Professionals
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The world is switching to clean energy faster than ever. Yet, there's a massive shortage of skilled solar engineers and Entrepreneur. <span className="text-blue-600 font-medium">The future is bright!</span> <span className="text-yellow-500">🌞</span>
-            </p>
+              The world is switching to green and renewal energy faster than ever. Yet, there's a massive shortage of skilled solar engineers and Entrepreneur. <span className="text-blue-600 font-medium">The future is bright!</span> <span className="text-yellow-500">🌞</span>
+            </p>  
           </div>
 
           {/* Stats Grid */}

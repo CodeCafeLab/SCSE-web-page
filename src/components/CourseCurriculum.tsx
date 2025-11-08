@@ -114,7 +114,7 @@ export const CourseCurriculum = ({ onEnrollClick }: CourseCurriculumProps) => {
             Certification Included
           </div>
           <h3 className="text-2xl font-bold text-gray-900">Ready to Start Your Solar Career?</h3>
-          <p className="text-gray-600 mb-6">Join our next batch and get certified as a Solar Energy Professional</p>
+          <p className="text-gray-600 mb-6">Join our next batch and get certified as a Solar enterpreneur</p>
           <Button 
             onClick={onEnrollClick}
             className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-amber-200 transition-all duration-300 transform hover:scale-105"

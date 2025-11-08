@@ -429,13 +429,7 @@ export const EnrollmentForm = () => {
             ) : (
               <>
                 <span className="text-yellow-300">🎓</span>
-                <span>Enroll Now for Just ₹11,700</span>
-                <span className="ml-2 px-2 py-0.5 text-sm bg-yellow-400/20 text-yellow-100 rounded-full">
-                  Limited Seats
-                </span>
-                <span className="absolute -right-2 -top-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
-                  SAVE 20%
-                </span>
+                <span>Enroll Now</span>
               </>
             )}
           </span>

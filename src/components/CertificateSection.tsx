@@ -1,14 +1,16 @@
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Award,
   CheckCircle2,
+  ShieldCheck,
+  Building2,
+  FileCheck,
+  Star,
+  Award as Trophy,
   MapPin,
   Users,
   Zap,
-  TrendingUp,
-  Star,
-  Clock,
-  Calendar,
 } from "lucide-react";
 
 // Import certificate images
@@ -29,35 +31,45 @@ export const CertificateSection = ({
   timeLeft,
   offerEnded,
 }: CertificateSectionProps) => {
-  const programHighlights = [
-    { icon: <Zap className="w-5 h-5" />, text: "Real projects training" },
-    { icon: <Award className="w-5 h-5" />, text: "Provincial offers" },
-    { icon: <Star className="w-5 h-5" />, text: "Free Suncity Solar entry" },
-    {
-      icon: <Users className="w-5 h-5" />,
-      text: "Learn from industry experts",
+  const companyAchievements = [
+    { 
+      icon: <ShieldCheck className="w-6 h-6 text-blue-600" />, 
+      title: "Government Certified",
+      description: "Recognized by state and national authorities"
     },
-    { icon: <TrendingUp className="w-5 h-5" />, text: "Earn from sales" },
-    {
-      icon: <TrendingUp className="w-5 h-5" />,
-      text: "Scale from hundreds to thousands",
+    { 
+      icon: <Building2 className="w-6 h-6 text-green-600" />, 
+      title: "Industry Leader",
+      description: "Pioneers in solar energy solutions"
     },
+    { 
+      icon: <FileCheck className="w-6 h-6 text-amber-600" />, 
+      title: "Certified Excellence",
+      description: "Awarded for outstanding performance"
+    },
+    { 
+      icon: <Trophy className="w-6 h-6 text-red-600" />, 
+      title: "Award Winning",
+      description: "Multiple industry recognitions"
+    }
   ];
 
   const certificates = [
     {
       id: 1,
-      title: 'Discovery of Success',
+      title: 'Government Recognition',
       year: '2017',
       image: cert1,
-      description: 'Certificate of Achievement in Professional Development'
+      description: 'Certificate of Excellence in Solar Energy Solutions',
+      issuer: 'Ministry of New and Renewable Energy'
     },
     {
       id: 2,
-      title: 'Advanced Success Program',
+      title: 'Industry Achievement',
       year: '2018',
       image: cert2,
-      description: 'Advanced Certification in Professional Excellence'
+      description: 'Award for Outstanding Contribution to Solar Sector',
+      issuer: 'Renewable Energy Association'
     }
   ];
 
@@ -79,41 +91,62 @@ export const CertificateSection = ({
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-br from-muted/50 to-background">
+    <section className="py-10 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
         {/* Certificate Section */}
-        <div className="max-w-4xl mx-auto mb-16 ">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-accent/10 px-6 py-3 rounded-full mb-4">
-              <Award className="w-5 h-5 text-accent" />
-              <span className="text-sm font-semibold text-accent">
-                Industry Recognized
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
-              Get Your Professional Certificate
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 py-1.5 px-4 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Certified Excellence
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Government Recognized <span className="text-blue-600">Certifications</span>
             </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Our commitment to excellence is validated by prestigious government and industry certifications
+            </p>
           </div>
 
-          {/* Certificate Images Side by Side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          {/* Certificate Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {certificates.map((cert) => (
               <div 
                 key={cert.id}
-                className="relative group overflow-hidden rounded-xl shadow-2xl transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+                className="group relative bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="relative w-full overflow-hidden">
-                  <img
-                    src={cert.image}
-                    alt={`${cert.title} Certificate ${cert.year}`}
-                    className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                  <h4 className="text-xl font-bold text-white mb-1">{cert.title}</h4>
-                  <p className="text-accent font-medium">{cert.year}</p>
-                  <p className="text-white/80 text-sm mt-2">{cert.description}</p>
+                {/* Certificate Frame */}
+                <div className="relative p-6 md:p-8">
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-blue-400"></div>
+                  
+                  {/* Certificate Badge */}
+                  <div className="absolute top-6 right-6 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                    {cert.year}
+                  </div>
+                  
+                  {/* Certificate Content */}
+                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-inner">
+                    <img
+                      src={cert.image}
+                      alt={`${cert.title} Certificate ${cert.year}`}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                  </div>
+                  
+                  {/* Certificate Footer */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">{cert.title}</h3>
+                      </div>
+                      <div className="bg-blue-50 p-2 rounded-lg">
+                        <FileCheck className="w-6 h-6 text-blue-600" />
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm text-gray-500">{cert.description}</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -122,87 +155,39 @@ export const CertificateSection = ({
           </div>
         </div>
 
-        {/* Program Highlights */}
-        <div className="max-w-6xl mx-auto ">
+    
+
+        {/* Service Coverage */}
+        <div className="max-w-4xl mx-auto mt-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-              Program Highlights
+            <Badge variant="outline" className="mb-4 py-1.5 px-4 border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-50">
+              <MapPin className="w-4 h-4 mr-2" />
+              Our Reach
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Our Entrepreneurs Embarking in <span className="text-blue-600">Following States</span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-              {programHighlights.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold text-center">
-                    {item.text}
-                  </h3>
-                </div>
-              ))}
+            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+              We are committed to providing solar solutions to our customers in these states
+            </p>
+            
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="flex flex-wrap justify-center gap-3">
+                {states.map((state, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 border border-gray-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors"
+                  >
+                    {state}
+                  </span>
+                ))}
+              </div>
+             
             </div>
           </div>
         </div>
 
-        {/* Geographic Availability */}
-        <div className="max-w-4xl mx-auto ">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-accent/10 px-6 py-3 rounded-full mb-4">
-              <MapPin className="w-5 h-5 text-accent" />
-              <span className="text-sm font-semibold text-accent">
-                Available In
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
-              Geographic Availability
-            </h2>
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {states.map((state, index) => (
-                <span
-                  key={index}
-                  className="px-4 py-2 bg-white rounded-full text-sm font-medium shadow-sm border"
-                >
-                  {state}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Seat Availability */}
-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-amber-50 to-yellow-50 p-8 rounded-2xl border border-amber-100">
-          <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-6 py-2 rounded-full mb-4">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-semibold">Limited Seats</span>
-          </div>
-          <h3 className="text-2xl font-bold text-amber-900 mb-2">
-            Only 50 seats available for offline training
-          </h3>
-          <p className="text-amber-800 mb-4">
-            Next batch starts:{" "}
-            <span className="font-semibold">01 Jan 2026</span>
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <div className="text-3xl font-bold text-amber-700">₹11,700</div>
-            {!offerEnded ? (
-              <div className="text-sm text-amber-700">
-                <div>
-                  Offer ends:{" "}
-                  <span className="font-semibold">11th November</span>
-                </div>
-                <div className="text-xs opacity-80">
-                  Hurry! Limited time offer
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-amber-700 font-semibold">
-                Offer has ended
-              </div>
-            )}
-          </div>
-        </div>
+  
 
     </section>
   );

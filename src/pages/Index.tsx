@@ -176,9 +176,7 @@ const Index = () => {
                 {/* Right Side - Form */}
                 <div className="md:w-3/5 p-8 bg-white">
                   <div className="relative h-full">
-                    <div className="absolute -top-8 right-0 bg-yellow-400 text-yellow-900 text-sm font-semibold px-4 py-1 rounded-l-full">
-                      Special Offer: Save 20%
-                    </div>
+                   
                     <EnrollmentForm />
                   </div>
                 </div>

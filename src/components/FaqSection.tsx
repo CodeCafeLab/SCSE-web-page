@@ -37,7 +37,7 @@ export const FaqSection = () => {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-gray-50">
+    <section className="py-8 md:py-10">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -77,19 +77,6 @@ export const FaqSection = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-6">
-              Still have questions? We're here to help!
-            </p>
-            <a 
-              href="https://wa.me/91XXXXXXXXXX" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-300"
-            >
-              💬 Chat with us on WhatsApp
-            </a>
-          </div>
         </div>
       </div>
     </section>
