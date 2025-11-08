@@ -105,22 +105,39 @@ export const EnrollmentForm = () => {
       return "Please enter a valid 10-digit mobile number starting with 6-9.";
     }
 
-    // Age validation (18+ years)
+    // Date of birth validation
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    
+    // Check if date is valid
     const birthDate = new Date(formData.birth_date);
+    if (isNaN(birthDate.getTime())) {
+      return "Please enter a valid date of birth.";
+    }
+    
+    // Check if date is in the future
+    if (birthDate >= today) {
+      return "Date of birth cannot be in the future.";
+    }
+    
+    // Check for reasonable date range (e.g., not before 1900)
+    const minValidDate = new Date('1900-01-01');
+    if (birthDate < minValidDate) {
+      return "Please enter a valid date of birth after 1900.";
+    }
+    
+    // Calculate age
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
+    // Adjust age if birthday hasn't occurred yet this year
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
     
+    // Check minimum age requirement
     if (age < 18) {
-      return "You must be at least 18 years old to enroll.";
-    }
-    
-    if (birthDate >= today) {
-      return "Date of birth must be in the past.";
+      return "You must be at least 18 years old to enroll. Please provide a valid date of birth.";
     }
 
     return null;
