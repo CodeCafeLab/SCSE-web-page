@@ -48,6 +48,8 @@ export const EnrollmentForm = () => {
     referralCode: "",
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -72,87 +74,92 @@ export const EnrollmentForm = () => {
     return `${day}-${month}-${year}`;
   };
 
-  const validateForm = (): string | null => {
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
     const requiredFields = [
-      { field: "first_name", name: "Full Name" },
-      { field: "email", name: "Email" },
-      { field: "gender", name: "Gender" },
-      { field: "birth_date", name: "Date of Birth" },
-      { field: "mobile_no", name: "Mobile Number" },
-      { field: "address", name: "Address" },
-      { field: "city", name: "City" },
-      { field: "state", name: "State" },
-      { field: "pincode", name: "Pincode" },
-      { field: "qualification", name: "Education" },
+      { field: "first_name", name: "Full Name", errorMessage: "Please enter your full name" },
+      { field: "email", name: "Email", errorMessage: "Please enter a valid email address (e.g., example@domain.com)" },
+      { field: "gender", name: "Gender", errorMessage: "Please select your gender" },
+      { field: "birth_date", name: "Date of Birth", errorMessage: "Please enter a valid date of birth (YYYY-MM-DD)" },
+      { field: "mobile_no", name: "Mobile Number", errorMessage: "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)" },
+      { field: "address", name: "Address", errorMessage: "Please enter your address" },
+      { field: "city", name: "City", errorMessage: "Please enter your city" },
+      { field: "state", name: "State", errorMessage: "Please enter your state" },
+      { field: "pincode", name: "Pincode", errorMessage: "Please enter a valid pincode" },
+      { field: "qualification", name: "Education", errorMessage: "Please enter your education" },
     ];
 
-    for (const { field, name } of requiredFields) {
+    // Check required fields
+    for (const { field, name, errorMessage } of requiredFields) {
       const value = formData[field as keyof FormData];
       if (!value || (typeof value === "string" && value.trim() === "")) {
-        return `${name} is required`;
+        newErrors[field] = errorMessage;
       }
     }
 
     // Email validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(formData.email)) {
-      return "Please enter a valid email address (e.g., example@domain.com).";
+    if (formData.email) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = "Please enter a valid email address (e.g., example@domain.com)";
+      }
     }
 
     // Mobile number validation
-    const mobileRegex = /^[6-9]\d{9}$/;
-    if (!mobileRegex.test(formData.mobile_no)) {
-      return "Please enter a valid 10-digit mobile number starting with 6-9.";
+    if (formData.mobile_no) {
+      const mobileRegex = /^[6-9]\d{9}$/;
+      if (!mobileRegex.test(formData.mobile_no)) {
+        newErrors.mobile_no = "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)";
+      }
     }
 
     // Date of birth validation
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day
-    
-    // Check if date is valid
-    const birthDate = new Date(formData.birth_date);
-    if (isNaN(birthDate.getTime())) {
-      return "Please enter a valid date of birth.";
-    }
-    
-    // Check if date is in the future
-    if (birthDate >= today) {
-      return "Date of birth cannot be in the future.";
-    }
-    
-    // Check for reasonable date range (e.g., not before 1900)
-    const minValidDate = new Date('1900-01-01');
-    if (birthDate < minValidDate) {
-      return "Please enter a valid date of birth after 1900.";
-    }
-    
-    // Calculate age
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    // Adjust age if birthday hasn't occurred yet this year
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    // Check minimum age requirement
-    if (age < 18) {
-      return "You must be at least 18 years old to enroll. Please provide a valid date of birth.";
+    if (formData.birth_date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const birthDate = new Date(formData.birth_date);
+      
+      if (isNaN(birthDate.getTime())) {
+        newErrors.birth_date = "Please enter a valid date of birth (YYYY-MM-DD)";
+      } else if (birthDate >= today) {
+        newErrors.birth_date = "Date of birth cannot be in the future";
+      } else {
+        const minValidDate = new Date('1900-01-01');
+        if (birthDate < minValidDate) {
+          newErrors.birth_date = "Please enter a date after 1900";
+        } else {
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          
+          if (age < 18) {
+            newErrors.birth_date = "You must be at least 18 years old to enroll";
+          }
+        }
+      }
     }
 
-    return null;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationError = validateForm();
-    if (validationError) {
-      toast({
-        title: "Validation Error",
-        description: validationError,
-        variant: "destructive",
-      });
+    const isValid = validateForm();
+    if (!isValid) {
+      // Scroll to the first error
+      const firstErrorField = Object.keys(errors)[0];
+      if (firstErrorField) {
+        document.getElementById(firstErrorField)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
       return;
     }
 
@@ -277,9 +284,13 @@ export const EnrollmentForm = () => {
               type="email"
               value={formData.email}
               onChange={handleInputChange}
-              required
-              placeholder="your.email@example.com"
+              onBlur={() => validateForm()}
+              className={errors.email ? 'border-red-500' : ''}
+              placeholder="e.g., john.doe@example.com"
             />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -290,10 +301,14 @@ export const EnrollmentForm = () => {
               type="tel"
               value={formData.mobile_no}
               onChange={handleInputChange}
-              required
-              placeholder="Enter 10-digit mobile number"
+              onBlur={() => validateForm()}
+              className={errors.mobile_no ? 'border-red-500' : ''}
+              placeholder="e.g., 9876543210"
               maxLength={10}
             />
+            {errors.mobile_no && (
+              <p className="text-sm text-red-500 mt-1">{errors.mobile_no}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -321,9 +336,13 @@ export const EnrollmentForm = () => {
               type="date"
               value={formData.birth_date}
               onChange={handleInputChange}
-              required
-              max={new Date().toISOString().split("T")[0]}
+              onBlur={() => validateForm()}
+              className={errors.birth_date ? 'border-red-500' : ''}
+              max={new Date().toISOString().split('T')[0]}
             />
+            {errors.birth_date && (
+              <p className="text-sm text-red-500 mt-1">{errors.birth_date}</p>
+            )}
           </div>
 
           <div className="space-y-2">
