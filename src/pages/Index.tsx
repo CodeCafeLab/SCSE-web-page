@@ -134,8 +134,7 @@ const Index = () => {
                         {[
                           { text: 'Limited seats available', icon: '👥' },
                           { text: 'Early bird pricing', icon: '⏰' },
-                          { text: 'Guaranteed internship', icon: '💼' },
-                          { text: 'Free career counseling', icon: '🎓' },
+                          { text: 'Guaranteed entrepreneurship', icon: '💼' },
                           { text: 'Industry-recognized certification', icon: '🏆' }
                         ].map((item, index) => (
                           <li key={index} className="flex items-start group">

@@ -52,6 +52,14 @@ export const EnrollmentForm = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Mobile number validation - only allow numbers and limit to 10 digits
+    if (name === 'mobile_no') {
+      const numbers = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: numbers }));
+      return;
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -75,6 +83,7 @@ export const EnrollmentForm = () => {
       { field: "city", name: "City" },
       { field: "state", name: "State" },
       { field: "pincode", name: "Pincode" },
+      { field: "qualification", name: "Education" },
     ];
 
     for (const { field, name } of requiredFields) {
@@ -84,18 +93,32 @@ export const EnrollmentForm = () => {
       }
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
-      return "Please enter a valid email address.";
+      return "Please enter a valid email address (e.g., example@domain.com).";
     }
 
+    // Mobile number validation
     const mobileRegex = /^[6-9]\d{9}$/;
-    if (!mobileRegex.test(formData.mobile_no.replace(/\D/g, ""))) {
-      return "Please enter a valid 10-digit Indian mobile number.";
+    if (!mobileRegex.test(formData.mobile_no)) {
+      return "Please enter a valid 10-digit mobile number starting with 6-9.";
     }
 
+    // Age validation (18+ years)
     const today = new Date();
     const birthDate = new Date(formData.birth_date);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    if (age < 18) {
+      return "You must be at least 18 years old to enroll.";
+    }
+    
     if (birthDate >= today) {
       return "Date of birth must be in the past.";
     }
@@ -287,14 +310,25 @@ export const EnrollmentForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="qualification">Qualification</Label>
-            <Input
-              id="qualification"
-              name="qualification"
+            <Label htmlFor="qualification">Highest Education *</Label>
+            <Select
               value={formData.qualification}
-              onChange={handleInputChange}
-              placeholder="e.g., B.Tech, BBA, 12th, etc."
-            />
+              onValueChange={(value) => handleSelectChange("qualification", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select your highest education" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="8th">8th Standard</SelectItem>
+                <SelectItem value="10th">10th Standard</SelectItem>
+                <SelectItem value="12th">12th Standard</SelectItem>
+                <SelectItem value="diploma">Diploma</SelectItem>
+                <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                <SelectItem value="masters">Master's Degree</SelectItem>
+                <SelectItem value="phd">Ph.D. or higher</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
