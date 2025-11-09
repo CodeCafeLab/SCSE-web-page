@@ -21,7 +21,7 @@ import { useRef, useState, useEffect } from "react";
 import { CheckCircle, Lock, ShieldCheck } from "lucide-react";
 import { CourseCurriculum } from "@/components/CourseCurriculum";
 
-const Index = () => {
+ export  const Index = () => {
   const formRef = useRef<HTMLDivElement>(null);
 
   // Smooth scroll to form

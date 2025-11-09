@@ -39,7 +39,8 @@ const App = () => (
         } />
         <Route path="/privacy-policy" element={
           <Layout className="bg-gray-50">
-<PrivacyPolicy>          </Layout>
+            <PrivacyPolicy />
+          </Layout>
         } />
         <Route path="/payment/callback" element={<PaymentCallback />} />
         <Route path="/thank-you" element={
