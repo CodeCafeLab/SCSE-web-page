@@ -57,19 +57,17 @@ export const CertificateSection = ({
   const certificates = [
     {
       id: 1,
-      title: 'Government Recognition',
+      title: 'ISO 29993:2017',
       year: '2017',
       image: cert1,
-      description: 'Certificate of Excellence in Solar Energy Solutions',
-      issuer: 'Ministry of New and Renewable Energy'
+      description: 'Learning services outside formal education',
     },
     {
       id: 2,
-      title: 'Industry Achievement',
+      title: 'ISO 21001:2018',
       year: '2018',
       image: cert2,
-      description: 'Award for Outstanding Contribution to Solar Sector',
-      issuer: 'Renewable Energy Association'
+      description: 'Management system for Educational organizations',
     }
   ];
 
@@ -118,7 +116,7 @@ export const CertificateSection = ({
                 {/* Certificate Frame */}
                 <div className="relative p-6 md:p-8">
                   {/* Decorative Elements */}
-                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-blue-400"></div>
+                  <div className="absolute top-0 left-0 w-full h-2  from-blue-600 to-blue-400"></div>
                   
                   {/* Certificate Badge */}
                   <div className="absolute top-6 right-6 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">

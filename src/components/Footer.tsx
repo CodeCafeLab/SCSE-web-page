@@ -36,6 +36,9 @@ export const Footer = () => {
                 <Link to="/" className="hover:text-accent transition-colors block">Home</Link>
               </li>
               <li>
+                <Link to="/privacy-policy" className="hover:text-accent transition-colors block">Privacy policy</Link>
+              </li>
+              <li>
                 <Link to="/terms" className="hover:text-accent transition-colors block">Terms & Conditions</Link>
               </li>
               <li>
@@ -43,9 +46,6 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/refund-policy" className="hover:text-accent transition-colors block">Refund Policy</Link>
-              </li>
-              <li>
-                <Link to="/purchase-terms" className="hover:text-accent transition-colors block">Purchase Terms</Link>
               </li>
             </ul>
           </div>
@@ -86,7 +86,7 @@ export const Footer = () => {
         <Separator className="bg-white/20 mb-6" />
         
         <div className="text-center text-sm text-white/60">
-          <p>&copy; {new Date().getFullYear()} Discovery of Success - Suncity Solar Learning Program. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Discovery of Success - A Business School by Suncity Solar.  All rights reserved.</p>
         </div>
       </div>
     </footer>

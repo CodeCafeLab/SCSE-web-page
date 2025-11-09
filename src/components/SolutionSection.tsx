@@ -18,28 +18,30 @@ export const SolutionSection = () => {
   const features = [
     {
       icon: BookOpen,
-      title: "Beginner to Expert Curriculum",
+      title: "Learn From Industry Experts",
       description: "Structured learning path from basics to advanced concepts",
     },
     {
       icon: Briefcase,
-      title: "Real Projects & Hands-On Practice",
-      description: "Work on actual solar installation projects",
+      title: "Live Online Training",
+      description: "Flexible online learning options to suit your schedule",
     },
     {
       icon: Award,
-      title: "Govt. Recognized Certification",
-      description: "Earn a certificate that's valued by employers",
+      title: "Certificate by 'DOS'",
+      description:
+        "Get certification by 'DOS' as ISO recognised solar institute",
     },
     {
       icon: Users,
-      title: "Placement & Business Support",
-      description: "Get help finding jobs or starting your own business",
+      title: "Practical Training After Certification",
+      description:
+        "Gain hands-on practical training after certification to build real-world skills and confidence.",
     },
     {
       icon: Monitor,
-      title: "Online + Offline Classes",
-      description: "Flexible learning options to suit your schedule",
+      title: "Entrepreneurship Opportunity",
+      description: "Free Suncity Solar entrepreneurship opportunity",
     },
   ];
 
@@ -55,7 +57,7 @@ export const SolutionSection = () => {
             <p className="text-xl text-gray-600">
               Introducing the Solar Education System —{" "}
               <span className="font-semibold text-amber-600">
-                learn from solar, earn from solar.
+                Learn from Solar, Earn from Solar{" "}
               </span>
             </p>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -90,7 +92,7 @@ export const SolutionSection = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Second Row - 2 Centered Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl mx-auto mt-8">
                 {features.slice(3, 5).map((feature, index) => (

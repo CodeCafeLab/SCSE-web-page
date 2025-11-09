@@ -141,7 +141,7 @@ export const AboutSection = () => {
         </div>
 
         {/* Quote Section */}
-        <div className="w-full py-4 md:py-6 bg-gradient-to-br from-amber-50 to-amber-100 relative overflow-hidden">
+        <div className="w-full py-4 md:py-6 relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-amber-200">
               <div className="md:flex items-stretch">

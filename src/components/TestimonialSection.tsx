@@ -180,10 +180,7 @@ export const TestimonialSection = () => {
   const handleMouseLeave = () => setIsPaused(false);
 
   return (
-    <section
-      id="testimonials"
-      className="bg-gradient-to-b from-amber-50 to-white py-16 md:py-24"
-    >
+    <section id="testimonials" className=" py-6 md:py-8">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
@@ -194,11 +191,10 @@ export const TestimonialSection = () => {
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Transforming Lives Through Solar Education
+              Hear From Our Solar Entrepreneurs
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Hear from our students who turned their lives around with solar
-              skills and entrepreneurship
+              Our certified trainees are shining bright
             </p>
           </div>
 

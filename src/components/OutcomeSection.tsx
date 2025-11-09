@@ -93,7 +93,7 @@ export const OutcomeSection = () => {
 
           <div className="mt-16">
             <Button 
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-blue-200 transition-all duration-300 transform hover:scale-105"
+              className=" from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-blue-200 transition-all duration-300 transform hover:scale-105"
             >
               🌟 Start Your Success Story Today
             </Button>
