@@ -1,15 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Index } from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import RefundPolicy from "./pages/RefundPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
-import PurchaseTerms from "./pages/PurchaseTerms";
 import { Layout } from "./components/Layout";
 import { PaymentCallback } from "./components/PaymentCallback";
 import ThankYou from "./pages/ThankYou";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { Index } from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +38,7 @@ const App = () => (
         } />
         <Route path="/privacy-policy" element={
           <Layout className="bg-gray-50">
-            <PrivacyPolicy />
+<PrivacyPolicy />
           </Layout>
         } />
         <Route path="/payment/callback" element={<PaymentCallback />} />

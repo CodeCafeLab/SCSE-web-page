@@ -21,7 +21,7 @@ import { useRef, useState, useEffect } from "react";
 import { CheckCircle, Lock, ShieldCheck } from "lucide-react";
 import { CourseCurriculum } from "@/components/CourseCurriculum";
 
- export  const Index = () => {
+export const Index = () => {
   const formRef = useRef<HTMLDivElement>(null);
 
   // Smooth scroll to form
@@ -220,11 +220,8 @@ import { CourseCurriculum } from "@/components/CourseCurriculum";
 
         {/* WhatsApp Button - Always Accessible */}
         <WhatsAppButton />
+        <AboutSection />
       </div>
-      <AboutSection />
-      <WhatsAppButton />
-
-      <AboutSection />
     </div>
   );
 };

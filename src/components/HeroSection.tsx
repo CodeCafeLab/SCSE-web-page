@@ -188,7 +188,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                       <button 
                         onClick={() => setIsGalleryOpen(true)}
                         className={cn(
-                          "relative flex items-center gap-2 px-4 py-2  from-blue-600 to-blue-800 text-white rounded-full",
+                          "relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-full",
                           "text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg",
                           "shadow-md backdrop-blur-sm border border-white/20",
                           "group"
@@ -198,7 +198,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                         <span>View Gallery</span>
                         {/* Subtle shine effect on hover */}
                         <span className="absolute inset-0 overflow-hidden rounded-full">
-                          <span className="absolute inset-0  from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-full group-hover:translate-x-full"></span>
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-full group-hover:translate-x-full"></span>
                         </span>
                       </button>
                     </div>
