@@ -88,23 +88,6 @@ export const CourseCurriculum = ({ onEnrollClick }: CourseCurriculumProps) => {
             </div>
           ))}
         </div>
-
-        <div className="max-w-3xl mx-auto    from-amber-50 to-yellow-50 rounded-2xl p-8 text-center">
-          <div className="inline-flex items-center bg-white px-4 py-2 rounded-full text-sm font-medium text-amber-700 mb-4">
-            <Award className="w-4 h-4 mr-2" />
-            CERTIFICATE
-          </div>
-          <Button
-            onClick={onEnrollClick}
-            className=" from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg py-6 px-8 rounded-full font-semibold"
-          >
-            Enroll Now for Just ₹11,700
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <p className="text-sm text-gray-500 mt-4 flex items-center justify-center">
-            <Clock className="w-4 h-4 mr-1" /> Next batch starts: 01 Jan 2026
-          </p>
-        </div>
       </div>
     </section>
   );
