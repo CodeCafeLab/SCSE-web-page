@@ -28,7 +28,7 @@ export const Header = () => {
           <div className="flex items-center justify-start p-1 sm:p-2">
             <img
               src={suncityLogo}
-              alt="Suncity Solar Learning Program"
+              alt="Discovery Of Success : A Solar Entrepreneur Programme by Suncity Solar"
               className="h-16 w-auto sm:h-18 md:h-24 object-contain transition-all duration-300"
               width={80}
               height={80}
