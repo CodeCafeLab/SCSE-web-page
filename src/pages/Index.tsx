@@ -9,7 +9,6 @@ import { BenefitsSection } from "@/components/BenefitsSection";
 import { EnrollmentForm } from "@/components/EnrollmentForm";
 import { CertificateSection } from "@/components/CertificateSection";
 import { AboutSection } from "@/components/AboutSection";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
 import {
   Card,
   CardContent,
@@ -219,7 +218,6 @@ export const Index = () => {
         <FinalCtaSection />
 
         {/* WhatsApp Button - Always Accessible */}
-        <WhatsAppButton />
         <AboutSection />
       </div>
     </div>

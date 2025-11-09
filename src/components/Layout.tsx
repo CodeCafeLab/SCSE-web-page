@@ -18,24 +18,22 @@ export const Layout = ({ children, className = "" }: LayoutProps) => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Initial check
     checkIfMobile();
-    
+
     // Add event listener
-    window.addEventListener('resize', checkIfMobile);
-    
+    window.addEventListener("resize", checkIfMobile);
+
     // Cleanup
-    return () => window.removeEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
       <TooltipProvider>
-        <Header isMobile={isMobile} />
-        <main className={cn("flex-1 w-full", className)}>
-          {children}
-        </main>
+        <Header />
+        <main className={cn("flex-1 w-full", className)}>{children}</main>
         <Footer />
         <Toaster />
         <Sonner />
