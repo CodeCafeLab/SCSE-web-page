@@ -58,7 +58,7 @@ export const FinalCtaSection = () => {
 
               {/* Address */}
               <a
-                href="https://www.google.com/maps/place/Sun+City+Solar+Energy+Pvt.+Ltd./@26.864296,75.751672,17z/data=!3m1!4b1!4m6!3m5!1s0x3e8c7a3d8b0b0b0b:0x8f8f8f8f8f8f8f8f!8m2!3d26.864296!4d75.751672!16s%2Fg%2F11b8f8f8f8?entry=ttu"
+                href="https://www.google.com/search?sca_esv=2e82bc2b963fb339&rlz=1C5CHFA_enIN1029IN1029&cs=1&output=search&kgmid=/g/11wtdzfzn5&q=Suncity+Solar&shndl=30&shem=lcuae,uaasie,shrtsdl&source=sh/x/loc/uni/m1/1&kgs=2dfa33809b4eff91&utm_source=lcuae,uaasie,shrtsdl,sh/x/loc/uni/m1/1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300 group"
