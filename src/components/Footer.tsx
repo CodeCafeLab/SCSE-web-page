@@ -8,7 +8,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="flex flex-col items-start">
-            <div className="bg-white shadow-sm border border-gray-100 mb-4">
+            <div className="bg-white shadow-sm border border-gray-100 mb-4 rounded rounded-md">
               <img
                 src={suncityLogo}
                 alt="Suncity Solar"

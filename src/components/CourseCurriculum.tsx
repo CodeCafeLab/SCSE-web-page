@@ -7,7 +7,7 @@ interface CourseCurriculumProps {
 
 const modules = [
   {
-    title: "SESSION SUMMARY",
+    title: "1 Week",
     duration: "1 Week",
     lessons: [
       "WELCOME",
@@ -20,8 +20,8 @@ const modules = [
     ],
   },
   {
-    title: "SESSION SUMMARY",
-    duration: "1 Week",
+    title: "2 Week",
+    duration: "2 Week",
     lessons: [
       "ABOUT LATEST AND ADVANCED SOLAR TECHNOLOGY",
       "ABOUT SOLAR SYSTEM",
@@ -33,8 +33,8 @@ const modules = [
     ],
   },
   {
-    title: "SESSION SUMMARY",
-    duration: "1 Week",
+    title: "3 Week",
+    duration: "3 Week",
     lessons: [
       "PERSONALITY DEVELOPMENT",
       "ONLINE EXAM",
@@ -57,7 +57,7 @@ export const CourseCurriculum = ({ onEnrollClick }: CourseCurriculumProps) => {
             JOURNEY OF TRAINEE
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            SESSION SUMMARY
+            Course Modules
           </h2>
         </div>
 
@@ -71,9 +71,9 @@ export const CourseCurriculum = ({ onEnrollClick }: CourseCurriculumProps) => {
                 <h3 className="text-xl font-bold text-gray-900">
                   {module.title}
                 </h3>
-                <span className="text-sm font-medium bg-white/30 px-3 py-1 rounded-full">
+                {/* <span className="text-sm font-medium bg-white/30 px-3 py-1 rounded-full">
                   {module.duration}
-                </span>
+                </span> */}
               </div>
               <div className="p-6">
                 <ul className="space-y-3">
