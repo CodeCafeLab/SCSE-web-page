@@ -102,8 +102,7 @@ export const CertificateSection = ({
               Certified Excellence
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Government Recognized{" "}
-              <span className="text-blue-600">Certifications</span>
+              'DOS' Is ISO Recognised Solar Institute
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Our commitment to excellence is validated by prestigious
@@ -124,7 +123,7 @@ export const CertificateSection = ({
                   <div className="absolute top-0 left-0 w-full h-2  from-blue-600 to-blue-400"></div>
 
                   {/* Certificate Badge */}
-                  <div className="absolute top-6 right-6 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                  <div className="absolute z-10 top-6 right-6 bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
                     {cert.year}
                   </div>
 
