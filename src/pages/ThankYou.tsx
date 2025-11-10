@@ -316,58 +316,6 @@ export const ThankYou = () => {
           )}
         </div>
 
-        {/* Next Steps */}
-        <div className="px-6 py-6 bg-gray-50">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">What's Next?</h3>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 h-5 w-5 text-green-500">
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="ml-3 text-sm text-gray-700">
-                You will receive a confirmation email with course access details within 24 hours.
-              </p>
-            </div>
-            <div className="flex items-start">
-              <div className="flex-shrink-0 h-5 w-5 text-green-500">
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="ml-3 text-sm text-gray-700">
-                Check your spam folder if you don't see our email in your inbox.
-              </p>
-            </div>
-            <div className="flex items-start">
-              <div className="flex-shrink-0 h-5 w-5 text-green-500">
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <p className="ml-3 text-sm text-gray-700">
-                For any questions, please contact our support team at support@suncitysolar.in
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              onClick={() => window.print()}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              Print Receipt
-            </Button>
-            <Button
-              onClick={() => navigate('/')}
-              className="w-full sm:w-auto"
-            >
-              Back to Home
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

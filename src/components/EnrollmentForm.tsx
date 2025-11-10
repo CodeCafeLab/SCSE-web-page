@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Mail } from "lucide-react";
 
 interface FormData {
   first_name: string;
@@ -28,10 +28,52 @@ interface FormData {
   referralCode: string;
 }
 
+// Email service utility
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+const sendEmailOTP = async (email: string, otp: string): Promise<boolean> => {
+  try {
+    // Store email OTP data in localStorage
+    const emailOtpData = {
+      otp: otp,
+      timestamp: new Date().getTime(),
+      email: email,
+      attempts: 0,
+    };
+    localStorage.setItem("email_otp", JSON.stringify(emailOtpData));
+
+    // Simulate API call - in production, replace with actual email service
+    console.log(`Email OTP ${otp} sent to: ${email}`);
+
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    return true;
+  } catch (error) {
+    console.error("Error sending email OTP:", error);
+    return false;
+  }
+};
+
 export const EnrollmentForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Mobile OTP States
+  const [otp, setOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+
+  // Email OTP States
+  const [emailOtp, setEmailOtp] = useState("");
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailOtpVerified, setEmailOtpVerified] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
@@ -54,14 +96,21 @@ export const EnrollmentForm = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
+
     // Mobile number validation - only allow numbers and limit to 10 digits
-    if (name === 'mobile_no') {
-      const numbers = value.replace(/\D/g, '').slice(0, 10);
+    if (name === "mobile_no") {
+      const numbers = value.replace(/\D/g, "").slice(0, 10);
       setFormData((prev) => ({ ...prev, [name]: numbers }));
       return;
     }
-    
+
+    // If email is changed, reset email verification
+    if (name === "email" && emailOtpSent) {
+      setEmailOtpSent(false);
+      setEmailOtpVerified(false);
+      setEmailOtp("");
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -69,24 +118,57 @@ export const EnrollmentForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const formatDateForAPI = (dateString: string): string => {
-    const [year, month, day] = dateString.split("-");
-    return `${day}-${month}-${year}`;
-  };
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     const requiredFields = [
-      { field: "first_name", name: "Full Name", errorMessage: "Please enter your full name" },
-      { field: "email", name: "Email", errorMessage: "Please enter a valid email address (e.g., example@domain.com)" },
-      { field: "gender", name: "Gender", errorMessage: "Please select your gender" },
-      { field: "birth_date", name: "Date of Birth", errorMessage: "Please enter a valid date of birth (YYYY-MM-DD)" },
-      { field: "mobile_no", name: "Mobile Number", errorMessage: "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)" },
-      { field: "address", name: "Address", errorMessage: "Please enter your address" },
+      {
+        field: "first_name",
+        name: "Full Name",
+        errorMessage: "Please enter your full name",
+      },
+      {
+        field: "email",
+        name: "Email",
+        errorMessage:
+          "Please enter a valid email address (e.g., example@domain.com)",
+      },
+      {
+        field: "gender",
+        name: "Gender",
+        errorMessage: "Please select your gender",
+      },
+      {
+        field: "birth_date",
+        name: "Date of Birth",
+        errorMessage: "Please enter a valid date of birth (YYYY-MM-DD)",
+      },
+      {
+        field: "mobile_no",
+        name: "Mobile Number",
+        errorMessage:
+          "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)",
+      },
+      {
+        field: "address",
+        name: "Address",
+        errorMessage: "Please enter your address",
+      },
       { field: "city", name: "City", errorMessage: "Please enter your city" },
-      { field: "state", name: "State", errorMessage: "Please enter your state" },
-      { field: "pincode", name: "Pincode", errorMessage: "Please enter a valid pincode" },
-      { field: "qualification", name: "Education", errorMessage: "Please enter your education" },
+      {
+        field: "state",
+        name: "State",
+        errorMessage: "Please enter your state",
+      },
+      {
+        field: "pincode",
+        name: "Pincode",
+        errorMessage: "Please enter a valid pincode",
+      },
+      {
+        field: "qualification",
+        name: "Education",
+        errorMessage: "Please enter your education",
+      },
     ];
 
     // Check required fields
@@ -99,9 +181,9 @@ export const EnrollmentForm = () => {
 
     // Email validation
     if (formData.email) {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Please enter a valid email address (e.g., example@domain.com)";
+      if (!isValidEmail(formData.email)) {
+        newErrors.email =
+          "Please enter a valid email address (e.g., example@domain.com)";
       }
     }
 
@@ -109,7 +191,8 @@ export const EnrollmentForm = () => {
     if (formData.mobile_no) {
       const mobileRegex = /^[6-9]\d{9}$/;
       if (!mobileRegex.test(formData.mobile_no)) {
-        newErrors.mobile_no = "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)";
+        newErrors.mobile_no =
+          "Please enter a valid 10-digit mobile number starting with 6-9 (e.g., 9876543210)";
       }
     }
 
@@ -118,25 +201,30 @@ export const EnrollmentForm = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const birthDate = new Date(formData.birth_date);
-      
+
       if (isNaN(birthDate.getTime())) {
-        newErrors.birth_date = "Please enter a valid date of birth (YYYY-MM-DD)";
+        newErrors.birth_date =
+          "Please enter a valid date of birth (YYYY-MM-DD)";
       } else if (birthDate >= today) {
         newErrors.birth_date = "Date of birth cannot be in the future";
       } else {
-        const minValidDate = new Date('1900-01-01');
+        const minValidDate = new Date("1900-01-01");
         if (birthDate < minValidDate) {
           newErrors.birth_date = "Please enter a date after 1900";
         } else {
           let age = today.getFullYear() - birthDate.getFullYear();
           const monthDiff = today.getMonth() - birthDate.getMonth();
-          
-          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
             age--;
           }
-          
+
           if (age < 18) {
-            newErrors.birth_date = "You must be at least 18 years old to enroll";
+            newErrors.birth_date =
+              "You must be at least 18 years old to enroll";
           }
         }
       }
@@ -144,20 +232,284 @@ export const EnrollmentForm = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
 
+  // Send Email OTP
+  const sendEmailOTPHandler = async () => {
+    if (!formData.email || !isValidEmail(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingEmail(true);
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit OTP
+
+    try {
+      const emailSent = await sendEmailOTP(formData.email, newOtp);
+
+      if (emailSent) {
+        setEmailOtpSent(true);
+        setEmailOtp("");
+
+        toast({
+          title: "Email Verification Sent",
+          description: `A 6-digit verification code has been sent to ${formData.email}`,
+        });
+      } else {
+        throw new Error("Failed to send email OTP");
+      }
+    } catch (error) {
+      console.error("Email OTP sending error:", error);
+      toast({
+        title: "Error Sending Email OTP",
+        description: "Failed to send verification email. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Verify Email OTP
+  const verifyEmailOTP = () => {
+    if (!emailOtp || emailOtp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a valid 6-digit OTP",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const storedData = localStorage.getItem("email_otp");
+    if (!storedData) {
+      toast({
+        title: "OTP Expired",
+        description: "Please request a new email OTP",
+        variant: "destructive",
+      });
+      setEmailOtpSent(false);
+      return;
+    }
+
+    const { otp: storedOtp, timestamp, email } = JSON.parse(storedData);
+    const now = new Date().getTime();
+    const OTP_EXPIRY = 10 * 60 * 1000; // 10 minutes expiry for email
+
+    // Check if OTP is expired
+    if (now - timestamp > OTP_EXPIRY) {
+      toast({
+        title: "OTP Expired",
+        description: "Your email OTP has expired. Please request a new one.",
+        variant: "destructive",
+      });
+      setEmailOtpSent(false);
+      return;
+    }
+
+    // Check if email matches
+    if (email !== formData.email) {
+      toast({
+        title: "Error",
+        description: "Email mismatch. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verify OTP - must match exactly
+    if (emailOtp === storedOtp) {
+      setEmailOtpVerified(true);
+      toast({
+        title: "Email Verified ✅",
+        description: "Your email has been successfully verified.",
+      });
+    } else {
+      // Increment attempts
+      const otpData = JSON.parse(storedData);
+      otpData.attempts = (otpData.attempts || 0) + 1;
+      localStorage.setItem("email_otp", JSON.stringify(otpData));
+
+      // Check if too many attempts
+      if (otpData.attempts >= 5) {
+        toast({
+          title: "Too Many Attempts",
+          description: "Please request a new OTP",
+          variant: "destructive",
+        });
+        setEmailOtpSent(false);
+        return;
+      }
+
+      toast({
+        title: "Incorrect OTP",
+        description: "The OTP you entered is incorrect. Please try again.",
+        variant: "destructive",
+      });
+
+      setEmailOtp("");
+    }
+  };
+
+  // Send Mobile OTP
+  const sendOTP = async () => {
+    if (!formData.mobile_no || formData.mobile_no.length !== 10) {
+      toast({
+        title: "Invalid Mobile Number",
+        description: "Please enter a valid 10-digit mobile number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit OTP
+    setGeneratedOtp(newOtp);
+
+    // Store OTP in localStorage with timestamp
+    const otpData = {
+      otp: newOtp,
+      timestamp: new Date().getTime(),
+      mobile: formData.mobile_no,
+    };
+    localStorage.setItem("enrollment_otp", JSON.stringify(otpData));
+
+    try {
+      // Always attempt to send OTP via SMS
+      try {
+        const url = `https://trans.ismsexpert.com/http-tokenkeyapi.php?authentic-key=393173756e63697479733130301714721103&senderid=SUNCTM&route=1&templateid=1107176258910305673&number=${formData.mobile_no}&message=Your one time code for DOS enrollment is : ${newOtp} -Suncity solar`;
+        await fetch(url, {
+          method: "GET",
+          mode: "no-cors",
+        });
+      } catch (sslError) {
+        console.warn("HTTPS request failed, falling back to HTTP");
+        // Fallback to HTTP if HTTPS fails
+        try {
+          const httpUrl = `http://trans.ismsexpert.com/http-tokenkeyapi.php?authentic-key=393173756e63697479733130301714721103&senderid=SUNCTM&route=1&templateid=1107176258910305673&number=${formData.mobile_no}&message=Your one time code for DOS enrollment is : ${newOtp} -Suncity solar`;
+          await fetch(httpUrl, {
+            method: "GET",
+            mode: "no-cors",
+          });
+        } catch (httpError) {
+          console.error("HTTP request failed:", httpError);
+          throw new Error("Failed to send OTP. Please try again later.");
+        }
+      }
+
+      // Show OTP sent message and display input field
+      setOtpSent(true);
+      setOtp("");
+
+      // Show success message without revealing the OTP
+      toast({
+        title: "OTP Sent",
+        description: `A 6-digit verification code has been sent to ${formData.mobile_no}`,
+      });
+    } catch (error) {
+      console.error("OTP sending error:", error);
+      toast({
+        title: "Error Sending OTP",
+        description: error.message || "Failed to send OTP. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Verify Mobile OTP
+  const verifyOTP = () => {
+    if (!otp || otp.length !== 6) {
+      toast({
+        title: "Invalid OTP",
+        description: "Please enter a valid 6-digit OTP",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const storedData = localStorage.getItem("enrollment_otp");
+    if (!storedData) {
+      toast({
+        title: "OTP Expired",
+        description: "Please request a new OTP",
+        variant: "destructive",
+      });
+      setOtpSent(false);
+      return;
+    }
+
+    const { otp: storedOtp, timestamp, mobile } = JSON.parse(storedData);
+    const now = new Date().getTime();
+    const OTP_EXPIRY = 5 * 60 * 1000; // 5 minutes expiry
+
+    // Check if OTP is expired
+    if (now - timestamp > OTP_EXPIRY) {
+      toast({
+        title: "OTP Expired",
+        description: "Your OTP has expired. Please request a new one.",
+        variant: "destructive",
+      });
+      setOtpSent(false);
+      return;
+    }
+
+    // Check if mobile number matches
+    if (mobile !== formData.mobile_no) {
+      toast({
+        title: "Error",
+        description: "Mobile number mismatch. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Verify OTP - must match exactly
+    if (otp === storedOtp) {
+      setOtpVerified(true);
+      toast({
+        title: "Mobile Number Verified ✅",
+        description: "Your mobile number has been successfully verified.",
+      });
+    } else {
+      const errorMessage =
+        "The OTP you entered is incorrect. Please try again.";
+
+      toast({
+        title: "Incorrect OTP",
+        description: errorMessage,
+        variant: "destructive",
+      });
+
+      setOtp("");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!otpVerified) {
+      toast({
+        title: "Mobile verification required",
+        description: "Please verify your mobile number before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+
     const isValid = validateForm();
     if (!isValid) {
-      // Scroll to the first error
       const firstErrorField = Object.keys(errors)[0];
       if (firstErrorField) {
         document.getElementById(firstErrorField)?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
+          behavior: "smooth",
+          block: "center",
         });
       }
       return;
@@ -173,7 +525,7 @@ export const EnrollmentForm = () => {
         email: formData.email.trim(),
         gender: formData.gender,
         birth_date: formData.birth_date,
-        mobile_no: formData.mobile_no.replace(/\D/g, ''),
+        mobile_no: formData.mobile_no.replace(/\D/g, ""),
         address: formData.address.trim(),
         city: formData.city.trim(),
         state: formData.state,
@@ -183,7 +535,7 @@ export const EnrollmentForm = () => {
         referral_code: formData.referralCode.trim(),
         course: "Solar Panel Technology: From Basics to Installation",
         amount: "11700",
-        currency: "INR"
+        currency: "INR",
       };
 
       // Add form data to URL parameters
@@ -196,30 +548,41 @@ export const EnrollmentForm = () => {
       const redirectUrl = `${baseUrl}?${formDataForUrl.toString()}`;
 
       // Redirect to Cashfree payment page with the redirect URL
-      const cashfreeUrl = new URL('https://payments.cashfree.com/forms/solar-training-jan2026');
-      cashfreeUrl.searchParams.append('redirect', 'true');
-      cashfreeUrl.searchParams.append('redirectUrl', redirectUrl);
-      
+      const cashfreeUrl = new URL(
+        "https://payments.cashfree.com/forms/solar-training-jan2026"
+      );
+      cashfreeUrl.searchParams.append("redirect", "true");
+      cashfreeUrl.searchParams.append("redirectUrl", redirectUrl);
+
       // Add any additional parameters required by Cashfree
-      cashfreeUrl.searchParams.append('customerName', formData.first_name.trim());
-      cashfreeUrl.searchParams.append('customerEmail', formData.email.trim());
-      cashfreeUrl.searchParams.append('customerPhone', formData.mobile_no.replace(/\D/g, ''));
-      cashfreeUrl.searchParams.append('amount', '11700');
-      
+      cashfreeUrl.searchParams.append(
+        "customerName",
+        formData.first_name.trim()
+      );
+      cashfreeUrl.searchParams.append("customerEmail", formData.email.trim());
+      cashfreeUrl.searchParams.append(
+        "customerPhone",
+        formData.mobile_no.replace(/\D/g, "")
+      );
+      cashfreeUrl.searchParams.append("amount", "11700");
+
       // Save form data to localStorage before redirecting
       const formDataForStorage = {
         ...formPayload,
-        // Add any additional fields you want to store
         timestamp: new Date().toISOString(),
       };
-      localStorage.setItem('enrollmentFormData', JSON.stringify(formDataForStorage));
-      console.log('Form data saved to localStorage');
-      
+      localStorage.setItem(
+        "enrollmentFormData",
+        JSON.stringify(formDataForStorage)
+      );
+      console.log("Form data saved to localStorage");
+
       // Redirect to Cashfree payment page
       window.location.href = cashfreeUrl.toString();
     } catch (error) {
-      console.error('Error redirecting to payment:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      console.error("Error redirecting to payment:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error",
         description: `Failed to process payment: ${errorMessage}`,
@@ -285,7 +648,7 @@ export const EnrollmentForm = () => {
               value={formData.email}
               onChange={handleInputChange}
               onBlur={() => validateForm()}
-              className={errors.email ? 'border-red-500' : ''}
+              className={errors.email ? "border-red-500" : ""}
               placeholder="e.g., john.doe@example.com"
             />
             {errors.email && (
@@ -302,13 +665,83 @@ export const EnrollmentForm = () => {
               value={formData.mobile_no}
               onChange={handleInputChange}
               onBlur={() => validateForm()}
-              className={errors.mobile_no ? 'border-red-500' : ''}
+              className={errors.mobile_no ? "border-red-500" : ""}
               placeholder="e.g., 9876543210"
               maxLength={10}
             />
             {errors.mobile_no && (
               <p className="text-sm text-red-500 mt-1">{errors.mobile_no}</p>
             )}
+
+            <div className="mt-2">
+              {!otpSent ? (
+                <Button
+                  type="button"
+                  onClick={sendOTP}
+                  disabled={formData.mobile_no.length !== 10 || isLoading}
+                  className="w-full sm:w-auto"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send OTP"
+                  )}
+                </Button>
+              ) : !otpVerified ? (
+                <div className="space-y-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      value={otp}
+                      onChange={(e) => {
+                        const value = e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 6);
+                        setOtp(value);
+                      }}
+                      maxLength={6}
+                      className="flex-1"
+                      disabled={isLoading}
+                    />
+                    <Button
+                      type="button"
+                      onClick={verifyOTP}
+                      disabled={otp.length !== 6 || isLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        "Verify OTP"
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Enter the 6-digit code sent to {formData.mobile_no}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => setOtpSent(false)}
+                    className="h-auto p-0 text-sm"
+                  >
+                    Change number
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Mobile number verified</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -337,8 +770,8 @@ export const EnrollmentForm = () => {
               value={formData.birth_date}
               onChange={handleInputChange}
               onBlur={() => validateForm()}
-              className={errors.birth_date ? 'border-red-500' : ''}
-              max={new Date().toISOString().split('T')[0]}
+              className={errors.birth_date ? "border-red-500" : ""}
+              max={new Date().toISOString().split("T")[0]}
             />
             {errors.birth_date && (
               <p className="text-sm text-red-500 mt-1">{errors.birth_date}</p>
@@ -349,7 +782,9 @@ export const EnrollmentForm = () => {
             <Label htmlFor="qualification">Highest Education *</Label>
             <Select
               value={formData.qualification}
-              onValueChange={(value) => handleSelectChange("qualification", value)}
+              onValueChange={(value) =>
+                handleSelectChange("qualification", value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select your highest education" />
@@ -381,7 +816,9 @@ export const EnrollmentForm = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="referralCode">Referral Code (Optional)</Label>
-              <span className="text-xs text-gray-500">Have a referral code?</span>
+              <span className="text-xs text-gray-500">
+                Have a referral code?
+              </span>
             </div>
             <div className="relative">
               <Input
@@ -395,9 +832,10 @@ export const EnrollmentForm = () => {
               <button
                 type="button"
                 onClick={() => {
-                  // Add any referral code validation logic here
                   toast({
-                    title: formData.referralCode ? "Referral code applied!" : "Please enter a referral code",
+                    title: formData.referralCode
+                      ? "Referral code applied!"
+                      : "Please enter a referral code",
                     variant: formData.referralCode ? "default" : "destructive",
                   });
                 }}
@@ -476,7 +914,7 @@ export const EnrollmentForm = () => {
       <div className="pt-6">
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !otpVerified }
           className={`
             w-full py-4 px-6 text-lg font-semibold text-white rounded-xl
             bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
@@ -486,10 +924,8 @@ export const EnrollmentForm = () => {
             relative overflow-hidden group
           `}
         >
-          {/* Animated background effect */}
           <span className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-          
-          {/* Button content */}
+
           <span className="relative z-10 flex items-center justify-center gap-2">
             {isLoading ? (
               <>
@@ -499,15 +935,37 @@ export const EnrollmentForm = () => {
             ) : (
               <>
                 <span className="text-yellow-300">🎓</span>
-                <span>Enroll Now</span>
+                <span>
+                  {!otpVerified 
+                    ? "Complete Verification to Enroll"
+                    : "Enroll Now"}
+                </span>
               </>
             )}
           </span>
-          
-          {/* Shine effect on hover */}
+
           <span className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-white/20 -skew-x-12 transition-all duration-500 ease-in-out group-hover:left-full"></span>
         </button>
-  
+
+        {/* Verification Status */}
+        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <div
+            className={`flex items-center gap-2 ${
+              otpVerified ? "text-green-600" : "text-gray-500"
+            }`}
+          >
+            <CheckCircle className="h-4 w-4" />
+            <span>Mobile {otpVerified ? "Verified" : "Verification"}</span>
+          </div>
+          <div
+            className={`flex items-center gap-2 ${
+              emailOtpVerified ? "text-green-600" : "text-gray-500"
+            }`}
+          >
+            <CheckCircle className="h-4 w-4" />
+            <span>Email {emailOtpVerified ? "Verified" : "Verification"}</span>
+          </div>
+        </div>
       </div>
     </form>
   );
