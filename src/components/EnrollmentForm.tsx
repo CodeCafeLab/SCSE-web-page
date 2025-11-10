@@ -937,7 +937,7 @@ export const EnrollmentForm = () => {
                 <span className="text-yellow-300">🎓</span>
                 <span>
                   {!otpVerified 
-                    ? "Complete Verification to Enroll"
+                    ? "Complete Mobile Number Verification to Enroll"
                     : "Enroll Now"}
                 </span>
               </>
@@ -947,25 +947,7 @@ export const EnrollmentForm = () => {
           <span className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-white/20 -skew-x-12 transition-all duration-500 ease-in-out group-hover:left-full"></span>
         </button>
 
-        {/* Verification Status */}
-        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-          <div
-            className={`flex items-center gap-2 ${
-              otpVerified ? "text-green-600" : "text-gray-500"
-            }`}
-          >
-            <CheckCircle className="h-4 w-4" />
-            <span>Mobile {otpVerified ? "Verified" : "Verification"}</span>
-          </div>
-          <div
-            className={`flex items-center gap-2 ${
-              emailOtpVerified ? "text-green-600" : "text-gray-500"
-            }`}
-          >
-            <CheckCircle className="h-4 w-4" />
-            <span>Email {emailOtpVerified ? "Verified" : "Verification"}</span>
-          </div>
-        </div>
+
       </div>
     </form>
   );
