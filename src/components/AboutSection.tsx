@@ -131,7 +131,6 @@ export const AboutSection = () => {
               <p className="text-blue-600 italic font-medium">
                 "हर घर सोलर, हर घर रोज़गार"
               </p>
-              <p className="text-gray-500 text-sm">"ex ex vitae-ex ex avare"</p>
             </div>
           </div>
 
