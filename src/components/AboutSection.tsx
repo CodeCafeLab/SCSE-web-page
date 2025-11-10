@@ -147,7 +147,7 @@ export const AboutSection = () => {
         </div>
 
         {/* Swami Vivekananda Quote Section */}
-        <div className="mt-12 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 shadow-sm">
+        <div className="mt-12 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 shadow-sm w-3/4 mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Image */}
             <div className="flex-shrink-0">
@@ -161,7 +161,7 @@ export const AboutSection = () => {
             </div>
 
             {/* Quote Content */}
-            <div className="flex-1 text-center md:text-left">
+            <div className="flex-1 text-center md:text-center ">
               <blockquote className="text-gray-700 text-base leading-relaxed mb-3 italic">
                 "जिस समय जिस काम के लिए प्रतिज्ञा करो, ठीक उसी समय पर उसे करना
                 ही चाहिए, नहीं तो लोगों का विश्वास उठ जाता है।"
