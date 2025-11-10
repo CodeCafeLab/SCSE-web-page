@@ -7,7 +7,7 @@ interface CourseCurriculumProps {
 
 const modules = [
   {
-    title: "1 Week",
+    title: "1st Week",
     duration: "1 Week",
     lessons: [
       "WELCOME",
@@ -20,8 +20,8 @@ const modules = [
     ],
   },
   {
-    title: "2 Week",
-    duration: "2 Week",
+    title: "2nd Week",
+    duration: "1 Week",
     lessons: [
       "ABOUT LATEST AND ADVANCED SOLAR TECHNOLOGY",
       "ABOUT SOLAR SYSTEM",
@@ -33,8 +33,8 @@ const modules = [
     ],
   },
   {
-    title: "3 Week",
-    duration: "3 Week",
+    title: "3rd Week",
+    duration: "1 Week",
     lessons: [
       "PERSONALITY DEVELOPMENT",
       "ONLINE EXAM",
