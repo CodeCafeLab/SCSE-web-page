@@ -22,12 +22,7 @@ export const Footer = () => {
               A Business School of Suncity Solar
             </p>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">About Us</h3>
-            <p className="text-white/80 text-sm">
-              Discovery of Success is India's leading solar education program, empowering individuals with skills for a sustainable future.
-            </p>
-          </div>
+        
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>

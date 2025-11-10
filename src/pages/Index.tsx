@@ -167,7 +167,7 @@ export const Index = () => {
                         <div className="grid grid-cols-3 gap-4 text-center">
                           {[
                             { value: "4.9/5", label: "Rating", icon: "⭐" },
-                            { value: "500+", label: "Students", icon: "👨‍🎓" },
+                            { value: "50,000+", label: "Students", icon: "👨‍🎓" },
                             {
                               value: "90%",
                               label: "Entrepreneur Success",
