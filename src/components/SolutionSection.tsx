@@ -30,7 +30,7 @@ export const SolutionSection = () => {
       icon: Award,
       title: "Certificate by 'DOS'",
       description:
-        "Get certification by 'DOS' as ISO recognised solar institute",
+        "Get certification by 'DOS' an ISO recognised solar institute",
     },
     {
       icon: Users,

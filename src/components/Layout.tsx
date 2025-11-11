@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { AICallerWidget } from "./AICallerWidget";
 
 interface LayoutProps {
   children: ReactNode;
@@ -38,7 +37,6 @@ export const Layout = ({ children, className = "" }: LayoutProps) => {
         <Footer />
         <Toaster />
         <Sonner />
-        <AICallerWidget />
       </TooltipProvider>
     </div>
   );

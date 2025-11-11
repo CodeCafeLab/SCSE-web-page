@@ -52,7 +52,7 @@ export const AboutSection = () => {
         {/* Hindi Line Design */}
         <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-full p-4 text-center mb-6 shadow-md">
           <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            "सौर्य क्रांति से राष्ट्र निर्माण की ओर ..."
+            "सौर क्रांति से राष्ट्र निर्माण की ओर ..."
           </h3>
           <p className="text-lg text-amber-100 italic">
             "Towards Nation-Building through Solar Revolution..."

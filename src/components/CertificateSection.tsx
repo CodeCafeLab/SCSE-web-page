@@ -102,11 +102,10 @@ export const CertificateSection = ({
               Certified Excellence
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              'DOS' Is ISO Recognised Solar Institute
+              'DOS' An ISO Recognised Solar Institute
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our commitment to excellence is validated by prestigious
-              government and industry certifications
+              Our commitment to excellence is validated by industry certifications
             </p>
           </div>
 

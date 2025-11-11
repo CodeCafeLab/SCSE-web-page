@@ -192,7 +192,7 @@ export const Index = () => {
                   </div>
 
                   {/* Right Side - Form */}
-                  <div className="md:w-3/5 p-8 bg-white">
+                  <div id="enrollment-form" className="md:w-3/5 p-8 bg-white">
                     <div className="relative h-full">
                       <EnrollmentForm />
                     </div>
