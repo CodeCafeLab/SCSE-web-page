@@ -1202,7 +1202,6 @@ export const EnrollmentForm = () => {
 
       {/* Terms & Conditions Section */}
       <div className="space-y-4 p-6 bg-gray-50 rounded-lg border">
-      
         <div className="space-y-3">
           <p className="text-sm text-gray-700 leading-relaxed">
             <strong>Declaration:</strong> "I have read, understood, and accepted
@@ -1229,7 +1228,8 @@ export const EnrollmentForm = () => {
               className="text-blue-600 hover:text-blue-800 underline mx-1"
             >
               Course Refund & Cancellation Policy
-            </a>and
+            </a>
+            and
             <a
               href="/terms-of-use"
               target="_blank"
@@ -1237,10 +1237,10 @@ export const EnrollmentForm = () => {
             >
               website usage terms and conditions
             </a>
-            of Discovery of Success (DOS)
-            - A business school of Suncity Solar. I hereby undertake and agree
-            that I shall abide by all the policies and T&C as mentioned and be
-            amended from time to time at the sole discretion of the management."
+            of Discovery of Success (DOS) - A business school of Suncity Solar.
+            I hereby undertake and agree that I shall abide by all the policies
+            and T&C as mentioned and be amended from time to time at the sole
+            discretion of the management."
           </p>
 
           <p className="text-sm text-gray-700 leading-relaxed">
