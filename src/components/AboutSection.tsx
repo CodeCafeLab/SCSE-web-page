@@ -61,12 +61,12 @@ export const AboutSection = () => {
 
         <p className="text-gray-700 mb-4 leading-relaxed">
           At Suncity Solar, we embrace a broad and visionary approach to
-          expanding the reach of our campaign "all this is my fault of all...".
-          To move forward successfully toward this path, we have identified
-          energy scarcity and unemployment as critical obstacles to national
-          progress. The solution to these challenges lies in renewable energy
-          adoption and sustainable employment generation, which are deeply
-          embedded in our company's vision.
+          expanding the reach of our campaign "सौर क्रांति से राष्ट्र निर्माण की
+          ओर...". To move forward successfully toward this path, we have
+          identified energy scarcity and unemployment as critical obstacles to
+          national progress. The solution to these challenges lies in renewable
+          energy adoption and sustainable employment generation, which are
+          deeply embedded in our company's vision.
         </p>
 
         <p className="text-gray-700 mb-4 leading-relaxed">
@@ -75,7 +75,7 @@ export const AboutSection = () => {
           livelihood opportunities. Through Suncity Solar's unique DIRECT
           SELLING MODEL, we empower individuals to establish successful careers
           while contributing to our nations vision of a green,
-          energy-independent bharat.
+          energy-independent Bharat.
         </p>
 
         <p className="text-gray-700 leading-relaxed">
@@ -93,7 +93,7 @@ export const AboutSection = () => {
 
         <p className="text-gray-700 mb-4 leading-relaxed">
           Discovery of Success (DOS) is a structured and visionary platform
-          designed to train and transform common individuals through "trigger"
+          designed to train and transform common individuals through "गुरुकुल"
           into skilled solar advisors while equipping them with in-depth
           knowledge of the solar industry.
         </p>
@@ -114,7 +114,7 @@ export const AboutSection = () => {
           personality development, and system-oriented expertise. This
           initiative strengthens the foundation of our growing solar network,
           creating professionals who are not just advisors but true solar
-          experts as "the the diga".
+          experts as "सौर वीर योद्धा".
         </p>
 
         {/* Vision & Mission Boxes */}
@@ -129,7 +129,7 @@ export const AboutSection = () => {
                 "Solar For All and Employment for All"
               </p>
               <p className="text-blue-600 italic font-medium">
-                "हर घर सोलर, हर घर रोज़गार"
+                "हर घर सोलर, हर घर रोजगार"
               </p>
             </div>
           </div>

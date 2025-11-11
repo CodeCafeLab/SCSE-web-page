@@ -11,17 +11,14 @@ const verifyEmailOTPApi = async (
   otp: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/otp/verify-otp`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, otp }),
-        credentials: "include", // Include cookies if needed
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/otp/verify-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+      credentials: "include", // Include cookies if needed
+    });
 
     const data = await response.json();
     return data;
@@ -203,6 +200,9 @@ export const EnrollmentForm = () => {
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpVerified, setEmailOtpVerified] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+
+  // Terms & Conditions State
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
@@ -688,6 +688,16 @@ export const EnrollmentForm = () => {
       return;
     }
 
+    // Check if terms are accepted
+    if (!acceptedTerms) {
+      toast({
+        title: "Terms & Conditions Required",
+        description: "Please accept the Terms & Conditions to proceed",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // First validate the form
     const isValid = validateForm();
 
@@ -723,7 +733,7 @@ export const EnrollmentForm = () => {
         present_occupation: formData.presentOccupation,
         referral_code: formData.referralCode.trim(),
         source_of_knowledge: formData.sourceOfKnowledge,
-        course: "Solar Panel Technology: From Basics to Installation",
+        course: "Solar business training course",
         amount: "11700",
         currency: "INR",
       };
@@ -1190,11 +1200,79 @@ export const EnrollmentForm = () => {
         </div>
       </div>
 
+      {/* Terms & Conditions Section */}
+      <div className="space-y-4 p-6 bg-gray-50 rounded-lg border">
+      
+        <div className="space-y-3">
+          <p className="text-sm text-gray-700 leading-relaxed">
+            <strong>Declaration:</strong> "I have read, understood, and accepted
+            the
+            <a
+              href="/terms"
+              target="_blank"
+              className="text-blue-600 hover:text-blue-800 underline mx-1"
+            >
+              Terms & Conditions for Course enrollment
+            </a>
+            ,
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              className="text-blue-600 hover:text-blue-800 underline mx-1"
+            >
+              privacy policy
+            </a>
+            ,
+            <a
+              href="/refund-policy"
+              target="_blank"
+              className="text-blue-600 hover:text-blue-800 underline mx-1"
+            >
+              Course Refund & Cancellation Policy
+            </a>and
+            <a
+              href="/terms-of-use"
+              target="_blank"
+              className="text-blue-600 hover:text-blue-800 underline mx-1"
+            >
+              website usage terms and conditions
+            </a>
+            of Discovery of Success (DOS)
+            - A business school of Suncity Solar. I hereby undertake and agree
+            that I shall abide by all the policies and T&C as mentioned and be
+            amended from time to time at the sole discretion of the management."
+          </p>
+
+          <p className="text-sm text-gray-700 leading-relaxed">
+            <strong>Consent:</strong> "I willingly like to proceed further by
+            accepting and giving my consent in complete sense and to the best of
+            my knowledge."
+          </p>
+        </div>
+
+        <div className="flex items-start space-x-3 pt-2">
+          <input
+            type="checkbox"
+            id="acceptTerms"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label
+            htmlFor="acceptTerms"
+            className="text-sm font-medium text-gray-900 cursor-pointer select-none"
+          >
+            I accept the Terms & Conditions and give my consent as mentioned
+            above
+          </label>
+        </div>
+      </div>
+
       {/* Submit Button */}
       <div className="pt-6">
         <button
           type="submit"
-          disabled={isLoading || !whatsappOtpVerified}
+          disabled={isLoading || !whatsappOtpVerified || !acceptedTerms}
           className={`
             w-full py-4 px-6 text-lg font-semibold text-white rounded-xl
             bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900
@@ -1216,9 +1294,9 @@ export const EnrollmentForm = () => {
               <>
                 <span className="text-yellow-300">🎓</span>
                 <span>
-                  {!whatsappOtpVerified
-                    ? "Complete WhatsApp And Email Verification to Enroll"
-                    : "Buy Now"}
+                  {!whatsappOtpVerified || !acceptedTerms
+                    ? "Complete Verification & Accept Terms to Enroll"
+                    : "Join Course just in ₹11,700"}
                 </span>
               </>
             )}
@@ -1226,6 +1304,17 @@ export const EnrollmentForm = () => {
 
           <span className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/2 h-full bg-white/20 -skew-x-12 transition-all duration-500 ease-in-out group-hover:left-full"></span>
         </button>
+
+        {/* Helper text */}
+        {(!whatsappOtpVerified || !acceptedTerms) && (
+          <p className="text-sm text-center text-gray-600 mt-3">
+            {!whatsappOtpVerified && !acceptedTerms
+              ? "Complete WhatsApp verification and accept Terms & Conditions to enable enrollment"
+              : !whatsappOtpVerified
+              ? "Complete WhatsApp verification to enable enrollment"
+              : "Please accept the Terms & Conditions to enable enrollment"}
+          </p>
+        )}
       </div>
     </form>
   );

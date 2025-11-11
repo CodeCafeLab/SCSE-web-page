@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { CheckCircle, Loader2, AlertCircle, XCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 type FormData = {
   first_name?: string;
@@ -24,12 +24,14 @@ type FormData = {
 
 export const ThankYou = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'success' | 'pending' | 'failed'>('pending');
+  const [paymentStatus, setPaymentStatus] = useState<'success' | 'pending' | 'failed' | 'unauthorized'>('pending');
+  const [paymentVerified, setPaymentVerified] = useState<boolean>(false);
 
   useEffect(() => {
     // This function will be called when the component mounts
@@ -37,24 +39,39 @@ export const ThankYou = () => {
       try {
         console.log('Processing payment...');
         
+        // Check if payment was verified in the redirect state
+        const isPaymentVerified = location.state?.paymentVerified;
+        const paymentId = searchParams.get('payment_id') || searchParams.get('cf_payment_id');
+        
+        // If no payment ID and not verified, redirect to home
+        if (!paymentId && !isPaymentVerified) {
+          console.log('No payment ID found and payment not verified, redirecting to home');
+          setPaymentStatus('unauthorized');
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Check payment status from localStorage if not verified
+        if (paymentId && !isPaymentVerified) {
+          const storedStatus = localStorage.getItem(`payment_${paymentId}`);
+          if (storedStatus !== 'success') {
+            console.log('Payment not verified, redirecting to home');
+            setPaymentStatus('unauthorized');
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        
         // Get all URL parameters
         const params = Object.fromEntries(searchParams.entries());
         console.log('URL Params:', params);
         
-        // Try to get form data from localStorage first
-        const storedFormData = localStorage.getItem('enrollmentFormData');
+        // Try to get form data from URL params or localStorage
         let formData: FormData;
         
-        if (storedFormData) {
-          // Parse the stored form data
-          formData = JSON.parse(storedFormData);
-          console.log('Retrieved form data from localStorage:', formData);
-          
-          // Clean up by removing the stored data
-          localStorage.removeItem('enrollmentFormData');
-        } else {
-          // Fallback to URL parameters if no data in localStorage
-          console.log('No form data found in localStorage, falling back to URL params');
+        // First, try to get from URL params
+        if (params.first_name && params.email) {
+          console.log('Using form data from URL parameters');
           formData = {
             first_name: params.first_name,
             email: params.email,
@@ -66,16 +83,35 @@ export const ThankYou = () => {
             state: params.state,
             pincode: params.pincode,
             qualification: params.qualification,
-            present_occupation: params.present_occupation,
-            course: params.course || "Solar Panel Technology: From Basics to Installation",
+            present_occupation: params.present_occupation || params.present_occupation,
+            course: params.course || "Solar business training course fee ",
             amount: params.amount || "11700",
             currency: params.currency || "INR"
           };
+        } 
+        // Fallback to localStorage if no data in URL
+        else {
+          const storedFormData = localStorage.getItem('enrollmentFormData');
+          if (storedFormData) {
+            console.log('Using form data from localStorage');
+            formData = JSON.parse(storedFormData);
+            // Clean up by removing the stored data after using it
+            localStorage.removeItem('enrollmentFormData');
+          } else {
+            console.log('No form data found, using default values');
+            formData = {
+              first_name: 'Student',
+              email: 'no-email@example.com',
+              course: "Solar business training course fee",
+              amount: "11700",
+              currency: "INR"
+            };
+          }
         }
 
         console.log('Form Data:', formData);
 
-        // Check payment status from URL parameters
+        // Check payment status from URL parameters or state
         const paymentStatus = params.payment_status || 
                             params.txStatus || 
                             (params.payment_id ? 'success' : 'pending');
@@ -83,6 +119,7 @@ export const ThankYou = () => {
         const status = paymentStatus.toLowerCase() as 'success' | 'pending' | 'failed';
         setPaymentStatus(status);
         setFormData(formData);
+        setPaymentVerified(true);
 
         console.log('Payment Status:', status);
         console.log('Form Data Check:', { 
@@ -111,7 +148,7 @@ export const ThankYou = () => {
           // Required fields
           first_name: formData.first_name || 'Not Provided',
           email: formData.email || 'not-provided@example.com',
-          course: formData.course || "Solar Panel Technology: From Basics to Installation",
+          course: formData.course || "Solar business training course fee",
           
           // Personal Information
           gender: formData.gender || 'Not Specified',
@@ -191,6 +228,30 @@ export const ThankYou = () => {
     // We only want this to run once when the component mounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array means this runs once on mount
+
+  // If payment is not verified, show unauthorized message
+  if (paymentStatus === 'unauthorized') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+              <XCircle className="h-10 w-10 text-red-600" />
+            </div>
+            <CardTitle className="text-2xl">Access Denied</CardTitle>
+            <CardDescription className="text-base mt-2">
+              You can only access this page after a successful payment.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button onClick={() => navigate('/')} className="mt-4">
+              Return to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // If still submitting, show loading state
   if (isSubmitting) {

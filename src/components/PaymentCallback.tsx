@@ -1,73 +1,197 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export const PaymentCallback = () => {
   const [status, setStatus] = useState<'success' | 'failed' | 'pending' | 'loading'>('loading');
   const [orderId, setOrderId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  interface FormData {
+    first_name?: string;
+    email?: string;
+    mobile_no?: string;
+    [key: string]: unknown;
+  }
+  
+  const [formData, setFormData] = useState<FormData | null>(null);
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const orderIdParam = searchParams.get('order_id');
-      const paymentStatus = searchParams.get('payment_status');
+      const orderIdParam = searchParams.get('order_id') || searchParams.get('cf_payment_id');
+      const paymentStatus = searchParams.get('payment_status') || searchParams.get('txStatus');
+      const paymentMessage = searchParams.get('payment_message');
+
+      // Try to get form data from state or localStorage
+      const stateFormData = location.state?.formData;
+      const storedFormData = localStorage.getItem('enrollmentFormData');
+      
+      if (stateFormData) {
+        setFormData(stateFormData);
+      } else if (storedFormData) {
+        setFormData(JSON.parse(storedFormData));
+      }
 
       if (!orderIdParam) {
         setStatus('failed');
+        toast({
+          title: "Error",
+          description: "Invalid payment reference. Please try again.",
+          variant: "destructive",
+        });
+        navigate('/');
         return;
       }
 
       setOrderId(orderIdParam);
 
       // If payment status is in URL, use it
-      if (paymentStatus === 'SUCCESS') {
+      if (paymentStatus === 'SUCCESS' || paymentStatus === 'PAYMENT_SUCCESS') {
         setStatus('success');
-        // Redirect to form with success status - form will auto-submit
-        setTimeout(() => {
-          navigate(`/?payment_status=SUCCESS&order_id=${orderIdParam}`);
-        }, 2000);
-      } else if (paymentStatus === 'FAILED') {
+        
+        // Store payment success in localStorage
+        localStorage.setItem(`payment_${orderIdParam}`, 'success');
+        
+        // Redirect to thank you page with all necessary parameters
+        const formDataToSend = stateFormData || (storedFormData ? JSON.parse(storedFormData) : {});
+        
+        // Create a URLSearchParams object with the form data
+        const params = new URLSearchParams();
+        
+        // Add all form data to URL parameters
+        Object.entries(formDataToSend).forEach(([key, value]) => {
+          if (value) {
+            params.append(key, String(value));
+          }
+        });
+        
+        // Add payment details
+        params.append('payment_id', orderIdParam);
+        params.append('payment_status', 'success');
+        params.append('txStatus', 'SUCCESS');
+        
+        // Redirect to thank you page with all parameters
+        navigate(`/thank-you?${params.toString()}`, { 
+          state: { paymentVerified: true },
+          replace: true
+        });
+        
+      } else if (paymentStatus === 'FAILED' || paymentStatus === 'PAYMENT_ERROR' || paymentStatus === 'CANCELLED') {
         setStatus('failed');
-        // Redirect back to form on failure
-        setTimeout(() => {
-          navigate('/?payment_status=FAILED&order_id=' + orderIdParam);
-        }, 3000);
+        
+        // Store payment failure in localStorage
+        localStorage.setItem(`payment_${orderIdParam}`, 'failed');
+        
+        // Show error message
+        toast({
+          title: "Payment Failed",
+          description: paymentMessage || "We couldn't process your payment. Please try again.",
+          variant: "destructive",
+        });
+        
+        // Redirect back to form with error state immediately
+        navigate('/', { 
+          state: { 
+            paymentError: true,
+            errorMessage: paymentMessage || 'Payment was not successful. Please try again.'
+          },
+          replace: true 
+        });
+        return;
       } else {
-        // Verify payment status with backend
+        // Verify payment status with backend if status is not clear from URL
         try {
           const apiUrl = import.meta.env.VITE_API_URL || '/api';
           const response = await fetch(`${apiUrl}/payment/verify?order_id=${orderIdParam}`);
           
           if (response.ok) {
             const data = await response.json();
-            if (data.payment_status === 'SUCCESS') {
+            if (data.payment_status === 'SUCCESS' || data.payment_status === 'PAYMENT_SUCCESS') {
               setStatus('success');
-              setTimeout(() => {
-                navigate(`/?payment_status=SUCCESS&order_id=${orderIdParam}`);
-              }, 2000);
-            } else if (data.payment_status === 'FAILED') {
+              
+              // Store payment success in localStorage
+              localStorage.setItem(`payment_${orderIdParam}`, 'success');
+              
+              // Get form data from state or localStorage
+              const formDataToSend = location.state?.formData || 
+                                   (localStorage.getItem('enrollmentFormData') ? 
+                                    JSON.parse(localStorage.getItem('enrollmentFormData') || '{}') : {});
+              
+              // Create a URLSearchParams object with the form data
+              const params = new URLSearchParams();
+              
+              // Add all form data to URL parameters
+              Object.entries(formDataToSend).forEach(([key, value]) => {
+                if (value) {
+                  params.append(key, String(value));
+                }
+              });
+              
+              // Add payment details
+              params.append('payment_id', orderIdParam);
+              params.append('payment_status', 'success');
+              
+              // Redirect to thank you page with all parameters
+              navigate(`/thank-you?${params.toString()}`, { 
+                state: { paymentVerified: true },
+                replace: true
+              });
+              
+            } else if (data.payment_status === 'FAILED' || data.payment_status === 'PAYMENT_ERROR') {
               setStatus('failed');
+              
+              // Store payment failure in localStorage
+              localStorage.setItem(`payment_${orderIdParam}`, 'failed');
+              
+              // Show error message
+              toast({
+                title: "Payment Failed",
+                description: data.message || "We couldn't process your payment. Please try again.",
+                variant: "destructive",
+              });
+              
+              // Redirect back to form with error state
               setTimeout(() => {
-                navigate('/?payment_status=FAILED&order_id=' + orderIdParam);
+                navigate('/', { 
+                  state: { paymentError: true },
+                  replace: true 
+                });
               }, 3000);
             } else {
               setStatus('pending');
+              
+              // Check again after delay if still pending
+              setTimeout(() => {
+                verifyPayment();
+              }, 2000);
             }
           } else {
             setStatus('pending');
+            
+            // Retry after delay if there was an error
+            setTimeout(() => {
+              verifyPayment();
+            }, 2000);
           }
         } catch (error) {
           console.error('Error verifying payment:', error);
           setStatus('pending');
+          
+          // Retry after delay on error
+          setTimeout(() => {
+            verifyPayment();
+          }, 2000);
         }
       }
     };
 
     verifyPayment();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, location.state?.formData, toast]);
 
   if (status === 'loading') {
     return (

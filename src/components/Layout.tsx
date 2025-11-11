@@ -12,21 +12,16 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children, className = "" }: LayoutProps) => {
-  const [isMobile, setIsMobile] = useState(false);
-
+  // Add viewport meta tag for better mobile responsiveness
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const viewportMeta = document.createElement('meta');
+    viewportMeta.name = 'viewport';
+    viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover';
+    document.head.appendChild(viewportMeta);
+    
+    return () => {
+      document.head.removeChild(viewportMeta);
     };
-
-    // Initial check
-    checkIfMobile();
-
-    // Add event listener
-    window.addEventListener("resize", checkIfMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   return (
