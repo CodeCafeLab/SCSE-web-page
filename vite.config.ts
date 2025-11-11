@@ -10,16 +10,19 @@ export default defineConfig(({ mode }) => {
   // It's only for development tooling, so skip it in production builds
   // For development, you can manually add it if needed
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   return {
     server: {
       host: "::",
       port: 8080,
       proxy: {
-        // Proxy API requests to the backend server
+        // Proxy API requests to the backend server in development
         '/api': {
           target: 'http://localhost:5000',
           changeOrigin: true,
           secure: false,
+          rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api prefix when proxying
           ws: true,
         },
       },
@@ -32,7 +35,9 @@ export default defineConfig(({ mode }) => {
     },
     // Add environment variables
     define: {
-      'import.meta.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || '')
+      'import.meta.env.API_BASE_URL': isProduction 
+        ? JSON.stringify('https://dos.suncitysolar.in/api') 
+        : JSON.stringify('/api') // Use proxy in development
     },
   };
 });

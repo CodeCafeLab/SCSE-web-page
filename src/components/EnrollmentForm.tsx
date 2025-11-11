@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// Verify OTP API call
-// Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+// API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const verifyEmailOTPApi = async (
   email: string,
@@ -13,7 +12,7 @@ const verifyEmailOTPApi = async (
 ): Promise<{ success: boolean; message: string }> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/otp/verify-whatsapp-otp`,
+      `${API_BASE_URL}/api/otp/verify-otp`,
       {
         method: "POST",
         headers: {
@@ -93,7 +92,7 @@ const sendEmailOTP = async (
   email: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/otp/send-whatsapp-otp`, {
+    const response = await fetch(`${API_BASE_URL}/api/otp/send-otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
