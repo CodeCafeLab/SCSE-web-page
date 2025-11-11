@@ -4,18 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 // Verify OTP API call
+// Get API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const verifyEmailOTPApi = async (
   email: string,
   otp: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await fetch("http://localhost:5000/api/otp/verify-otp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, otp }),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/otp/verify-whatsapp-otp`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
+        credentials: "include", // Include cookies if needed
+      }
+    );
 
     const data = await response.json();
     return data;
@@ -86,7 +93,7 @@ const sendEmailOTP = async (
   email: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    const response = await fetch("http://localhost:5000/api/otp/send-otp", {
+    const response = await fetch(`${API_BASE_URL}/api/otp/send-whatsapp-otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -928,7 +935,9 @@ export const EnrollmentForm = () => {
                   disabled={
                     formData.mobile_no.length !== 10 || isSendingWhatsApp
                   }
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto "
+                  variant="outline"
+                  size="sm"
                 >
                   {isSendingWhatsApp ? (
                     <>
@@ -936,7 +945,7 @@ export const EnrollmentForm = () => {
                       Sending...
                     </>
                   ) : (
-                    "Send WhatsApp OTP"
+                    "Send OTP"
                   )}
                 </Button>
               ) : !whatsappOtpVerified ? (
@@ -968,7 +977,7 @@ export const EnrollmentForm = () => {
                           Verifying...
                         </>
                       ) : (
-                        "Verify WhatsApp OTP"
+                        "Verify Number"
                       )}
                     </Button>
                   </div>
@@ -1140,12 +1149,6 @@ export const EnrollmentForm = () => {
             </div>
           </div>
         </div>
-      </div>
-      {/* Address Information - Only Pincode Field */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">
-          Address Information
-        </h2>
 
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
@@ -1215,8 +1218,8 @@ export const EnrollmentForm = () => {
                 <span className="text-yellow-300">🎓</span>
                 <span>
                   {!whatsappOtpVerified
-                    ? "Complete WhatsApp Verification to Enroll"
-                    : "Enroll Now"}
+                    ? "Complete WhatsApp And Email Verification to Enroll"
+                    : "Buy Now"}
                 </span>
               </>
             )}

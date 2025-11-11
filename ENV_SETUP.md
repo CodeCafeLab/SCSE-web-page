@@ -10,7 +10,7 @@ PORT=5000
 NODE_ENV=development
 
 # Frontend URL (for callback URLs)
-VITE_APP_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080
 VITE_API_URL=http://localhost:5000
 APP_URL=http://localhost:8080
 
@@ -41,7 +41,7 @@ NODE_ENV=production
 
 # Production Domain - IMPORTANT: Use your actual production domain
 APP_URL=https://dos.suncitysolar.in
-VITE_APP_URL=https://dos.suncitysolar.in
+VITE_API_BASE_URL=https://dos.suncitysolar.in
 VITE_API_URL=https://dos.suncitysolar.in/api
 
 # Cashfree Payment Gateway Configuration
@@ -70,5 +70,5 @@ CASHFREE_API_URL=https://api.cashfree.com/pg/orders
 - Never commit your `.env` file to git
 - The `.env` file is already in `.gitignore`
 - For production, update `CASHFREE_API_URL` to production URL
-- Update `VITE_APP_URL` to your production domain when deploying
+- Update `VITE_API_BASE_URL` to your production domain when deploying
 

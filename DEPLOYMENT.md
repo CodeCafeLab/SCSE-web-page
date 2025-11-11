@@ -22,7 +22,7 @@ NODE_ENV=production
 
 # Production Domain - IMPORTANT
 APP_URL=https://dos.suncitysolar.in
-VITE_APP_URL=https://dos.suncitysolar.in
+VITE_API_BASE_URL=https://dos.suncitysolar.in
 VITE_API_URL=https://dos.suncitysolar.in/api
 
 # Cashfree Payment Gateway - Production Credentials

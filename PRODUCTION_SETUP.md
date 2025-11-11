@@ -24,7 +24,7 @@ Use Vercel/Netlify Functions or similar for the payment endpoint.
 VITE_CASHFREE_APP_ID=your_production_client_id
 VITE_CASHFREE_API_URL=https://api.cashfree.com/pg/orders
 VITE_API_URL=https://dos.suncitysolar.in/api
-VITE_APP_URL=https://dos.suncitysolar.in
+VITE_API_BASE_URL=https://dos.suncitysolar.in
 NODE_ENV=production
 ```
 

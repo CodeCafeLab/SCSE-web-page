@@ -16,7 +16,7 @@ VITE_API_URL=http://localhost:5000/api
 CASHFREE_SECRET_KEY=your_cashfree_secret_key_here
 
 # Line 5: Application URL (Optional)
-VITE_APP_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080
 
 # Line 6: Node Environment (Optional)
 NODE_ENV=development

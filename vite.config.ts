@@ -14,12 +14,25 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      proxy: {
+        // Proxy API requests to the backend server
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+      },
     },
     plugins,
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    // Add environment variables
+    define: {
+      'import.meta.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || '')
     },
   };
 });

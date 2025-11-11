@@ -21,7 +21,7 @@ VITE_CASHFREE_API_URL=https://sandbox.cashfree.com/pg/orders
 VITE_API_URL=http://localhost:5000/api
 
 # Application URL (for payment callbacks)
-VITE_APP_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080
 ```
 
 ## How to Get Cashfree Credentials:

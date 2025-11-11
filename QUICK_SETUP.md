@@ -16,7 +16,7 @@ VITE_CASHFREE_APP_ID=2010284e3f0d145901db313a3b820102
 VITE_API_URL=https://dos.suncitysolar.in/api
 
 # Line 3: Application URL
-VITE_APP_URL=https://dos.suncitysolar.in
+VITE_API_BASE_URL=https://dos.suncitysolar.in
 
 # Line 4: Node Environment
 NODE_ENV=production
