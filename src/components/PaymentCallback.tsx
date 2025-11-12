@@ -134,9 +134,9 @@ export const PaymentCallback = () => {
       } else {
         // Verify payment status with backend if status is not clear from URL
         try {
-          const apiUrl = import.meta.env.VITE_API_URL || "/api";
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
           const response = await fetch(
-            `http://localhost:5000/api/payments/verify/${orderIdParam}`
+            `${API_BASE_URL}/api/payments/verify/${orderIdParam}`
           );
 
           if (response.ok) {

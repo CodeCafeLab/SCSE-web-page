@@ -48,7 +48,12 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   isLoading: externalLoading = false,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { checkout, isLoading: isCashfreeLoading, error, isInitialized } = useCashfree(mode);
+  const {
+    checkout,
+    isLoading: isCashfreeLoading,
+    error,
+    isInitialized,
+  } = useCashfree(mode);
   const isLoading = externalLoading || isProcessing || isCashfreeLoading;
 
   const handlePayment = useCallback(async () => {
@@ -57,13 +62,19 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
     try {
       // Validate customer data
-      if (!customer?.name?.trim() || !customer?.email?.trim() || !customer?.phone?.trim()) {
+      if (
+        !customer?.name?.trim() ||
+        !customer?.email?.trim() ||
+        !customer?.phone?.trim()
+      ) {
         throw new Error("Please fill in all customer details");
       }
 
       // Create order in your backend
       const orderId = `order_${Date.now()}`;
-      const response = await fetch("http://localhost:5000/api/payments/orders", {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+      const response = await fetch(`${API_BASE_URL}/api/payments/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +84,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
           customer: {
             name: customer.name.trim(),
             email: customer.email.trim(),
-            phone: customer.phone.replace(/\D/g, ''), // Remove non-numeric characters
+            phone: customer.phone.replace(/\D/g, ""), // Remove non-numeric characters
           },
           orderId,
         }),
@@ -85,11 +96,13 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       }
 
       const responseData = await response.json();
-      
+
       if (!responseData.success || !responseData.data?.payment_session_id) {
-        throw new Error(responseData.message || "Failed to create payment session");
+        throw new Error(
+          responseData.message || "Failed to create payment session"
+        );
       }
-      
+
       const paymentSessionId = responseData.data.payment_session_id;
 
       // Initialize Cashfree checkout
@@ -116,7 +129,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
             }
           } catch (error) {
             console.error("Payment verification error:", error);
-            onFailure?.(error instanceof Error ? error : new Error("Payment verification failed"));
+            onFailure?.(
+              error instanceof Error
+                ? error
+                : new Error("Payment verification failed")
+            );
           }
         },
         onFailure: (error: Error & { code?: string }) => {
@@ -125,18 +142,28 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
             name: "PaymentError",
             message: error?.message || "Payment was cancelled or failed",
             code: error?.code,
-            details: error
+            details: error,
           });
         },
       });
-
     } catch (error) {
       console.error("Payment error:", error);
-      onFailure?.(error instanceof Error ? error : new Error("Payment processing failed"));
+      onFailure?.(
+        error instanceof Error ? error : new Error("Payment processing failed")
+      );
     } finally {
       setIsProcessing(false);
     }
-  }, [amount, customer, isInitialized, isLoading, onSuccess, onFailure, checkout, redirectTarget]);
+  }, [
+    amount,
+    customer,
+    isInitialized,
+    isLoading,
+    onSuccess,
+    onFailure,
+    checkout,
+    redirectTarget,
+  ]);
 
   if (error) {
     return (
@@ -162,20 +189,31 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded 
         transition-colors disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center min-w-[120px]
-        ${isLoading ? 'opacity-75' : ''}
+        ${isLoading ? "opacity-75" : ""}
       `}
       disabled={disabled || isLoading || !isInitialized}
     >
       {isLoading ? (
         <>
-          <svg 
-            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
+          <svg
+            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
             viewBox="0 0 24 24"
           >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
           Processing...
         </>
