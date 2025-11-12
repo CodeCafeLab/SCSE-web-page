@@ -41,6 +41,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, Mail, MapPin } from "lucide-react";
+import PaymentButton from "./PaymentButton";
 
 interface FormData {
   first_name: string;
@@ -186,6 +187,9 @@ const sendWhatsAppOTP = async (
 export const EnrollmentForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isTestMode, setIsTestMode] = useState(
+    process.env.NODE_ENV === "development"
+  );
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isFetchingPincode, setIsFetchingPincode] = useState(false);
 
@@ -793,6 +797,31 @@ export const EnrollmentForm = () => {
     }
   };
 
+  // Test handler for PaymentButton
+  const handleTestPayment = async () => {
+    try {
+      setIsLoading(true);
+      // Simulate a successful payment after a short delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      toast({
+        title: "Test Payment Successful",
+        description: "This is a test payment simulation.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Test payment failed:", error);
+      toast({
+        title: "Test Payment Failed",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-8">
       {/* Header */}
@@ -1268,6 +1297,25 @@ export const EnrollmentForm = () => {
         </div>
       </div>
 
+      <PaymentButton
+        amount={1} // Amount in INR
+        customer={{
+          name: "John Doe",
+          email: "antima142005@gmail.com",
+          phone: "8619749796",
+        }}
+        onSuccess={(response) => {
+          console.log("Payment successful:", response);
+          // Handle successful payment
+        }}
+        onFailure={(error) => {
+          console.error("Payment failed:", error);
+          // Handle payment failure
+        }}
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
+      >
+        Pay Now
+      </PaymentButton>
       {/* Submit Button */}
       <div className="pt-6">
         <button

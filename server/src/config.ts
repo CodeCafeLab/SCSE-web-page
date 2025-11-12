@@ -16,6 +16,9 @@ const requiredEnvVars = [
   'EMAIL_USER',
   'EMAIL_PASSWORD',
   'EMAIL_FROM',
+  'CASHFREE_CLIENT_ID',
+  'CASHFREE_CLIENT_SECRET',
+  'FRONTEND_URL',
 ];
 
 for (const envVar of requiredEnvVars) {
@@ -53,9 +56,21 @@ export const config = {
     from: process.env.EMAIL_FROM!,
   },
   
+  // Cashfree configuration
+  cashfree: {
+    clientId: process.env.CASHFREE_CLIENT_ID!,
+    clientSecret: process.env.CASHFREE_CLIENT_SECRET!,
+    env: process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX',
+  },
+  
+  // App configuration
+  app: {
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:8080',
+  },
+  
   // CORS configuration
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
     credentials: process.env.CORS_CREDENTIALS === 'true',
   },
 } as const;

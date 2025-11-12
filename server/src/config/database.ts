@@ -33,9 +33,11 @@ export const AppDataSource = new DataSource({
 export const initializeDatabase = async () => {
   try {
     await AppDataSource.initialize();
-    console.log('Database connection established successfully');
+    // No console.log here - we'll handle the message in the server startup
+    return true;
   } catch (error) {
-    console.error('Error connecting to database:', error);
+    console.error('Database connection failed');
+    console.error(error);
     process.exit(1);
   }
 };

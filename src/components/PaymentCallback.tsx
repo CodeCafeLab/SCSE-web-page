@@ -1,12 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export const PaymentCallback = () => {
-  const [status, setStatus] = useState<'success' | 'failed' | 'pending' | 'loading'>('loading');
+  const [status, setStatus] = useState<
+    "success" | "failed" | "pending" | "loading"
+  >("loading");
   const [orderId, setOrderId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,19 +26,32 @@ export const PaymentCallback = () => {
     mobile_no?: string;
     [key: string]: unknown;
   }
-  
+
   const [formData, setFormData] = useState<FormData | null>(null);
+
+  // Function to check if payment is verified
+  const isPaymentVerified = (status: string | null) => {
+    return status === "PAID" || status === "SUCCESS" || status === "success";
+  };
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const orderIdParam = searchParams.get('order_id') || searchParams.get('cf_payment_id');
-      const paymentStatus = searchParams.get('payment_status') || searchParams.get('txStatus');
-      const paymentMessage = searchParams.get('payment_message');
+      const orderIdParam =
+        searchParams.get("order_id") || searchParams.get("cf_payment_id");
+      const paymentStatus =
+        searchParams.get("payment_status") || searchParams.get("txStatus");
+      const paymentMessage = searchParams.get("payment_message");
+
+      // If no order ID, redirect to home
+      if (!orderIdParam) {
+        navigate("/", { replace: true });
+        return;
+      }
 
       // Try to get form data from state or localStorage
       const stateFormData = location.state?.formData;
-      const storedFormData = localStorage.getItem('enrollmentFormData');
-      
+      const storedFormData = localStorage.getItem("enrollmentFormData");
+
       if (stateFormData) {
         setFormData(stateFormData);
       } else if (storedFormData) {
@@ -38,150 +59,170 @@ export const PaymentCallback = () => {
       }
 
       if (!orderIdParam) {
-        setStatus('failed');
+        setStatus("failed");
         toast({
           title: "Error",
           description: "Invalid payment reference. Please try again.",
           variant: "destructive",
         });
-        navigate('/');
+        navigate("/");
         return;
       }
 
       setOrderId(orderIdParam);
 
       // If payment status is in URL, use it
-      if (paymentStatus === 'SUCCESS' || paymentStatus === 'PAYMENT_SUCCESS') {
-        setStatus('success');
-        
+      if (paymentStatus === "SUCCESS" || paymentStatus === "PAYMENT_SUCCESS") {
+        setStatus("success");
+
         // Store payment success in localStorage
-        localStorage.setItem(`payment_${orderIdParam}`, 'success');
-        
+        localStorage.setItem(`payment_${orderIdParam}`, "success");
+
         // Redirect to thank you page with all necessary parameters
-        const formDataToSend = stateFormData || (storedFormData ? JSON.parse(storedFormData) : {});
-        
+        const formDataToSend =
+          stateFormData || (storedFormData ? JSON.parse(storedFormData) : {});
+
         // Create a URLSearchParams object with the form data
         const params = new URLSearchParams();
-        
+
         // Add all form data to URL parameters
         Object.entries(formDataToSend).forEach(([key, value]) => {
           if (value) {
             params.append(key, String(value));
           }
         });
-        
+
         // Add payment details
-        params.append('payment_id', orderIdParam);
-        params.append('payment_status', 'success');
-        params.append('txStatus', 'SUCCESS');
-        
+        params.append("payment_id", orderIdParam);
+        params.append("payment_status", "success");
+        params.append("txStatus", "SUCCESS");
+
         // Redirect to thank you page with all parameters
-        navigate(`/thank-you?${params.toString()}`, { 
+        navigate(`/thank-you?${params.toString()}`, {
           state: { paymentVerified: true },
-          replace: true
+          replace: true,
         });
-        
-      } else if (paymentStatus === 'FAILED' || paymentStatus === 'PAYMENT_ERROR' || paymentStatus === 'CANCELLED') {
-        setStatus('failed');
-        
+      } else if (
+        paymentStatus === "FAILED" ||
+        paymentStatus === "PAYMENT_ERROR" ||
+        paymentStatus === "CANCELLED"
+      ) {
+        setStatus("failed");
+
         // Store payment failure in localStorage
-        localStorage.setItem(`payment_${orderIdParam}`, 'failed');
-        
+        localStorage.setItem(`payment_${orderIdParam}`, "failed");
+
         // Show error message
         toast({
           title: "Payment Failed",
-          description: paymentMessage || "We couldn't process your payment. Please try again.",
+          description:
+            paymentMessage ||
+            "We couldn't process your payment. Please try again.",
           variant: "destructive",
         });
-        
+
         // Redirect back to form with error state immediately
-        navigate('/', { 
-          state: { 
+        navigate("/", {
+          state: {
             paymentError: true,
-            errorMessage: paymentMessage || 'Payment was not successful. Please try again.'
+            errorMessage:
+              paymentMessage || "Payment was not successful. Please try again.",
           },
-          replace: true 
+          replace: true,
         });
         return;
       } else {
         // Verify payment status with backend if status is not clear from URL
         try {
-          const apiUrl = import.meta.env.VITE_API_URL || '/api';
-          const response = await fetch(`${apiUrl}/payment/verify?order_id=${orderIdParam}`);
-          
+          const apiUrl = import.meta.env.VITE_API_URL || "/api";
+          const response = await fetch(
+            `http://localhost:5000/api/payments/verify/${orderIdParam}`
+          );
+
           if (response.ok) {
-            const data = await response.json();
-            if (data.payment_status === 'SUCCESS' || data.payment_status === 'PAYMENT_SUCCESS') {
-              setStatus('success');
-              
+            const { data: paymentData } = await response.json();
+            if (isPaymentVerified(paymentData?.order_status)) {
+              setStatus("success");
+
               // Store payment success in localStorage
-              localStorage.setItem(`payment_${orderIdParam}`, 'success');
-              
+              localStorage.setItem(`payment_${orderIdParam}`, "success");
+
               // Get form data from state or localStorage
-              const formDataToSend = location.state?.formData || 
-                                   (localStorage.getItem('enrollmentFormData') ? 
-                                    JSON.parse(localStorage.getItem('enrollmentFormData') || '{}') : {});
-              
+              const formDataToSend =
+                location.state?.formData ||
+                (localStorage.getItem("enrollmentFormData")
+                  ? JSON.parse(
+                      localStorage.getItem("enrollmentFormData") || "{}"
+                    )
+                  : {});
+
               // Create a URLSearchParams object with the form data
               const params = new URLSearchParams();
-              
+
               // Add all form data to URL parameters
               Object.entries(formDataToSend).forEach(([key, value]) => {
                 if (value) {
                   params.append(key, String(value));
                 }
               });
-              
+
               // Add payment details
-              params.append('payment_id', orderIdParam);
-              params.append('payment_status', 'success');
-              
-              // Redirect to thank you page with all parameters
-              navigate(`/thank-you?${params.toString()}`, { 
-                state: { paymentVerified: true },
-                replace: true
+              params.append("payment_id", orderIdParam);
+              params.append("payment_status", "success");
+
+              // Only navigate to thank you page if payment is verified
+              navigate(`/thank-you?${params.toString()}`, {
+                state: {
+                  paymentVerified: true,
+                  formData: formDataToSend,
+                },
+                replace: true,
               });
-              
-            } else if (data.payment_status === 'FAILED' || data.payment_status === 'PAYMENT_ERROR') {
-              setStatus('failed');
-              
+            } else if (
+              paymentData?.payment_status === "FAILED" ||
+              paymentData?.payment_status === "PAYMENT_ERROR"
+            ) {
+              setStatus("failed");
+
               // Store payment failure in localStorage
-              localStorage.setItem(`payment_${orderIdParam}`, 'failed');
-              
+              localStorage.setItem(`payment_${orderIdParam}`, "failed");
+
               // Show error message
               toast({
                 title: "Payment Failed",
-                description: data.message || "We couldn't process your payment. Please try again.",
+                description:
+                  paymentData?.message ||
+                  "We couldn't process your payment. Please try again.",
                 variant: "destructive",
               });
-              
+
               // Redirect back to form with error state
               setTimeout(() => {
-                navigate('/', { 
+                navigate("/", {
                   state: { paymentError: true },
-                  replace: true 
+                  replace: true,
                 });
               }, 3000);
             } else {
-              setStatus('pending');
-              
+              setStatus("pending");
+
               // Check again after delay if still pending
               setTimeout(() => {
                 verifyPayment();
               }, 2000);
             }
           } else {
-            setStatus('pending');
-            
+            setStatus("pending");
+
             // Retry after delay if there was an error
             setTimeout(() => {
               verifyPayment();
             }, 2000);
           }
         } catch (error) {
-          console.error('Error verifying payment:', error);
-          setStatus('pending');
-          
+          console.error("Error verifying payment:", error);
+          setStatus("pending");
+
           // Retry after delay on error
           setTimeout(() => {
             verifyPayment();
@@ -193,7 +234,7 @@ export const PaymentCallback = () => {
     verifyPayment();
   }, [searchParams, navigate, location.state?.formData, toast]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md w-full">
@@ -212,7 +253,7 @@ export const PaymentCallback = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
-          {status === 'success' && (
+          {status === "success" && (
             <>
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
                 <CheckCircle className="h-10 w-10 text-green-600" />
@@ -224,26 +265,28 @@ export const PaymentCallback = () => {
             </>
           )}
 
-          {status === 'failed' && (
+          {status === "failed" && (
             <>
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
                 <XCircle className="h-10 w-10 text-red-600" />
               </div>
               <CardTitle className="text-2xl">Payment Failed</CardTitle>
               <CardDescription className="text-base mt-2">
-                We couldn't process your payment. Please try again or contact support.
+                We couldn't process your payment. Please try again or contact
+                support.
               </CardDescription>
             </>
           )}
 
-          {status === 'pending' && (
+          {status === "pending" && (
             <>
               <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
                 <Loader2 className="h-10 w-10 text-yellow-600 animate-spin" />
               </div>
               <CardTitle className="text-2xl">Payment Pending</CardTitle>
               <CardDescription className="text-base mt-2">
-                Your payment is being processed. We'll notify you once it's confirmed.
+                Your payment is being processed. We'll notify you once it's
+                confirmed.
               </CardDescription>
             </>
           )}
@@ -257,20 +300,25 @@ export const PaymentCallback = () => {
           )}
 
           <div className="space-y-2">
-            {status === 'success' && (
-              <Button onClick={() => navigate('/')} className="w-full">
+            {status === "success" && (
+              <Button onClick={() => navigate("/")} className="w-full">
                 Return to Home
               </Button>
             )}
 
-            {status === 'failed' && (
+            {status === "failed" && (
               <>
-                <Button onClick={() => navigate('/#enrollment-form')} className="w-full">
+                <Button
+                  onClick={() => navigate("/#enrollment-form")}
+                  className="w-full"
+                >
                   Try Again
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open('https://wa.me/919876543210', '_blank')} 
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    window.open("https://wa.me/919876543210", "_blank")
+                  }
                   className="w-full"
                 >
                   Contact Support
@@ -278,8 +326,8 @@ export const PaymentCallback = () => {
               </>
             )}
 
-            {status === 'pending' && (
-              <Button onClick={() => navigate('/')} className="w-full">
+            {status === "pending" && (
+              <Button onClick={() => navigate("/")} className="w-full">
                 Back to Home
               </Button>
             )}
@@ -289,4 +337,3 @@ export const PaymentCallback = () => {
     </div>
   );
 };
-
