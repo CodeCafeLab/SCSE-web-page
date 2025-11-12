@@ -23,6 +23,12 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     }
 
+    // Determine the base URL based on environment
+    const isProduction = config.cashfree.env === 'PRODUCTION';
+    const baseUrl = isProduction 
+      ? 'https://dos.suncitysolar.in' 
+      : 'http://localhost:8080';
+
     const orderRequest = {
       order_amount: amount.toString(),
       order_currency: "INR",
@@ -35,10 +41,21 @@ export const createOrder = async (req: Request, res: Response) => {
         customer_phone: customer.phone,
       },
       order_meta: {
-        return_url: `${config.app.frontendUrl}/payment/callback?order_id={order_id}`,
+        return_url: `${baseUrl}/payment/callback?order_id={order_id}`,
+        notify_url: isProduction 
+          ? 'https://dos.suncitysolar.in/api/payments/webhook'
+          : `${baseUrl}/api/payments/webhook`
       },
       order_note: "Payment for Suncity Enrollment",
     };
+    
+    console.log('Creating order with request:', {
+      ...orderRequest,
+      customer_details: {
+        ...orderRequest.customer_details,
+        customer_phone: orderRequest.customer_details.customer_phone ? '***' : 'missing'
+      }
+    });
 
     const response = await cashfree.PGCreateOrder(orderRequest);
     const sessionId = response.data?.payment_session_id;
@@ -53,12 +70,32 @@ export const createOrder = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error(
       "Error creating order:",
-      error.response?.data || error.message
+      {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers ? Object.keys(error.config.headers) : null
+        }
+      }
     );
-    res.status(500).json({
+    
+    // More detailed error response
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to create order';
+    
+    res.status(statusCode).json({
       success: false,
-      message: "Failed to create order",
-      error: error.response?.data?.message || error.message,
+      message: errorMessage,
+      error: process.env.NODE_ENV === 'development' 
+        ? {
+            message: error.message,
+            stack: error.stack,
+            code: error.code
+          }
+        : 'An error occurred while processing your request'
     });
   }
 };

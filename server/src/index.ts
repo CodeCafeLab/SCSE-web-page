@@ -11,7 +11,6 @@ const PORT = config.port || 5000;
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:8080',
-  'http://localhost:8080',
   'https://dos.suncitysolar.in',
   'https://www.dos.suncitysolar.in'
 ];
@@ -19,15 +18,24 @@ const allowedOrigins = [
 // Middleware
 app.use(cors({
   origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
+    
+    // Check if the origin is in the allowed list
     if (allowedOrigins.indexOf(origin) === -1) {
+      console.warn(`CORS blocked for origin: ${origin}`);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Pre-flight requests
+app.options('*', cors());
 
 app.use(express.json());
 
