@@ -2,14 +2,24 @@ import { Request, Response } from "express";
 import { Cashfree, CFEnvironment } from "cashfree-pg";
 import { config } from "../config";
 
+// Debug: Log the config when the file loads
+console.log('Payment controller loaded with config:', {
+  cashfreeEnv: config.cashfree?.env,
+  nodeEnv: config.nodeEnv,
+  clientId: config.cashfree?.clientId ? '***' : 'missing',
+  clientSecret: config.cashfree?.clientSecret ? '***' : 'missing'
+});
+
 // Initialize Cashfree instance
+const isProduction = process.env.CASHFREE_ENV === 'PRODUCTION' || config.cashfree?.env === 'PRODUCTION';
+
 const cashfree = new Cashfree(
-  config.cashfree.env === "PRODUCTION"
-    ? CFEnvironment.PRODUCTION
-    : CFEnvironment.SANDBOX,
-  config.cashfree.clientId,
-  config.cashfree.clientSecret
+  isProduction ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
+  process.env.CASHFREE_CLIENT_ID || config.cashfree?.clientId || '',
+  process.env.CASHFREE_CLIENT_SECRET || config.cashfree?.clientSecret || ''
 );
+
+console.log(`Cashfree initialized in ${isProduction ? 'PRODUCTION' : 'SANDBOX'} mode`);
 
 // ✅ Create order API
 export const createOrder = async (req: Request, res: Response) => {
@@ -23,31 +33,58 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     }
 
-    // Determine the base URL based on environment
-    const isProduction = config.cashfree.env === 'PRODUCTION';
+    // Debug: Log current config
+    console.log('Current config:', {
+      cashfreeEnv: process.env.CASHFREE_ENV,
+      nodeEnv: process.env.NODE_ENV,
+      configCashfreeEnv: config.cashfree?.env
+    });
+
+    // Always use HTTPS for production, HTTP for local development
+    const isProduction = process.env.CASHFREE_ENV === 'PRODUCTION' || config.cashfree?.env === 'PRODUCTION';
     const baseUrl = isProduction 
       ? 'https://dos.suncitysolar.in' 
       : 'http://localhost:8080';
+      
+    console.log(`Using base URL: ${baseUrl}, isProduction: ${isProduction}`);
+
+    // Ensure we're using HTTPS for production
+    const returnUrl = isProduction
+      ? 'https://dos.suncitysolar.in/payment/callback?order_id={order_id}'
+      : `${baseUrl}/payment/callback?order_id={order_id}`;
+      
+    const notifyUrl = isProduction
+      ? 'https://dos.suncitysolar.in/api/payments/webhook'
+      : `${baseUrl}/api/payments/webhook`;
 
     const orderRequest = {
       order_amount: amount.toString(),
       order_currency: "INR",
       order_id: orderId || "order_" + Date.now(),
       customer_details: {
-        customer_id:
-          customer.id || "cust_" + Math.random().toString(36).slice(2, 10),
+        customer_id: customer.id || "cust_" + Math.random().toString(36).slice(2, 10),
         customer_name: customer.name || "User",
         customer_email: customer.email || "noemail@example.com",
         customer_phone: customer.phone,
       },
       order_meta: {
-        return_url: `${baseUrl}/payment/callback?order_id={order_id}`,
-        notify_url: isProduction 
-          ? 'https://dos.suncitysolar.in/api/payments/webhook'
-          : `${baseUrl}/api/payments/webhook`
+        return_url: returnUrl,
+        notify_url: notifyUrl
       },
       order_note: "Payment for Suncity Enrollment",
     };
+    
+    console.log('Order request details:', {
+      ...orderRequest,
+      order_meta: {
+        return_url: returnUrl,
+        notify_url: notifyUrl
+      },
+      customer_details: {
+        ...orderRequest.customer_details,
+        customer_phone: orderRequest.customer_details.customer_phone ? '***' : 'missing'
+      }
+    });
     
     console.log('Creating order with request:', {
       ...orderRequest,
