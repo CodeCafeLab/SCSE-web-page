@@ -17,10 +17,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRef, useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { CheckCircle, Lock, ShieldCheck } from "lucide-react";
 import { CourseCurriculum } from "@/components/CourseCurriculum";
 
-export const Index = () => {
+interface IndexProps {
+  advisorId?: string;
+}
+
+export const Index = ({ advisorId }: IndexProps) => {
   const formRef = useRef<HTMLDivElement>(null);
 
   // Smooth scroll to form
@@ -194,7 +199,7 @@ export const Index = () => {
                   {/* Right Side - Form */}
                   <div id="enrollment-form" className="md:w-3/5 p-8 bg-white">
                     <div className="relative h-full">
-                      <EnrollmentForm />
+                      <EnrollmentForm advisorId={advisorId} />
                     </div>
                   </div>
                 </div>

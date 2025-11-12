@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -9,6 +9,12 @@ import { PaymentCallback } from "./components/PaymentCallback";
 import ThankYou from "./pages/ThankYou";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { Index } from "./pages/Index";
+
+// Wrapper component to handle route parameters
+const IndexWithAdvisor = () => {
+  const { advisorId } = useParams<{ advisorId?: string }>();
+  return <Index advisorId={advisorId} />;
+};
 
 const queryClient = new QueryClient();
 
@@ -21,6 +27,14 @@ const App = () => (
           element={
             <Layout>
               <Index />
+            </Layout>
+          }
+        />
+        <Route
+          path="/:advisorId"
+          element={
+            <Layout>
+              <IndexWithAdvisor />
             </Layout>
           }
         />

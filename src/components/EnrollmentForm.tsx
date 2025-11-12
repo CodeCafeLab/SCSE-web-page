@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -184,7 +184,11 @@ const sendWhatsAppOTP = async (
   }
 };
 
-export const EnrollmentForm = () => {
+interface EnrollmentFormProps {
+  advisorId?: string;
+}
+
+export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isTestMode, setIsTestMode] = useState(
@@ -208,6 +212,7 @@ export const EnrollmentForm = () => {
   // Terms & Conditions State
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
+  // Set initial form data with advisorId if provided
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
     email: "",
@@ -220,9 +225,19 @@ export const EnrollmentForm = () => {
     pincode: "",
     qualification: "",
     presentOccupation: "",
-    referralCode: "",
+    referralCode: advisorId || "", // Auto-fill with advisorId if provided
     sourceOfKnowledge: "",
   });
+
+  // Update referral code if advisorId changes
+  useEffect(() => {
+    if (advisorId) {
+      setFormData((prev) => ({
+        ...prev,
+        referralCode: advisorId,
+      }));
+    }
+  }, [advisorId]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
