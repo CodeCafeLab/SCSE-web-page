@@ -12,11 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Environment variables
 .env
 .env.*
 !.env.example
+
+# Local development environment files
 !.env.local
-!.env
+
+# Server environment files
+server/.env
+server/.env.*
+!server/.env.example
 
 # Editor directories and files
 .vscode/*
