@@ -77,31 +77,37 @@ export const Index = ({ advisorId }: IndexProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-x-hidden">
-      {/* Hero Section - Full viewport height behind header */}
-      <div className="relative h-screen w-full">
-        <HeroSection timeLeft={timeLeft} offerEnded={offerEnded} />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#f9fbff] via-white to-white overflow-x-hidden">
+      {/* Hero Section */}
+      <HeroSection timeLeft={timeLeft} offerEnded={offerEnded} />
 
       {/* Main content container */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-col ">
         {/* Certificate Section - Show Value Proposition */}
-        <CertificateSection timeLeft={timeLeft} offerEnded={offerEnded} />
+        <section className="scroll-mt-28">
+          <CertificateSection timeLeft={timeLeft} offerEnded={offerEnded} />
+        </section>
 
         {/* Problem Section - Create Urgency */}
-        <ProblemSection />
+        <section className="scroll-mt-28">
+          <ProblemSection />
+        </section>
 
         {/* Solution Section - Present Your Offer */}
-        <SolutionSection />
+        <section className="scroll-mt-28">
+          <SolutionSection />
+        </section>
 
         {/* Course Curriculum - Show Value */}
-        <CourseCurriculum onEnrollClick={scrollToForm} />
+        <section id="curriculum" className="scroll-mt-28">
+          <CourseCurriculum onEnrollClick={scrollToForm} />
+        </section>
 
         {/* Enrollment Form - Conversion Point */}
         <section
           id="enrollment-form"
           ref={formRef}
-          className="relative bg-gradient-to-b from-white to-blue-50 overflow-hidden"
+          className="relative bg-gradient-to-b from-white to-blue-50/80 overflow-hidden scroll-mt-28"
         >
           {/* Decorative elements */}
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
@@ -197,7 +203,7 @@ export const Index = ({ advisorId }: IndexProps) => {
                   </div>
 
                   {/* Right Side - Form */}
-                  <div id="enrollment-form" className="md:w-3/5 p-8 bg-white">
+                <div className="md:w-3/5 p-6 md:p-8 bg-white">
                     <div className="relative h-full">
                       <EnrollmentForm advisorId={advisorId} />
                     </div>
@@ -209,21 +215,31 @@ export const Index = ({ advisorId }: IndexProps) => {
         </section>
 
         {/* Benefits Section - Build Trust */}
-        <BenefitsSection />
+        <section className="scroll-mt-28">
+          <BenefitsSection />
+        </section>
 
         {/* Certificate Section - Social Proof */}
 
         {/* Testimonials - Social Proof */}
-        <TestimonialSection />
+        <section id="testimonials" className="scroll-mt-28">
+          <TestimonialSection />
+        </section>
 
         {/* FAQ Section - Address Objections */}
-        <FaqSection />
+        <section id="faq" className="scroll-mt-28">
+          <FaqSection />
+        </section>
 
         {/* Final CTA Section - Last Chance */}
-        <FinalCtaSection />
+        <section className="scroll-mt-28">
+          <FinalCtaSection />
+        </section>
 
         {/* WhatsApp Button - Always Accessible */}
-        <AboutSection />
+        <section className="scroll-mt-28">
+          <AboutSection />
+        </section>
       </div>
     </div>
   );

@@ -40,9 +40,6 @@ export const ProblemSection = () => {
             </div>
           </div>
 
-          {/* Decorative Elements */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 -translate-x-10 -translate-y-10"></div>
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-amber-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 translate-x-10 translate-y-10"></div>
         </div>
       </div>
     </section>

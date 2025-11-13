@@ -51,7 +51,7 @@ export const CourseCurriculum = ({ onEnrollClick }: CourseCurriculumProps) => {
   return (
     <section
       id="curriculum"
-      className="py-20 bg-gradient-to-b from-gray-50 to-white"
+      className="py-20 "
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center mb-16">

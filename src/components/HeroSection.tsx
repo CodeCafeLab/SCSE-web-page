@@ -66,7 +66,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
 
   const features = [
     { text: "3 weeks training", icon: Clock },
-    { text: "Entrepreneur certified", icon: Award },
+    { text: "Certified entrepreneur", icon: Award },
     { text: "Eligible for advanced practical training", icon: Check },
   ];
 
@@ -133,7 +133,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   return (
     <section
       id="home"
-      className="relative w-full bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 text-white py-8 sm:py-10 md:py-12 lg:py-16 overflow-x-hidden"
+      className="relative w-full bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-500 text-white py-14 overflow-hidden min-h-[calc(100vh-6rem)] scroll-mt-28"
     >
       {/* Background image */}
       <div
@@ -149,15 +149,15 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/30"></div>
 
-      <div className="w-full max-w-full px-4 sm:px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
           {/* Trust Badge */}
           <div className="inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium text-white/90 mb-6 sm:mb-8">
             <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 text-yellow-300 fill-yellow-300 flex-shrink-0" />
             <span>Rated 4.9/5 by 50,000+ Students</span>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid gap-10 lg:gap-12 xl:gap-16 items-center lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
             {/* Left Column - Content */}
             <div className="text-center lg:text-left space-y-4 sm:space-y-5 md:space-y-6">
               <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
@@ -170,13 +170,13 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
               </p>
 
               {/* Features List */}
-              <div className="space-y-2.5 sm:space-y-3 pt-1">
+              <div className="space-y-2.5 sm:space-y-3 pt-1 max-w-xl mx-auto lg:mx-0">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
                   return (
                     <div
                       key={index}
-                      className="flex items-center space-x-2 sm:space-x-3"
+                      className="flex items-center gap-2 sm:gap-3 text-left"
                     >
                       <div className="flex-shrink-0 bg-white/20 p-1 rounded-full">
                         <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-yellow-300" />
@@ -190,7 +190,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4 pt-2">
+              <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4 pt-3 sm:pt-4">
                 <Button
                   onClick={scrollToForm}
                   size={isMobile ? "default" : "lg"}
@@ -212,8 +212,8 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
             </div>
 
             {/* Right Column - Image Carousel */}
-            <div className="relative mt-8 lg:mt-0 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-              <div className="relative z-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 md:p-2 shadow-2xl h-full">
+            <div className="relative mt-10 lg:mt-0 h-[320px] sm:h-[360px] md:h-[420px] lg:h-[460px]">
+              <div className="relative z-10 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-1.5 sm:p-2 shadow-2xl h-full">
                 <div className="relative w-full h-full rounded-2xl overflow-hidden group">
                   <ImageCarousel
                     images={galleryImages}
@@ -363,9 +363,20 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
           </div>
 
           {/* Floating Timer */}
-          <div className="mt-8 sm:mt-12 md:mt-16 bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-lg max-w-3xl mx-auto">
-            <div className="text-center">
-              <p className="text-xs sm:text-sm md:text-base font-medium mb-2 sm:mb-3">
+          <div className="mt-8 sm:mt-12 md:mt-16 bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-lg max-w-3xl mx-auto">
+            <div className="text-center space-y-3">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                <span className="text-sm sm:text-base text-white line-through">
+                  ₹15,700
+                </span>
+                <span className="inline-flex items-center rounded-full bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-100 ring-1 ring-red-400/30">
+                  25% OFF
+                </span>
+                <span className="text-2xl sm:text-3xl font-bold text-white">
+                  ₹11,700
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm md:text-base font-medium">
                 Offer ends in:
               </p>
               <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">

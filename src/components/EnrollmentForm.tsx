@@ -1035,8 +1035,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
                     </Button>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Enter the 6-digit code sent to your WhatsApp number{" "}
-                    {formData.mobile_no}
+                    Enter the 6-digit code sent to your WhatsApp number {formData.mobile_no}
                   </p>
                   <Button
                     type="button"

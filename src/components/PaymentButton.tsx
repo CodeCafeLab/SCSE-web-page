@@ -33,6 +33,7 @@ interface PaymentButtonProps {
   redirectTarget?: "_self" | "_blank" | "_top" | "_modal";
   disabled?: boolean;
   isLoading?: boolean;
+  beforePayment?: () => Promise<boolean> | boolean;
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
@@ -46,6 +47,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   redirectTarget = "_self",
   disabled = false,
   isLoading: externalLoading = false,
+  beforePayment,
 }) => {
   const resolvedMode = React.useMemo<"sandbox" | "production">(() => {
     if (mode) {
@@ -96,6 +98,26 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   const isLoading = externalLoading || isProcessing || isCashfreeLoading;
 
   const handlePayment = useCallback(async () => {
+    try {
+      if (beforePayment) {
+        const shouldProceed = await beforePayment();
+        if (!shouldProceed) {
+          console.info(
+            "[PaymentButton] beforePayment returned false. Aborting payment flow."
+          );
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("[PaymentButton] Error during beforePayment:", error);
+      onFailure?.(
+        error instanceof Error
+          ? error
+          : new Error("Pre-payment validation failed")
+      );
+      return;
+    }
+
     if (isLoading || !isInitialized) {
       console.warn("[PaymentButton] Ignoring click because Cashfree is not ready or already processing.", {
         isLoading,
@@ -240,6 +262,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     }
   }, [
     amount,
+    beforePayment,
     customer,
     isInitialized,
     isLoading,
@@ -254,10 +277,10 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     return (
       <button
         className={`
-          ${className} 
           bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded 
           transition-colors disabled:opacity-50 cursor-not-allowed
           flex items-center justify-center min-w-[120px]
+          ${className}
         `}
         disabled
       >
@@ -270,11 +293,11 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     <button
       onClick={handlePayment}
       className={`
-        ${className} 
         bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded 
         transition-colors disabled:opacity-50 disabled:cursor-not-allowed
         flex items-center justify-center min-w-[120px]
         ${isLoading ? "opacity-75" : ""}
+        ${className}
       `}
       disabled={disabled || isLoading || !isInitialized}
     >

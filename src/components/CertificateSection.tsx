@@ -89,7 +89,7 @@ export const CertificateSection = ({
   ];
 
   return (
-    <section className="py-10 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-10 ">
       <div className="container mx-auto px-4">
         {/* Certificate Section */}
         <div className="max-w-6xl mx-auto">
@@ -105,7 +105,8 @@ export const CertificateSection = ({
               'DOS' An ISO Recognised Solar Institute
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our commitment to excellence is validated by industry certifications
+              Our commitment to excellence is validated by industry
+              certifications
             </p>
           </div>
 
@@ -174,7 +175,7 @@ export const CertificateSection = ({
             <span className="text-blue-600">Following States</span>
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-            We are committed to providing solar solutions to these states{" "}
+            We are committed to marking their glorious presence in these states{" "}
           </p>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
