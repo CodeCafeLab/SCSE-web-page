@@ -38,10 +38,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, Mail, MapPin } from "lucide-react";
-import PaymentButton from "./PaymentButton";
+// import PaymentButton from "./PaymentButton";
 
 interface FormData {
   first_name: string;
@@ -1311,7 +1311,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         </div>
       </div>
 
-      <PaymentButton
+      {/* <PaymentButton
         amount={1} // Amount in INR
         customer={{
           name: "John Doe",
@@ -1329,7 +1329,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium"
       >
         Pay Now
-      </PaymentButton>
+      </PaymentButton> */}
       {/* Submit Button */}
       <div className="pt-6">
         <button
