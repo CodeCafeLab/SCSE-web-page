@@ -4,6 +4,11 @@ import path from 'path';
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+// Support both naming conventions for Cashfree credentials
+const cashfreeClientId = process.env.CASHFREE_CLIENT_ID || process.env.CASHFREE_APP_ID;
+const cashfreeClientSecret = process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET_KEY;
+const cashfreeEnv = process.env.CASHFREE_ENV || (process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX');
+
 // Validate required environment variables
 const requiredEnvVars = [
   'DB_HOST',
@@ -16,15 +21,22 @@ const requiredEnvVars = [
   'EMAIL_USER',
   'EMAIL_PASSWORD',
   'EMAIL_FROM',
-  'CASHFREE_CLIENT_ID',
-  'CASHFREE_CLIENT_SECRET',
-  'FRONTEND_URL',
 ];
 
+// Make Cashfree credentials optional during validation (they'll be checked separately)
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
+    console.warn(`Warning: Missing environment variable: ${envVar}`);
   }
+}
+
+// Validate Cashfree credentials separately
+if (!cashfreeClientId || !cashfreeClientSecret) {
+  console.error('ERROR: Missing Cashfree credentials!');
+  console.error('Please set either:');
+  console.error('  - CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET, OR');
+  console.error('  - CASHFREE_APP_ID and CASHFREE_SECRET_KEY');
+  throw new Error('Missing required Cashfree credentials');
 }
 
 // Export configuration
@@ -58,9 +70,9 @@ export const config = {
   
   // Cashfree configuration
   cashfree: {
-    clientId: process.env.CASHFREE_CLIENT_ID!,
-    clientSecret: process.env.CASHFREE_CLIENT_SECRET!,
-    env: process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX',
+    clientId: cashfreeClientId,
+    clientSecret: cashfreeClientSecret,
+    env: cashfreeEnv,
   },
   
   // App configuration

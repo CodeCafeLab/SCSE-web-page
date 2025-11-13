@@ -14,11 +14,11 @@ export const config = {
     database: process.env.DB_NAME || "suncity_enrollment",
     synchronize: process.env.NODE_ENV !== "production",
     logging: process.env.NODE_ENV !== "production",
-    cashfree: {
-      clientId: process.env.CASHFREE_CLIENT_ID || "",
-      clientSecret: process.env.CASHFREE_CLIENT_SECRET || "",
-      env: process.env.CASHFREE_ENV || "SANDBOX",
-    },
+  },
+  cashfree: {
+    clientId: process.env.CASHFREE_CLIENT_ID || "",
+    clientSecret: process.env.CASHFREE_CLIENT_SECRET || "",
+    env: process.env.CASHFREE_ENV || (process.env.NODE_ENV === "production" ? "PRODUCTION" : "SANDBOX"),
   },
   email: {
     host: process.env.EMAIL_HOST || "",

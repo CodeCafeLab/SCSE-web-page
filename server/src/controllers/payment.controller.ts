@@ -10,13 +10,18 @@ console.log('Payment controller loaded with config:', {
   clientSecret: config.cashfree?.clientSecret ? '***' : 'missing'
 });
 
-// Initialize Cashfree instance
-const isProduction = process.env.CASHFREE_ENV === 'PRODUCTION' || config.cashfree?.env === 'PRODUCTION';
+// Initialize Cashfree instance with better error handling
+const isProduction = config.cashfree?.env === 'PRODUCTION' || process.env.CASHFREE_ENV === 'PRODUCTION';
+
+if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
+  console.error('FATAL ERROR: Cashfree credentials are missing!');
+  console.error('Please check your .env file and ensure CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET are set');
+}
 
 const cashfree = new Cashfree(
   isProduction ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
-  process.env.CASHFREE_CLIENT_ID || config.cashfree?.clientId || '',
-  process.env.CASHFREE_CLIENT_SECRET || config.cashfree?.clientSecret || ''
+  config.cashfree?.clientId || '',
+  config.cashfree?.clientSecret || ''
 );
 
 console.log(`Cashfree initialized in ${isProduction ? 'PRODUCTION' : 'SANDBOX'} mode`);
@@ -33,15 +38,17 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     }
 
-    // Debug: Log current config
-    console.log('Current config:', {
-      cashfreeEnv: process.env.CASHFREE_ENV,
-      nodeEnv: process.env.NODE_ENV,
-      configCashfreeEnv: config.cashfree?.env
-    });
+    // Validate Cashfree credentials
+    if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
+      console.error('Cashfree credentials missing in createOrder');
+      return res.status(500).json({
+        success: false,
+        message: "Payment gateway configuration error. Please contact support.",
+      });
+    }
 
     // Always use HTTPS for production, HTTP for local development
-    const isProduction = process.env.CASHFREE_ENV === 'PRODUCTION' || config.cashfree?.env === 'PRODUCTION';
+    const isProduction = config.cashfree?.env === 'PRODUCTION' || process.env.CASHFREE_ENV === 'PRODUCTION';
     const baseUrl = isProduction 
       ? 'https://dos.suncitysolar.in' 
       : 'http://localhost:8080';
@@ -85,24 +92,22 @@ export const createOrder = async (req: Request, res: Response) => {
         customer_phone: orderRequest.customer_details.customer_phone ? '***' : 'missing'
       }
     });
-    
-    console.log('Creating order with request:', {
-      ...orderRequest,
-      customer_details: {
-        ...orderRequest.customer_details,
-        customer_phone: orderRequest.customer_details.customer_phone ? '***' : 'missing'
-      }
-    });
 
     const response = await cashfree.PGCreateOrder(orderRequest);
     const sessionId = response.data?.payment_session_id;
 
+    if (!sessionId) {
+      console.error('No payment session ID received from Cashfree:', response);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create payment session",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       data: response.data,
-      paymentLink: sessionId
-        ? `https://payments.cashfree.com/checkout/pay/${sessionId}`
-        : null,
+      paymentLink: `https://payments.cashfree.com/checkout/pay/${sessionId}`,
     });
   } catch (error: any) {
     console.error(
@@ -111,10 +116,10 @@ export const createOrder = async (req: Request, res: Response) => {
         message: error.message,
         stack: error.stack,
         response: error.response?.data,
+        status: error.response?.status,
         config: {
           url: error.config?.url,
           method: error.config?.method,
-          headers: error.config?.headers ? Object.keys(error.config.headers) : null
         }
       }
     );
@@ -123,16 +128,20 @@ export const createOrder = async (req: Request, res: Response) => {
     const statusCode = error.response?.status || 500;
     const errorMessage = error.response?.data?.message || error.message || 'Failed to create order';
     
+    // Log full error in development, sanitized in production
+    const errorDetails = process.env.NODE_ENV === 'development' 
+      ? {
+          message: error.message,
+          stack: error.stack,
+          code: error.code,
+          response: error.response?.data
+        }
+      : undefined;
+    
     res.status(statusCode).json({
       success: false,
       message: errorMessage,
-      error: process.env.NODE_ENV === 'development' 
-        ? {
-            message: error.message,
-            stack: error.stack,
-            code: error.code
-          }
-        : 'An error occurred while processing your request'
+      ...(errorDetails && { error: errorDetails })
     });
   }
 };
@@ -176,8 +185,24 @@ export const verifyPayment = async (req: Request, res: Response) => {
       });
     }
 
+    // Validate Cashfree credentials
+    if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
+      console.error('Cashfree credentials missing in verifyPayment');
+      return res.status(500).json({
+        success: false,
+        message: "Payment gateway configuration error. Please contact support.",
+      });
+    }
+
     const response = await cashfree.PGFetchOrder(orderId);
     const orderData = response.data as any;
+
+    if (!orderData) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -194,11 +219,26 @@ export const verifyPayment = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error(
       "Payment verification error:",
-      error.response?.data || error.message
+      {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+        status: error.response?.status,
+      }
     );
-    res.status(500).json({
+    
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message || "Failed to verify payment";
+    
+    res.status(statusCode).json({
       success: false,
-      message: error.response?.data?.message || "Failed to verify payment",
+      message: errorMessage,
+      ...(process.env.NODE_ENV === 'development' && {
+        error: {
+          message: error.message,
+          code: error.code
+        }
+      })
     });
   }
 };
