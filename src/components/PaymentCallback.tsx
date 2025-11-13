@@ -36,15 +36,31 @@ export const PaymentCallback = () => {
 
   useEffect(() => {
     const verifyPayment = async () => {
+      console.groupCollapsed(
+        "%c[PaymentCallback] Verification cycle",
+        "color:#0ea5e9; font-weight:bold;"
+      );
+      console.log("[PaymentCallback] Current URL:", window.location.href);
+      console.log("[PaymentCallback] Location state:", location.state);
       const orderIdParam =
         searchParams.get("order_id") || searchParams.get("cf_payment_id");
       const paymentStatus =
         searchParams.get("payment_status") || searchParams.get("txStatus");
       const paymentMessage = searchParams.get("payment_message");
 
+      console.log("[PaymentCallback] Parsed query params:", {
+        orderIdParam,
+        paymentStatus,
+        paymentMessage,
+      });
+
       // If no order ID, redirect to home
       if (!orderIdParam) {
+        console.warn(
+          "[PaymentCallback] No order ID detected in callback URL. Redirecting home."
+        );
         navigate("/", { replace: true });
+        console.groupEnd();
         return;
       }
 
@@ -53,8 +69,10 @@ export const PaymentCallback = () => {
       const storedFormData = localStorage.getItem("enrollmentFormData");
 
       if (stateFormData) {
+        console.log("[PaymentCallback] Using form data from navigation state.");
         setFormData(stateFormData);
       } else if (storedFormData) {
+        console.log("[PaymentCallback] Rehydrating form data from localStorage.");
         setFormData(JSON.parse(storedFormData));
       }
 
@@ -70,10 +88,14 @@ export const PaymentCallback = () => {
       }
 
       setOrderId(orderIdParam);
+      console.log("[PaymentCallback] Stored orderId in state:", orderIdParam);
 
       // If payment status is in URL, use it
       if (paymentStatus === "SUCCESS" || paymentStatus === "PAYMENT_SUCCESS") {
         setStatus("success");
+        console.log(
+          "[PaymentCallback] Payment status in URL indicates success. Preparing thank-you redirect."
+        );
 
         // Store payment success in localStorage
         localStorage.setItem(`payment_${orderIdParam}`, "success");
@@ -108,6 +130,10 @@ export const PaymentCallback = () => {
         paymentStatus === "CANCELLED"
       ) {
         setStatus("failed");
+        console.warn(
+          "[PaymentCallback] Payment status in URL indicates failure. Redirecting back to enrollment form.",
+          { paymentStatus, paymentMessage }
+        );
 
         // Store payment failure in localStorage
         localStorage.setItem(`payment_${orderIdParam}`, "failed");
@@ -135,14 +161,21 @@ export const PaymentCallback = () => {
         // Verify payment status with backend if status is not clear from URL
         try {
           const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+          console.log("[PaymentCallback] Payment status unclear. Calling verify endpoint.", {
+            apiUrl: `${API_BASE_URL}/api/payments/verify/${orderIdParam}`,
+          });
           const response = await fetch(
             `${API_BASE_URL}/api/payments/verify/${orderIdParam}`
           );
 
           if (response.ok) {
             const { data: paymentData } = await response.json();
+            console.log("[PaymentCallback] Verification API response:", paymentData);
             if (isPaymentVerified(paymentData?.order_status)) {
               setStatus("success");
+              console.log(
+                "[PaymentCallback] Backend confirmed payment success. Navigating to thank-you page."
+              );
 
               // Store payment success in localStorage
               localStorage.setItem(`payment_${orderIdParam}`, "success");
@@ -183,6 +216,9 @@ export const PaymentCallback = () => {
               paymentData?.payment_status === "PAYMENT_ERROR"
             ) {
               setStatus("failed");
+              console.warn(
+                "[PaymentCallback] Backend indicates payment failure. Redirecting to enrollment form."
+              );
 
               // Store payment failure in localStorage
               localStorage.setItem(`payment_${orderIdParam}`, "failed");
@@ -205,6 +241,9 @@ export const PaymentCallback = () => {
               }, 3000);
             } else {
               setStatus("pending");
+              console.warn(
+                "[PaymentCallback] Backend response pending. Scheduling retry."
+              );
 
               // Check again after delay if still pending
               setTimeout(() => {
@@ -213,6 +252,10 @@ export const PaymentCallback = () => {
             }
           } else {
             setStatus("pending");
+            console.warn("[PaymentCallback] Verification request failed. Retrying soon.", {
+              status: response.status,
+              statusText: response.statusText,
+            });
 
             // Retry after delay if there was an error
             setTimeout(() => {
@@ -222,6 +265,7 @@ export const PaymentCallback = () => {
         } catch (error) {
           console.error("Error verifying payment:", error);
           setStatus("pending");
+          console.warn("[PaymentCallback] Verification threw an error. Retrying soon.");
 
           // Retry after delay on error
           setTimeout(() => {
@@ -229,6 +273,7 @@ export const PaymentCallback = () => {
           }, 2000);
         }
       }
+      console.groupEnd();
     };
 
     verifyPayment();

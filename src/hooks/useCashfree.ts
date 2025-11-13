@@ -17,12 +17,23 @@ export const useCashfree = (mode: 'sandbox' | 'production' = 'sandbox') => {
 
   // Initialize Cashfree SDK
   useEffect(() => {
+    console.groupCollapsed('%c[useCashfree] Initializing Cashfree SDK', 'color:#6366f1; font-weight:bold;');
+    console.log('[useCashfree] Environment details:', {
+      requestedMode: mode,
+      runtimeMode: import.meta.env.MODE,
+      locationHref: window.location.href,
+    });
+
     // Check if script is already added
     const initializeCashfree = () => {
       try {
         cashfree.current = window.Cashfree({ mode });
         setIsInitialized(true);
         setError(null);
+        console.log('[useCashfree] Cashfree SDK initialized successfully.', {
+          mode,
+          hasCheckout: typeof cashfree.current?.checkout === 'function',
+        });
       } catch (err) {
         console.error('Failed to initialize Cashfree:', err);
         setError(err instanceof Error ? err : new Error('Failed to initialize Cashfree'));
@@ -32,12 +43,15 @@ export const useCashfree = (mode: 'sandbox' | 'production' = 'sandbox') => {
     };
 
     if (window.Cashfree) {
+      console.log('[useCashfree] Cashfree SDK already available on window. Reusing existing instance.');
       initializeCashfree();
+      console.groupEnd();
       return;
     }
 
     // Load the script if not already loaded
     if (!document.getElementById('cashfree-sdk')) {
+      console.log('[useCashfree] Cashfree SDK script not found. Injecting script tag.');
       const script = document.createElement('script');
       script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
       script.id = 'cashfree-sdk';
@@ -51,14 +65,18 @@ export const useCashfree = (mode: 'sandbox' | 'production' = 'sandbox') => {
       };
 
       document.body.appendChild(script);
+    } else {
+      console.log('[useCashfree] Cashfree SDK script tag already present. Waiting for onload.');
     }
 
     return () => {
       // Cleanup
       const scriptElement = document.getElementById('cashfree-sdk');
       if (scriptElement && document.body.contains(scriptElement)) {
+        console.log('[useCashfree] Cleaning up Cashfree SDK script tag.');
         document.body.removeChild(scriptElement);
       }
+      console.groupEnd();
     };
   }, [mode]);
 
@@ -68,6 +86,8 @@ export const useCashfree = (mode: 'sandbox' | 'production' = 'sandbox') => {
     }
 
     try {
+      console.groupCollapsed('%c[useCashfree] Invoking checkout', 'color:#2563eb; font-weight:bold;');
+      console.log('[useCashfree] Checkout options:', options);
       return await cashfree.current.checkout({
         paymentSessionId: options.paymentSessionId,
         redirectTarget: options.redirectTarget || '_self',
@@ -76,6 +96,8 @@ export const useCashfree = (mode: 'sandbox' | 'production' = 'sandbox') => {
       console.error('Payment error:', error);
       options.onFailure?.(error instanceof Error ? error : new Error('Payment failed'));
       throw error;
+    } finally {
+      console.groupEnd();
     }
   }, []);
 
