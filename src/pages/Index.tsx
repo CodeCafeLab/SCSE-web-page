@@ -30,7 +30,7 @@ export const Index = ({ advisorId }: IndexProps) => {
 
   // Smooth scroll to form
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Calculate remaining time for the offer (until December 12th, 2025, 11:59:59 PM)
@@ -103,11 +103,28 @@ export const Index = ({ advisorId }: IndexProps) => {
           <CourseCurriculum onEnrollClick={scrollToForm} />
         </section>
 
+        {/* Benefits Section - Build Trust */}
+        <section className="scroll-mt-28">
+          <BenefitsSection />
+        </section>
+
+        {/* Certificate Section - Social Proof */}
+
+        {/* Testimonials - Social Proof */}
+        <section id="testimonials" className="scroll-mt-28">
+          <TestimonialSection />
+        </section>
+
+        {/* FAQ Section - Address Objections */}
+        <section id="faq" className="scroll-mt-28">
+          <FaqSection />
+        </section>
+
         {/* Enrollment Form - Conversion Point */}
         <section
           id="enrollment-form"
           ref={formRef}
-          className="relative bg-gradient-to-b from-white to-blue-50/80 overflow-hidden scroll-mt-28"
+          className="relative bg-gradient-to-b from-white to-blue-50/80 overflow-hidden scroll-mt-28 py-10"
         >
           {/* Decorative elements */}
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
@@ -212,23 +229,6 @@ export const Index = ({ advisorId }: IndexProps) => {
               </Card>
             </div>
           </div>
-        </section>
-
-        {/* Benefits Section - Build Trust */}
-        <section className="scroll-mt-28">
-          <BenefitsSection />
-        </section>
-
-        {/* Certificate Section - Social Proof */}
-
-        {/* Testimonials - Social Proof */}
-        <section id="testimonials" className="scroll-mt-28">
-          <TestimonialSection />
-        </section>
-
-        {/* FAQ Section - Address Objections */}
-        <section id="faq" className="scroll-mt-28">
-          <FaqSection />
         </section>
 
         {/* Final CTA Section - Last Chance */}

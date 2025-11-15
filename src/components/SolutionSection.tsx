@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 export const SolutionSection = () => {
   const scrollToForm = () => {
     document
-      .getElementById("enrollment-form")
+      .getElementById("enquiry-form")
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -131,7 +131,7 @@ export const SolutionSection = () => {
                 onClick={scrollToForm}
                 className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-amber-200 transition-all duration-300 transform hover:scale-105"
               >
-                🚀 Start Your Solar Journey Today
+                Book Your Seat Now
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>

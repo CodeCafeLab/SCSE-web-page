@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export const ProblemSection = () => {
   const scrollToForm = () => {
-    document.getElementById("enrollment-form")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (

@@ -137,7 +137,7 @@ export const TestimonialSection = () => {
 
   const scrollToForm = () => {
     document
-      .getElementById("enrollment-form")
+      .getElementById("enquiry-form")
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -299,7 +299,7 @@ export const TestimonialSection = () => {
                 size="lg"
                 className="group bg-white text-amber-600 hover:bg-gray-100 text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
               >
-                Start My Solar Journey
+                Book Your Seat Now
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <p className="text-amber-100 text-sm mt-4">
