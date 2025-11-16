@@ -2,7 +2,6 @@ import { Mail, MapPin } from "lucide-react";
 import { EnquiryForm } from "./EnquiryForm";
 
 export const FinalCtaSection = () => {
-
   return (
     <section id="enquiry-form" className="relative py-8 w-full bg-gradient-to-br from-blue-900 to-blue-800 text-white scroll-mt-28">
       <div className="container mx-auto px-4 py-16">
@@ -77,7 +76,7 @@ export const FinalCtaSection = () => {
             </div>
           </div>
 
-          {/* Right Column - CTA Form */}
+          {/* Right Column - Form Directly Displayed */}
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 rounded-2xl">
             <div className="text-center mb-8">
               <h2 className="text-2xl md:text-3xl font-bold mb-3">

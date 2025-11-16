@@ -20,6 +20,7 @@ import { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle, Lock, ShieldCheck } from "lucide-react";
 import { CourseCurriculum } from "@/components/CourseCurriculum";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 interface IndexProps {
   advisorId?: string;
@@ -27,10 +28,11 @@ interface IndexProps {
 
 export const Index = ({ advisorId }: IndexProps) => {
   const formRef = useRef<HTMLDivElement>(null);
+  const { openDialog } = useEnquiryForm();
 
-  // Smooth scroll to form
+  // Open enquiry form dialog instead of scrolling
   const scrollToForm = () => {
-    document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth" });
+    openDialog();
   };
 
   // Calculate remaining time for the offer (until December 12th, 2025, 11:59:59 PM)
@@ -118,6 +120,11 @@ export const Index = ({ advisorId }: IndexProps) => {
         {/* FAQ Section - Address Objections */}
         <section id="faq" className="scroll-mt-28">
           <FaqSection />
+        </section>
+
+        {/* WhatsApp Button - Always Accessible */}
+        <section className="scroll-mt-28">
+          <AboutSection />
         </section>
 
         {/* Enrollment Form - Conversion Point */}
@@ -220,7 +227,7 @@ export const Index = ({ advisorId }: IndexProps) => {
                   </div>
 
                   {/* Right Side - Form */}
-                <div className="md:w-3/5 p-6 md:p-8 bg-white">
+                  <div className="md:w-3/5 p-6 md:p-8 bg-white">
                     <div className="relative h-full">
                       <EnrollmentForm advisorId={advisorId} />
                     </div>
@@ -234,11 +241,6 @@ export const Index = ({ advisorId }: IndexProps) => {
         {/* Final CTA Section - Last Chance */}
         <section className="scroll-mt-28">
           <FinalCtaSection />
-        </section>
-
-        {/* WhatsApp Button - Always Accessible */}
-        <section className="scroll-mt-28">
-          <AboutSection />
         </section>
       </div>
     </div>

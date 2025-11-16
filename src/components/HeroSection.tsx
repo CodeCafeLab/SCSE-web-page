@@ -58,9 +58,9 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
     };
   }, []);
 
-  const scrollToForm = () => {
+  const scrollToEnrollmentForm = () => {
     document
-      .getElementById("enquiry-form")
+      .getElementById("enrollment-form")
       ?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -192,11 +192,11 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
               {/* CTA Buttons */}
               <div className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4 pt-3 sm:pt-4">
                 <Button
-                  onClick={scrollToForm}
+                  onClick={scrollToEnrollmentForm}
                   size={isMobile ? "default" : "lg"}
                   className="w-full xs:w-auto flex-1 sm:flex-none bg-white text-amber-700 hover:bg-amber-50 font-medium text-sm sm:text-base md:text-lg px-4 sm:px-6 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                 >
-                  Book Your Seat Now{" "}
+                  Enroll Now{" "}
                   <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>

@@ -1,10 +1,12 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { EnquiryFormDialog } from "./EnquiryFormDialog";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,6 +14,8 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children, className = "" }: LayoutProps) => {
+  const { isDialogOpen, closeDialog } = useEnquiryForm();
+
   // Add viewport meta tag for better mobile responsiveness
   useEffect(() => {
     const viewportMeta = document.createElement('meta');
@@ -32,6 +36,9 @@ export const Layout = ({ children, className = "" }: LayoutProps) => {
         <Footer />
         <Toaster />
         <Sonner />
+        <EnquiryFormDialog open={isDialogOpen} onOpenChange={(open) => {
+          if (!open) closeDialog();
+        }} />
       </TooltipProvider>
     </div>
   );

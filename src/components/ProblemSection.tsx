@@ -1,9 +1,12 @@
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 export const ProblemSection = () => {
+  const { openDialog } = useEnquiryForm();
+
   const scrollToForm = () => {
-    document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth" });
+    openDialog();
   };
 
   return (

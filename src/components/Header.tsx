@@ -99,23 +99,44 @@ export const Header = () => {
             </div>
           </div>
 
-          {/* Mobile CTA button (right side) */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => scrollToSelector("#enrollment-form")}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3 py-2 rounded-lg transition-colors"
-              aria-label="Enroll Now"
-            >
-              Enroll
-            </button>
+          {/* Mobile CTA - Improved Layout with Button Inside Box */}
+          <div className="md:hidden flex-shrink-0">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg px-2.5 py-1.5 border border-blue-200/50 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                {/* Pricing Info */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] xs:text-xs text-gray-500 line-through font-medium">
+                      ₹15,700
+                    </span>
+                    <span className="rounded-full bg-red-500 text-white px-1.5 py-0.5 text-[9px] xs:text-[10px] font-bold leading-none shadow-sm">
+                      25% OFF
+                    </span>
+                  </div>
+                  <div className="text-base xs:text-lg font-bold text-gray-900 leading-tight">
+                    ₹11,700
+                  </div>
+                </div>
+
+                {/* Enhanced Enroll Button */}
+                <button
+                  onClick={() => scrollToSelector("#enrollment-form")}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
+                  aria-label="Enroll Now"
+                >
+                  Enroll
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Mobile tagline */}
-        <div className="md:hidden pt-2 pb-3 border-t border-gray-100">
-          <p className="text-center text-[13px] sm:text-sm font-semibold text-gray-800">
-            Target to prepare <span className="text-blue-700">1lakh +</span>{" "}
-            Solar entrepreneur till 2027
+        {/* Mobile tagline - Enhanced */}
+        <div className="md:hidden pt-3 pb-3 border-t border-gray-100 bg-gradient-to-r from-blue-50/30 via-transparent to-blue-50/30">
+          <p className="text-center text-[12px] xs:text-[13px] sm:text-sm font-semibold text-gray-800 px-2 leading-snug">
+            Target to prepare{" "}
+            <span className="text-blue-700 font-bold">1lakh +</span> Solar
+            entrepreneur till 2027
           </p>
         </div>
       </div>

@@ -2,23 +2,38 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
 interface EnquiryFormData {
   name: string;
-  email: string;
   phone: string;
-  message: string;
+  city: string;
+  occupation: string;
+  batchPreference: string;
+  message?: string;
 }
 
-export const EnquiryForm = () => {
+interface EnquiryFormProps {
+  onSuccess?: () => void;
+}
+
+export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<EnquiryFormData>({
     name: "",
-    email: "",
     phone: "",
+    city: "",
+    occupation: "",
+    batchPreference: "",
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -47,35 +62,50 @@ export const EnquiryForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    // Clear error for the current field when user selects
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Name validation
+    // Name validation (required)
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
 
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Please enter a valid email address";
-      }
-    }
-
-    // Phone validation
+    // Phone validation (required)
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (formData.phone.length !== 10) {
       newErrors.phone = "Please enter a valid 10-digit phone number";
     }
 
-    // Message validation
-    if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
+    // City validation (required)
+    if (!formData.city.trim()) {
+      newErrors.city = "City name is required";
     }
+
+    // Occupation validation (required)
+    if (!formData.occupation) {
+      newErrors.occupation = "Occupation is required";
+    }
+
+    // Batch preference validation (required)
+    if (!formData.batchPreference) {
+      newErrors.batchPreference = "Please select when you want to join";
+    }
+
+    // Message validation (optional - no validation needed)
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -105,9 +135,11 @@ export const EnquiryForm = () => {
           },
           body: JSON.stringify({
             name: formData.name.trim(),
-            email: formData.email.trim(),
             phone: formData.phone.trim(),
-            message: formData.message.trim(),
+            city: formData.city.trim(),
+            occupation: formData.occupation,
+            batchPreference: formData.batchPreference,
+            message: formData.message.trim() || undefined,
           }),
         }
       );
@@ -117,16 +149,24 @@ export const EnquiryForm = () => {
       if (response.ok && data.message?.success) {
         toast({
           title: "Success!",
-          description: "Your enquiry has been submitted successfully. We'll get back to you soon.",
+          description:
+            "Your enquiry has been submitted successfully. We'll get back to you soon.",
         });
 
         // Reset form
         setFormData({
           name: "",
-          email: "",
           phone: "",
+          city: "",
+          occupation: "",
+          batchPreference: "",
           message: "",
         });
+
+        // Call onSuccess callback if provided (e.g., to close dialog)
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         throw new Error(
           data.message?.message || "Failed to submit enquiry. Please try again."
@@ -152,7 +192,7 @@ export const EnquiryForm = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name" className="text-blue-100">
-            Full Name
+            Name *
           </Label>
           <Input
             id="name"
@@ -171,7 +211,7 @@ export const EnquiryForm = () => {
 
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-blue-100">
-            Phone Number
+            Mobile No. *
           </Label>
           <Input
             id="phone"
@@ -190,28 +230,86 @@ export const EnquiryForm = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="city" className="text-blue-100">
+            City Name *
+          </Label>
+          <Input
+            id="city"
+            name="city"
+            type="text"
+            value={formData.city}
+            onChange={handleInputChange}
+            placeholder="Your city"
+            className="bg-white/5 border-white/20 text-white placeholder-blue-300 focus:ring-yellow-400"
+            required
+          />
+          {errors.city && (
+            <p className="text-sm text-red-300 mt-1">{errors.city}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="occupation" className="text-blue-100">
+            Occupation *
+          </Label>
+          <Select
+            value={formData.occupation}
+            onValueChange={(value) => handleSelectChange("occupation", value)}
+          >
+            <SelectTrigger className="bg-white/5 border-white/20 text-white placeholder:text-blue-300 focus:ring-yellow-400">
+              <SelectValue
+                placeholder="Select occupation"
+                className="text-blue-300"
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ELECTRICIAN">Electrician</SelectItem>
+              <SelectItem value="Technician">Technician</SelectItem>
+              <SelectItem value="plumber">Plumber</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.occupation && (
+            <p className="text-sm text-red-300 mt-1">{errors.occupation}</p>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-blue-100">
-          Email Address
+        <Label htmlFor="batchPreference" className="text-blue-100">
+          When you want to join *
         </Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="your.email@example.com"
-          className="bg-white/5 border-white/20 text-white placeholder-blue-300 focus:ring-yellow-400"
-          required
-        />
-        {errors.email && (
-          <p className="text-sm text-red-300 mt-1">{errors.email}</p>
+        <Select
+          value={formData.batchPreference}
+          onValueChange={(value) =>
+            handleSelectChange("batchPreference", value)
+          }
+        >
+          <SelectTrigger className="bg-white/5 border-white/20 text-white placeholder:text-blue-300 focus:ring-yellow-400">
+            <SelectValue
+              placeholder="Select batch preference"
+              className="text-blue-300"
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="JUST STARTING BATCH">
+              Just Starting Batch
+            </SelectItem>
+            <SelectItem value="NEXT STARTING BATCH">
+              Next Starting Batch
+            </SelectItem>
+            <SelectItem value="LATTER">Latter</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.batchPreference && (
+          <p className="text-sm text-red-300 mt-1">{errors.batchPreference}</p>
         )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="message" className="text-blue-100">
-          Your Message
+          Your Message (Optional)
         </Label>
         <textarea
           id="message"
@@ -219,13 +317,9 @@ export const EnquiryForm = () => {
           value={formData.message}
           onChange={handleInputChange}
           rows={3}
-          placeholder="How can we help you?"
+          placeholder="Your message..."
           className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-md text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent resize-none"
-          required
         />
-        {errors.message && (
-          <p className="text-sm text-red-300 mt-1">{errors.message}</p>
-        )}
       </div>
 
       <Button
@@ -249,4 +343,3 @@ export const EnquiryForm = () => {
     </form>
   );
 };
-

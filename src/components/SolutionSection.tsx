@@ -7,12 +7,13 @@ import {
   Monitor,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 export const SolutionSection = () => {
+  const { openDialog } = useEnquiryForm();
+
   const scrollToForm = () => {
-    document
-      .getElementById("enquiry-form")
-      ?.scrollIntoView({ behavior: "smooth" });
+    openDialog();
   };
 
   const features = [

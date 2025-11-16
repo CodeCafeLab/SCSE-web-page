@@ -9,6 +9,7 @@ import { PaymentCallback } from "./components/PaymentCallback";
 import ThankYou from "./pages/ThankYou";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { Index } from "./pages/Index";
+import { EnquiryFormProvider } from "./contexts/EnquiryFormContext";
 
 // Wrapper component to handle route parameters
 const IndexWithAdvisor = () => {
@@ -20,7 +21,8 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
+    <EnquiryFormProvider>
+      <BrowserRouter>
       <Routes>
         <Route
           path="/"
@@ -89,7 +91,8 @@ const App = () => (
           }
         />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </EnquiryFormProvider>
   </QueryClientProvider>
 );
 

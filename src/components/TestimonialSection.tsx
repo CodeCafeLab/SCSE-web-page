@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 const testimonials = [
   {
@@ -135,10 +136,10 @@ export const TestimonialSection = () => {
   const itemsPerView = 3; // Number of testimonials to show at once
   const maxIndex = Math.ceil(testimonials.length / itemsPerView) - 1;
 
+  const { openDialog } = useEnquiryForm();
+
   const scrollToForm = () => {
-    document
-      .getElementById("enquiry-form")
-      ?.scrollIntoView({ behavior: "smooth" });
+    openDialog();
   };
 
   const nextSlide = () => {
