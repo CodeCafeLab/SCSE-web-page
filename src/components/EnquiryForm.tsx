@@ -265,7 +265,7 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
               />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Select your occupation</SelectItem>
+              <SelectItem value="SELECT">Select your occupation</SelectItem>
               <SelectItem value="ELECTRICIAN">Electrician</SelectItem>
               <SelectItem value="Technician">Technician</SelectItem>
               <SelectItem value="plumber">Plumber</SelectItem>

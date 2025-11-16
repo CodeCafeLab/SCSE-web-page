@@ -192,7 +192,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                   Book Your Seat Now{" "}
                   <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
-                <p className="text-white text-sm py-2">For more information scroll below</p>
+                <p className="text-white text-sm">For more information scroll below</p>
               </div>
 
               {/* Batch Info */}
