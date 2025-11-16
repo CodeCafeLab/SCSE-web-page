@@ -135,6 +135,8 @@ export const SolutionSection = () => {
                 Book Your Seat Now
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+
+            <p className="text-gray-600 text-sm">For more information scroll below</p>
             </div>
           </div>
         </div>

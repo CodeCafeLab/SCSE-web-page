@@ -138,8 +138,8 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
             phone: formData.phone.trim(),
             city: formData.city.trim(),
             occupation: formData.occupation,
-            when_to_join: formData.batchPreference,
-            message: formData.message?.trim() || undefined,
+            batchPreference: formData.batchPreference,
+            message: formData.message.trim() || undefined,
           }),
         }
       );
