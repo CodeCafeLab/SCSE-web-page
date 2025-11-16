@@ -303,7 +303,7 @@ export const TestimonialSection = () => {
                 Book Your Seat Now
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <p className="text-white text-sm">For more information scroll below</p>
+              <p className="text-white text-sm py-2">For more information scroll below</p>
 
               <p className="text-amber-100 text-sm mt-4">
                 Next batch starting soon! Limited seats available

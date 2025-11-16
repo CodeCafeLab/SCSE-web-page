@@ -17,14 +17,9 @@ import {
 } from "lucide-react";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 // Import images
 import image1 from "../assets/0D4A8808.png";
 import image2 from "../assets/0D4A8821.png";
@@ -43,7 +38,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   const [isMobile, setIsMobile] = useState(false);
-
+  const { openDialog } = useEnquiryForm();
   useEffect(() => {
     // Check if mobile on mount
     const checkIfMobile = () => {
@@ -59,9 +54,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   }, []);
 
   const scrollToEnrollmentForm = () => {
-    document
-      .getElementById("enrollment-form")
-      ?.scrollIntoView({ behavior: "smooth" });
+    openDialog();
   };
 
   const features = [
@@ -196,9 +189,10 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                   size={isMobile ? "default" : "lg"}
                   className="w-full xs:w-auto flex-1 sm:flex-none bg-white text-amber-700 hover:bg-amber-50 font-medium text-sm sm:text-base md:text-lg px-4 sm:px-6 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                 >
-                  Enroll Now{" "}
+                  Book Your Seat Now{" "}
                   <ArrowRight className="ml-1.5 sm:ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
+                <p className="text-white text-sm py-2">For more information scroll below</p>
               </div>
 
               {/* Batch Info */}

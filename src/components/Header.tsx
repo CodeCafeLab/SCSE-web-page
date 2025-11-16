@@ -124,7 +124,7 @@ export const Header = () => {
                   className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
                   aria-label="Enroll Now"
                 >
-                  Enroll
+                  Enroll Now
                 </button>
               </div>
             </div>
