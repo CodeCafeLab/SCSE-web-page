@@ -265,9 +265,19 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
               />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="">Select your occupation</SelectItem>
               <SelectItem value="ELECTRICIAN">Electrician</SelectItem>
               <SelectItem value="Technician">Technician</SelectItem>
               <SelectItem value="plumber">Plumber</SelectItem>
+              <SelectItem value="Student">Student</SelectItem>
+              <SelectItem value="Employed">Employed</SelectItem>
+              <SelectItem value="Self-Employed">Self-Employed</SelectItem>
+              <SelectItem value="Freelancer">Freelancer</SelectItem>
+              <SelectItem value="Business Owner">Business Owner</SelectItem>
+              <SelectItem value="Homemaker">Homemaker</SelectItem>
+              <SelectItem value="Unemployed">Unemployed</SelectItem>
+              <SelectItem value="Retired">Retired</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
           </Select>
           {errors.occupation && (

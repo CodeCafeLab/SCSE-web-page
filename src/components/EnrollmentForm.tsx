@@ -1124,6 +1124,9 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
               required
             >
               <option value="">Select your occupation</option>
+              <option value="ELECTRICIAN">Electrician</option>
+              <option value="Technician">Technician</option>
+              <option value="plumber">Plumber</option>
               <option value="Student">Student</option>
               <option value="Employed">Employed</option>
               <option value="Self-Employed">Self-Employed</option>
