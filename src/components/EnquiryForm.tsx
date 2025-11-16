@@ -309,7 +309,7 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
             <SelectItem value="NEXT STARTING BATCH">
               Next Starting Batch
             </SelectItem>
-            <SelectItem value="LATTER">Latter</SelectItem>
+            <SelectItem value="LATER">Later</SelectItem>
           </SelectContent>
         </Select>
         {errors.batchPreference && (
