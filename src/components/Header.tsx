@@ -63,8 +63,8 @@ export const Header = () => {
           {/* Tagline (Desktop) */}
           <div className="hidden md:block flex-1 px-4">
             <p className="text-center text-lg lg:text-2xl font-semibold text-gray-800">
-              Target to prepare <span className="text-blue-700">1lakh +</span>{" "}
-              Solar entrepreneur till 2027
+              Target to prepare <span className="text-blue-700">1 lakh+</span>{" "}
+              Solar Entrepreneurs by 2027
             </p>
           </div>
 
@@ -135,8 +135,8 @@ export const Header = () => {
         <div className="md:hidden pt-3 pb-3 border-t border-gray-100 bg-gradient-to-r from-blue-50/30 via-transparent to-blue-50/30">
           <p className="text-center text-[12px] xs:text-[13px] sm:text-sm font-semibold text-gray-800 px-2 leading-snug">
             Target to prepare{" "}
-            <span className="text-blue-700 font-bold">1lakh +</span> Solar
-            entrepreneur till 2027
+            <span className="text-blue-700 font-bold">1 lakh+</span> Solar
+            Entrepreneurs by 2027
           </p>
         </div>
       </div>
