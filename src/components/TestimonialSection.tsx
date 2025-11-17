@@ -3,16 +3,16 @@ import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
-import video1 from '/Bamwari Vaishnav 17 Nov.mp4'
-import video2 from '/Jitendra Patel 17 Nov.mp4'
-import video3 from '/Jitendra Sharma 17 Nov.mp4'
-import video4 from '/M.R. Lega 17 Nov.mp4'
-import video5 from '/Mr. Ratan lal Manjhu.mp4'
-import video6 from '/Nathulal 17 Nov.mp4'
-import video7 from '/Rajmal Tank 17 Nov.mp4'
-import video8 from '/Rakesh Kumar Bairagi 17 Nov.mp4'
-import video9 from '/Rakesh Mohan 17 Nov.mp4'
-import video10 from '/jitendra saini 17 Nov.mp4'
+import video1 from "/BamwariVaishnav17Nov.mp4";
+import video2 from "/JitendraPatel17Nov.mp4";
+import video3 from "/JitendraSharma17Nov.mp4";
+import video4 from "/M.R.Lega17Nov.mp4";
+import video5 from "/Mr.RatanlalManjhu.mp4";
+import video6 from "/Nathulal17Nov.mp4";
+import video7 from "/RajmalTank17Nov.mp4";
+import video8 from "/RakeshKumarBairagi17Nov.mp4";
+import video9 from "/RakeshMohan17Nov.mp4";
+import video10 from "/jitendrasaini17Nov.mp4";
 
 // // Video paths from public folder
 // const video1 = "/Bamwari Vaishnav 17 Nov.mp4";
