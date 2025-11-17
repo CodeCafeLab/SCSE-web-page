@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
-import video1 from "/BamwariVaishnav17Nov.mp4";
+import video1 from "../assets/BamwariVaishnav17Nov.mp4";
 import video2 from "/JitendraPatel17Nov.mp4";
 import video3 from "/JitendraSharma17Nov.mp4";
 import video4 from "/M.R.Lega17Nov.mp4";
