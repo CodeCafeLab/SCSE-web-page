@@ -4,16 +4,17 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
-import video1 from "../assets/Bamwari Vaishnav 17 Nov.mp4";
-import video2 from "../assets/Jitendra Patel 17 Nov.mp4";
-import video3 from "../assets/Jitendra Sharma 17 Nov.mp4";
-import video4 from "../assets/M.R. Lega 17 Nov.mp4";
-import video5 from "../assets/Mr. Ratan lal Manjhu.mp4";
-import video6 from "../assets/Nathulal 17 Nov.mp4";
-import video7 from "../assets/Rajmal Tank 17 Nov.mp4";
-import video8 from "../assets/Rakesh Kumar Bairagi 17 Nov.mp4";
-import video9 from "../assets/Rakesh Mohan 17 Nov.mp4";
-import video10 from "../assets/jitendra saini 17 Nov.mp4";
+// Video paths from public folder
+const video1 = "/Bamwari Vaishnav 17 Nov.mp4";
+const video2 = "/Jitendra Patel 17 Nov.mp4";
+const video3 = "/Jitendra Sharma 17 Nov.mp4";
+const video4 = "/M.R. Lega 17 Nov.mp4";
+const video5 = "/Mr. Ratan lal Manjhu.mp4";
+const video6 = "/Nathulal 17 Nov.mp4";
+const video7 = "/Rajmal Tank 17 Nov.mp4";
+const video8 = "/Rakesh Kumar Bairagi 17 Nov.mp4";
+const video9 = "/Rakesh Mohan 17 Nov.mp4";
+const video10 = "/jitendra saini 17 Nov.mp4";
 
 const videoSources = [
   video4,
