@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
-// Video paths from public folder
-const video1 = "/Bamwari Vaishnav 17 Nov.mp4";
+// Video paths from public folder - make sure these match exactly with filenames in public folder
+const video1 = "/BamwariVaishnav 17 Nov.mp4";
 const video2 = "/Jitendra Patel 17 Nov.mp4";
 const video3 = "/Jitendra Sharma 17 Nov.mp4";
 const video4 = "/M.R. Lega 17 Nov.mp4";
@@ -14,7 +14,7 @@ const video6 = "/Nathulal 17 Nov.mp4";
 const video7 = "/Rajmal Tank 17 Nov.mp4";
 const video8 = "/Rakesh Kumar Bairagi 17 Nov.mp4";
 const video9 = "/Rakesh Mohan 17 Nov.mp4";
-const video10 = "/jitendra saini 17 Nov.mp4";
+const video10 = "/Jitendra saini 17 Nov.mp4";
 
 const videoSources = [
   video4,
