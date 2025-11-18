@@ -146,13 +146,14 @@ export const TestimonialSection = () => {
                       key={i}
                       className="rounded-2xl shadow-lg bg-white border border-gray-100 p-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="relative w-full overflow-hidden rounded-xl pb-[177%] sm:pb-[70%] md:pb-[56.25%] bg-black">
+                      <div className="relative w-full overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
                         <video
                           src={src}
                           controls
                           preload="metadata"
                           className="absolute inset-0 h-full w-full object-cover"
                           playsInline
+                          muted
                         />
                       </div>
                     </div>

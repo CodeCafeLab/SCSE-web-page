@@ -10,8 +10,8 @@ export const ProblemSection = () => {
   };
 
   return (
-    <section className="py-10 overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-14 md:py-20 overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center mb-16 space-y-8">
           {/* Section Header */}
           <div className="space-y-4">
@@ -28,16 +28,16 @@ export const ProblemSection = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto pt-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto pt-8">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow h-full">
               <div className="text-4xl font-bold text-amber-500 mb-2">10x</div>
               <p className="text-gray-600">Solar Jobs Growing Faster than the overall job market</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow h-full">
               <div className="text-4xl font-bold text-amber-500 mb-2">2M+</div>
               <p className="text-gray-600">Solar Jobs expected by 2030 in India</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow h-full">
               <div className="text-4xl font-bold text-amber-500 mb-2">₹</div>
               <p className="text-gray-600">High-income career & business opportunities in solar</p>
             </div>
