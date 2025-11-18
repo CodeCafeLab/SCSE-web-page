@@ -1,30 +1,21 @@
 import { Zap, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
-import video1 from "../assets/BamwariVaishnav17Nov.mp4";
-import video2 from "/JitendraPatel17Nov.mp4";
-import video3 from "/JitendraSharma17Nov.mp4";
-import video4 from "/M.R.Lega17Nov.mp4";
-import video5 from "/Mr.RatanlalManjhu.mp4";
-import video6 from "/Nathulal17Nov.mp4";
-import video7 from "/RajmalTank17Nov.mp4";
-import video8 from "/RakeshKumarBairagi17Nov.mp4";
-import video9 from "/RakeshMohan17Nov.mp4";
-import video10 from "/jitendrasaini17Nov.mp4";
 
-// // Video paths from public folder
-// const video1 = "/Bamwari Vaishnav 17 Nov.mp4";
-// const video2 = "/Jitendra Patel 17 Nov.mp4";
-// const video3 = "/Jitendra Sharma 17 Nov.mp4";
-// const video4 = "/M.R. Lega 17 Nov.mp4";
-// const video5 = "/Mr. Ratan lal Manjhu.mp4";
-// const video6 = "/Nathulal 17 Nov.mp4";
-// const video7 = "/Rajmal Tank 17 Nov.mp4";
-// const video8 = "/Rakesh Kumar Bairagi 17 Nov.mp4";
-// const video9 = "/Rakesh Mohan 17 Nov.mp4";
-// const video10 = "/jitendra saini 17 Nov.mp4";
+// Video paths from public folder - use string paths for files in public folder
+// This ensures videos work correctly in production builds on server domain
+const video1 = "/BamwariVaishnav17Nov.mp4";
+const video2 = "/JitendraPatel17Nov.mp4";
+const video3 = "/JitendraSharma17Nov.mp4";
+const video4 = "/M.R.Lega17Nov.mp4";
+const video5 = "/Mr.RatanlalManjhu.mp4";
+const video6 = "/Nathulal17Nov.mp4";
+const video7 = "/RajmalTank17Nov.mp4";
+const video8 = "/RakeshKumarBairagi17Nov.mp4";
+const video9 = "/RakeshMohan17Nov.mp4";
+const video10 = "/jitendrasaini17Nov.mp4";
 
 const videoSources = [
   video4,
@@ -48,7 +39,10 @@ export const TestimonialSection = () => {
 
   const { openDialog } = useEnquiryForm();
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  }, [totalSlides]);
+  
   const prevSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
 
@@ -57,7 +51,7 @@ export const TestimonialSection = () => {
       const interval = setInterval(nextSlide, 5000);
       return () => clearInterval(interval);
     }
-  }, [isPaused]);
+  }, [isPaused, nextSlide]);
 
   return (
     <section className="py-14 md:py-20 bg-gradient-to-b from-gray-50 to-white">
