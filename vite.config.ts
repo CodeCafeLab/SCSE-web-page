@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { imagetools } from "vite-imagetools";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const plugins = [react()];
+  const plugins = [react(), imagetools()];
   
   // lovable-tagger is ESM-only and causes build issues
   // It's only for development tooling, so skip it in production builds

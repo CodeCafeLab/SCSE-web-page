@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import suncityLogo from "@/assets/suncity-logo.png";
+import { LazyImage } from "./LazyImage";
+import suncityLogoSrc from "@/assets/suncity-logo.png?w=360&format=webp&quality=80";
+import suncityLogoSrcSet from "@/assets/suncity-logo.png?w=180;240;320;360&format=webp&quality=80&as=srcset";
+import suncityLogoPlaceholder from "@/assets/suncity-logo.png?w=32&blur=30&format=webp&as=base64";
 import { cn } from "@/lib/utils";
 
 const scrollToSelector = (selector: string) => {
@@ -46,13 +49,16 @@ export const Header = () => {
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between py-3 sm:py-4">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img
-              src={suncityLogo}
+            <LazyImage
+              src={suncityLogoSrc}
+              srcSet={suncityLogoSrcSet}
+              placeholder={suncityLogoPlaceholder}
+              sizes="(max-width: 640px) 96px, (max-width: 1024px) 128px, 160px"
               alt="Discovery Of Success : A Solar Entrepreneur Programme by Suncity Solar"
               className="h-12 w-auto sm:h-14 md:h-16 lg:h-20 object-contain transition-all duration-300"
-              width={80}
+              width={160}
               height={80}
-              loading="eager"
+              eager
               style={{
                 filter: "brightness(1.05) contrast(1.05)",
                 imageRendering: "-webkit-optimize-contrast",

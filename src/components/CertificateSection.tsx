@@ -12,10 +12,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-
-// Import certificate images
-import cert1 from "@/assets/1350 FINAL Soft DISCOVERY OF SUCCESS  29993 2017_page-0001.jpg";
-import cert2 from "@/assets/1351 FINAL Soft DISCOVERY OF SUCCESS  21001 2018_page-0001.jpg";
+import { LazyImage } from "./LazyImage";
+import cert1Src from "@/assets/1350 FINAL Soft DISCOVERY OF SUCCESS  29993 2017_page-0001.jpg?w=1200&format=webp&quality=65";
+import cert1SrcSet from "@/assets/1350 FINAL Soft DISCOVERY OF SUCCESS  29993 2017_page-0001.jpg?w=480;768;1024;1200&format=webp&quality=65&as=srcset";
+import cert1Placeholder from "@/assets/1350 FINAL Soft DISCOVERY OF SUCCESS  29993 2017_page-0001.jpg?w=32&blur=30&format=webp&as=base64";
+import cert2Src from "@/assets/1351 FINAL Soft DISCOVERY OF SUCCESS  21001 2018_page-0001.jpg?w=1200&format=webp&quality=65";
+import cert2SrcSet from "@/assets/1351 FINAL Soft DISCOVERY OF SUCCESS  21001 2018_page-0001.jpg?w=480;768;1024;1200&format=webp&quality=65&as=srcset";
+import cert2Placeholder from "@/assets/1351 FINAL Soft DISCOVERY OF SUCCESS  21001 2018_page-0001.jpg?w=32&blur=30&format=webp&as=base64";
 
 interface CertificateSectionProps {
   timeLeft: {
@@ -59,14 +62,22 @@ export const CertificateSection = ({
       id: 1,
       title: "ISO 29993:2017",
       year: "ISO 29993:2017",
-      image: cert1,
+      image: {
+        src: cert1Src,
+        srcSet: cert1SrcSet,
+        placeholder: cert1Placeholder,
+      },
       description: "Learning services outside formal education",
     },
     {
       id: 2,
       title: "ISO 21001:2018",
       year: "ISO 21001:2018",
-      image: cert2,
+      image: {
+        src: cert2Src,
+        srcSet: cert2SrcSet,
+        placeholder: cert2Placeholder,
+      },
       description: "Management system for Educational organizations",
     },
   ];
@@ -128,12 +139,22 @@ export const CertificateSection = ({
                   </div>
 
                   {/* Certificate Content */}
-                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-inner">
-                    <img
-                      src={cert.image}
+                  <div
+                    className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white shadow-inner relative"
+                    style={{
+                      backgroundImage: `url(${cert.image.placeholder})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <LazyImage
+                      src={cert.image.src}
+                      srcSet={cert.image.srcSet}
+                      sizes="(max-width: 768px) 90vw, 560px"
+                      placeholder={cert.image.placeholder}
                       alt={`${cert.title} Certificate ${cert.year}`}
                       className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                      loading="lazy"
+                      style={{ position: "relative", zIndex: 1 }}
                     />
                   </div>
 

@@ -1,6 +1,9 @@
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
-import suncityLogo from "@/assets/suncity-logo.png";
+import { LazyImage } from "./LazyImage";
+import suncityLogoSrc from "@/assets/suncity-logo.png?w=320&format=webp&quality=80";
+import suncityLogoSrcSet from "@/assets/suncity-logo.png?w=160;240;320&format=webp&quality=80&as=srcset";
+import suncityLogoPlaceholder from "@/assets/suncity-logo.png?w=32&blur=30&format=webp&as=base64";
 import { Mail, MapPin } from "lucide-react";
 
 export const Footer = () => {
@@ -13,13 +16,15 @@ export const Footer = () => {
           {/* Logo and Description */}
           <div className="flex flex-col items-start">
             <div className="bg-white backdrop-blur-sm p-2 mb-4 rounded-lg shadow-inner">
-              <img
-                src={suncityLogo}
+              <LazyImage
+                src={suncityLogoSrc}
+                srcSet={suncityLogoSrcSet}
+                placeholder={suncityLogoPlaceholder}
+                sizes="(max-width: 640px) 120px, 160px"
                 alt="Suncity Solar"
                 className="h-10 sm:h-12 w-auto object-contain"
-                width={120}
-                height={48}
-                loading="lazy"
+                width={160}
+                height={60}
               />
             </div>
             <h3 className="text-lg font-semibold mb-2 text-white">

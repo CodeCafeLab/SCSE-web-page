@@ -1,5 +1,8 @@
 import React from "react";
-import swamiji from "./../assets/swami vivekanand ji.jpeg";
+import { LazyImage } from "./LazyImage";
+import swamijiSrc from "../assets/swami vivekanand ji.jpeg?w=200&format=webp&quality=75";
+import swamijiSrcSet from "../assets/swami vivekanand ji.jpeg?w=100;150;200;260&format=webp&quality=75&as=srcset";
+import swamijiPlaceholder from "../assets/swami vivekanand ji.jpeg?w=32&blur=30&format=webp&as=base64";
 
 export const AboutSection = () => {
   return (
@@ -147,15 +150,20 @@ export const AboutSection = () => {
         </div>
 
         {/* Swami Vivekananda Quote Section */}
-        <div className="mt-12 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 shadow-sm w-3/4 mx-auto">
+        <div className="mt-12 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 shadow-sm w-full max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Image */}
             <div className="flex-shrink-0">
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-amber-400 shadow-md">
-                <img
-                  src={swamiji}
+                <LazyImage
+                  src={swamijiSrc}
+                  srcSet={swamijiSrcSet}
+                  sizes="80px"
+                  placeholder={swamijiPlaceholder}
                   alt="Swami Vivekananda"
                   className="w-full h-full object-cover"
+                  width={80}
+                  height={80}
                 />
               </div>
             </div>

@@ -30,12 +30,21 @@ const videoSources = [
   video5,
 ];
 
-export const TestimonialSection = () => {
-  const itemsPerView = 4;
-  const totalSlides = Math.ceil(videoSources.length / itemsPerView);
+const getItemsPerView = () => {
+  if (typeof window === "undefined") return 1;
+  if (window.innerWidth < 640) return 1;
+  if (window.innerWidth < 1024) return 2;
+  return 4;
+};
 
+export const TestimonialSection = () => {
+  const [itemsPerView, setItemsPerView] = useState(getItemsPerView);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const totalSlides = Math.max(
+    1,
+    Math.ceil(videoSources.length / itemsPerView)
+  );
 
   const { openDialog } = useEnquiryForm();
 
@@ -45,6 +54,19 @@ export const TestimonialSection = () => {
   
   const prevSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerView(getItemsPerView());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    setCurrentSlide((prev) => Math.min(prev, totalSlides - 1));
+  }, [totalSlides]);
 
   useEffect(() => {
     if (!isPaused) {
@@ -109,20 +131,30 @@ export const TestimonialSection = () => {
               return (
                 <div
                   key={slideIndex}
-                  className="grid grid-cols-1 md:grid-cols-4 gap-6 px-4 w-full"
+                  className={cn(
+                    "grid w-full gap-6 px-4",
+                    itemsPerView === 1
+                      ? "grid-cols-1"
+                      : itemsPerView === 2
+                        ? "grid-cols-1 sm:grid-cols-2"
+                        : "grid-cols-1 md:grid-cols-4"
+                  )}
                   style={{ width: `${100 / totalSlides}%` }}
                 >
                   {slideVideos.map((src, i) => (
                     <div
                       key={i}
-                      className="rounded-xl shadow-lg bg-white border border-gray-100 p-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                      className="rounded-2xl shadow-lg bg-white border border-gray-100 p-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                     >
-                      <video
-                        src={src}
-                        controls
-                        preload="metadata"
-                        className="w-full h-120 md:h-140 rounded-lg object-cover bg-black"
-                      />
+                      <div className="relative w-full overflow-hidden rounded-xl pb-[177%] sm:pb-[70%] md:pb-[56.25%] bg-black">
+                        <video
+                          src={src}
+                          controls
+                          preload="metadata"
+                          className="absolute inset-0 h-full w-full object-cover"
+                          playsInline
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

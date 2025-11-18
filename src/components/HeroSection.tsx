@@ -15,16 +15,23 @@ import {
   Grid3x3,
   X,
 } from "lucide-react";
-import { ImageCarousel } from "@/components/ImageCarousel";
+import { ImageCarousel, OptimizedImage } from "@/components/ImageCarousel";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
-// Import images
-import image1 from "../assets/0D4A8808.png";
-import image2 from "../assets/0D4A8821.png";
-import image3 from "../assets/0D4A8874.png";
-import image4 from "../assets/0D4A8955.png";
+import image1Src from "../assets/0D4A8808.png?w=1280&format=webp&quality=70";
+import image1SrcSet from "../assets/0D4A8808.png?w=480;768;1024;1280&format=webp&quality=70&as=srcset";
+import image1Placeholder from "../assets/0D4A8808.png?w=32&blur=30&format=webp&as=base64";
+import image2Src from "../assets/0D4A8821.png?w=1280&format=webp&quality=70";
+import image2SrcSet from "../assets/0D4A8821.png?w=480;768;1024;1280&format=webp&quality=70&as=srcset";
+import image2Placeholder from "../assets/0D4A8821.png?w=32&blur=30&format=webp&as=base64";
+import image3Src from "../assets/0D4A8874.png?w=1280&format=webp&quality=70";
+import image3SrcSet from "../assets/0D4A8874.png?w=480;768;1024;1280&format=webp&quality=70&as=srcset";
+import image3Placeholder from "../assets/0D4A8874.png?w=32&blur=30&format=webp&as=base64";
+import image4Src from "../assets/0D4A8955.png?w=1280&format=webp&quality=70";
+import image4SrcSet from "../assets/0D4A8955.png?w=480;768;1024;1280&format=webp&quality=70&as=srcset";
+import image4Placeholder from "../assets/0D4A8955.png?w=32&blur=30&format=webp&as=base64";
 
 interface HeroSectionProps {
   timeLeft: {
@@ -66,7 +73,32 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const galleryImages = [image1, image2, image3, image4];
+  const galleryImages: OptimizedImage[] = [
+    {
+      src: image1Src,
+      srcSet: image1SrcSet,
+      placeholder: image1Placeholder,
+      alt: "Solar entrepreneur receiving hands-on mentoring",
+    },
+    {
+      src: image2Src,
+      srcSet: image2SrcSet,
+      placeholder: image2Placeholder,
+      alt: "Classroom view from Suncity Entrepreneur Program",
+    },
+    {
+      src: image3Src,
+      srcSet: image3SrcSet,
+      placeholder: image3Placeholder,
+      alt: "Practical training lab with solar equipment",
+    },
+    {
+      src: image4Src,
+      srcSet: image4SrcSet,
+      placeholder: image4Placeholder,
+      alt: "Graduation ceremony for certified entrepreneurs",
+    },
+  ];
 
   // Add custom scrollbar styles
   const customStyles = `
@@ -134,7 +166,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
         style={{
           backgroundImage:
             "url(https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80)",
-          backgroundAttachment: "fixed",
+          backgroundAttachment: isMobile ? "scroll" : "fixed",
         }}
         aria-hidden="true"
       ></div>
@@ -271,7 +303,8 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                             {galleryImages.map((img, index) => (
                               <img
                                 key={index}
-                                src={img}
+                                src={img.src}
+                                srcSet={img.srcSet}
                                 alt={`Gallery image ${index + 1}`}
                                 className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
                                   selectedImage === index
@@ -326,7 +359,7 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
                                 }`}
                               >
                                 <img
-                                  src={img}
+                                  src={img.src}
                                   alt={`Thumbnail ${index + 1}`}
                                   className="w-full h-full object-cover"
                                 />
