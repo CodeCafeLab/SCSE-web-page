@@ -14,6 +14,19 @@ export default defineConfig(({ mode }) => {
   const isProduction = process.env.NODE_ENV === 'production';
   
   return {
+    base: isProduction ? '/suncity/' : '/',
+    build: {
+      outDir: 'dist',
+      assetsDir: 'assets',
+      emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          assetFileNames: 'assets/[name]-[hash][extname]',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js',
+        },
+      },
+    },
     server: {
       host: "::",
       port: 8080,

@@ -1,21 +1,24 @@
-import { Zap, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Zap, ArrowRight, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
+import { toast } from "sonner";
 
-// Video paths from public folder - use string paths for files in public folder
-// This ensures videos work correctly in production builds on server domain
-const video1 = "/BamwariVaishnav17Nov.mp4";
-const video2 = "/JitendraPatel17Nov.mp4";
-const video3 = "/JitendraSharma17Nov.mp4";
-const video4 = "/M.R.Lega17Nov.mp4";
-const video5 = "/Mr.RatanlalManjhu.mp4";
-const video6 = "/Nathulal17Nov.mp4";
-const video7 = "/RajmalTank17Nov.mp4";
-const video8 = "/RakeshKumarBairagi17Nov.mp4";
-const video9 = "/RakeshMohan17Nov.mp4";
-const video10 = "/jitendrasaini17Nov.mp4";
+// Get the base URL from Vite's environment variables
+const baseUrl = import.meta.env.BASE_URL || '/';
+
+// Video paths from public folder - using base URL for proper resolution in production
+const video1 = `${baseUrl}BamwariVaishnav17Nov.mp4`;
+const video2 = `${baseUrl}JitendraPatel17Nov.mp4`;
+const video3 = `${baseUrl}JitendraSharma17Nov.mp4`;
+const video4 = `${baseUrl}M.R.Lega17Nov.mp4`;
+const video5 = `${baseUrl}Mr.RatanlalManjhu.mp4`;
+const video6 = `${baseUrl}Nathulal17Nov.mp4`;
+const video7 = `${baseUrl}RajmalTank17Nov.mp4`;
+const video8 = `${baseUrl}RakeshKumarBairagi17Nov.mp4`;
+const video9 = `${baseUrl}RakeshMohan17Nov.mp4`;
+const video10 = `${baseUrl}jitendrasaini17Nov.mp4`;
 
 const videoSources = [
   video4,
