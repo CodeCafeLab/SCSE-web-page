@@ -105,7 +105,7 @@ export const SolutionSection = () => {
               </p>
               <Button
                 onClick={scrollToForm}
-                className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-lg py-6 px-8 rounded-full font-semibold shadow-lg hover:shadow-amber-200 transition-all duration-300 transform hover:scale-105"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 px-8 rounded-full font-bold shadow-xl hover:shadow-blue-200 transition-all duration-300 transform hover:scale-105"
               >
                 Book Your Seat Now
                 <ArrowRight className="w-5 h-5 ml-2" />

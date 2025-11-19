@@ -96,7 +96,7 @@ export const Header = () => {
                   onClick={() => {
                     scrollToSelector("#enrollment-form");
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors whitespace-nowrap"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors whitespace-nowrap"
                   aria-label="Enroll Now"
                 >
                   Enroll Now
@@ -127,7 +127,7 @@ export const Header = () => {
                 {/* Enhanced Enroll Button */}
                 <button
                   onClick={() => scrollToSelector("#enrollment-form")}
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
                   aria-label="Enroll Now"
                 >
                   Enroll Now

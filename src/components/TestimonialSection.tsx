@@ -1,4 +1,11 @@
-import { Zap, ArrowRight, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react";
+import {
+  Zap,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -6,7 +13,7 @@ import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 import { toast } from "sonner";
 
 // Get the base URL from Vite's environment variables
-const baseUrl = import.meta.env.BASE_URL || '/';
+const baseUrl = import.meta.env.BASE_URL || "/";
 
 // Video paths from public folder - using base URL for proper resolution in production
 const video1 = `${baseUrl}BamwariVaishnav17Nov.mp4`;
@@ -44,6 +51,7 @@ export const TestimonialSection = () => {
   const [itemsPerView, setItemsPerView] = useState(getItemsPerView);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [currentPlayingVideo, setCurrentPlayingVideo] = useState<string | null>(null);
   const totalSlides = Math.max(
     1,
     Math.ceil(videoSources.length / itemsPerView)
@@ -51,12 +59,34 @@ export const TestimonialSection = () => {
 
   const { openDialog } = useEnquiryForm();
 
+  const handleVideoPlay = (videoSrc: string) => {
+    // Pause all other videos when a new video starts playing
+    const videos = document.querySelectorAll('video');
+    videos.forEach((video) => {
+      const videoElement = video as HTMLVideoElement;
+      // Compare the current video src with the playing video src
+      if (videoElement.src && !videoElement.src.includes(videoSrc.split('/').pop() || '') && !videoElement.paused) {
+        videoElement.pause();
+      }
+    });
+    setCurrentPlayingVideo(videoSrc);
+  };
+
+  const handleVideoPause = (videoSrc: string) => {
+    setCurrentPlayingVideo(null);
+  };
+
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
-  }, [totalSlides]);
-  
-  const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    if (!currentPlayingVideo) {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }
+  }, [totalSlides, currentPlayingVideo]);
+
+  const prevSlide = () => {
+    if (!currentPlayingVideo) {
+      setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -72,11 +102,13 @@ export const TestimonialSection = () => {
   }, [totalSlides]);
 
   useEffect(() => {
-    if (!isPaused) {
-      const interval = setInterval(nextSlide, 5000);
+    if (!isPaused && !currentPlayingVideo) {
+      const interval = setInterval(() => {
+        nextSlide();
+      }, 3000);
       return () => clearInterval(interval);
     }
-  }, [isPaused, nextSlide]);
+  }, [isPaused, nextSlide, currentPlayingVideo]);
 
   return (
     <section className="py-14 md:py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -106,14 +138,24 @@ export const TestimonialSection = () => {
           {/* ARROWS */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200"
+            disabled={!!currentPlayingVideo}
+            className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200 ${
+              currentPlayingVideo 
+                ? 'opacity-50 cursor-not-allowed hover:scale-100' 
+                : 'hover:scale-110'
+            }`}
           >
             <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
 
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200"
+            disabled={!!currentPlayingVideo}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200 ${
+              currentPlayingVideo 
+                ? 'opacity-50 cursor-not-allowed hover:scale-100' 
+                : 'hover:scale-110'
+            }`}
           >
             <ChevronRight className="w-6 h-6 text-gray-700" />
           </button>
@@ -139,8 +181,8 @@ export const TestimonialSection = () => {
                     itemsPerView === 1
                       ? "grid-cols-1"
                       : itemsPerView === 2
-                        ? "grid-cols-1 sm:grid-cols-2"
-                        : "grid-cols-1 md:grid-cols-4"
+                      ? "grid-cols-1 sm:grid-cols-2"
+                      : "grid-cols-1 md:grid-cols-4"
                   )}
                   style={{ width: `${100 / totalSlides}%` }}
                 >
@@ -149,14 +191,25 @@ export const TestimonialSection = () => {
                       key={i}
                       className="rounded-2xl shadow-lg bg-white border border-gray-100 p-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="relative w-full overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
+                      <div className="relative h-full md:h-[76vh] lg:h-[80vh]  w-full overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
                         <video
                           src={src}
                           controls
                           preload="metadata"
                           className="absolute inset-0 h-full w-full object-cover"
                           playsInline
-                          muted
+                          muted={false}
+                          onPlay={(e) => {
+                            console.log('Video playing:', src);
+                            handleVideoPlay(src);
+                          }}
+                          onPause={(e) => {
+                            console.log('Video paused:', src);
+                            handleVideoPause(src);
+                          }}
+                          onError={(e) => {
+                            console.error('Video error:', src, e);
+                          }}
                         />
                       </div>
                     </div>
@@ -172,10 +225,12 @@ export const TestimonialSection = () => {
           {Array.from({ length: totalSlides }).map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => !currentPlayingVideo && setCurrentSlide(index)}
+              disabled={!!currentPlayingVideo}
               className={cn(
                 "h-3 rounded-full transition-all",
-                currentSlide === index ? "bg-amber-600 w-8" : "bg-gray-300 w-3"
+                currentSlide === index ? "bg-amber-600 w-8" : "bg-gray-300 w-3",
+                currentPlayingVideo && "opacity-50 cursor-not-allowed"
               )}
             />
           ))}
@@ -195,7 +250,7 @@ export const TestimonialSection = () => {
           <Button
             onClick={openDialog}
             size="lg"
-            className="group bg-white text-amber-700 hover:bg-gray-100 text-lg py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1 font-semibold"
+            className="group bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1 font-bold"
           >
             Book Your Seat Now
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition" />
