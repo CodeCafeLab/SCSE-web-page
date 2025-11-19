@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface EnquiryFormData {
   name: string;
@@ -27,6 +28,7 @@ interface EnquiryFormProps {
 
 export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<EnquiryFormData>({
     name: "",
@@ -163,7 +165,8 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
           message: "",
         });
 
-        // Call onSuccess callback if provided (e.g., to close dialog)
+        navigate("/enquiry/thank-you");
+
         if (onSuccess) {
           onSuccess();
         }
