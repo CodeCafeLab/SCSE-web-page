@@ -43,12 +43,6 @@ const EnquiryThankYou = () => {
             <Button onClick={() => navigate("/")} className="sm:w-auto w-full">
               Return to Home
             </Button>
-            <a
-              href="tel:+919000000000"
-              className="sm:w-auto w-full inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition"
-            >
-              Call Us
-            </a>
           </div>
         </div>
       </div>
