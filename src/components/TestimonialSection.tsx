@@ -189,9 +189,9 @@ export const TestimonialSection = () => {
                   {slideVideos.map((src, i) => (
                     <div
                       key={i}
-                      className="rounded-2xl shadow-lg bg-white border border-gray-100 p-2 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                      className="rounded-2xl  shadow-lg bg-white border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="relative h-full md:h-[76vh] lg:h-[80vh]  w-full overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
+                      <div className="relative   h-full md:h-[76vh] lg:h-[80vh]  w-72 overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
                         <video
                           src={src}
                           controls
