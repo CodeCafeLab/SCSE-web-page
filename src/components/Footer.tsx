@@ -4,7 +4,7 @@ import { LazyImage } from "./LazyImage";
 import suncityLogoSrc from "@/assets/suncity-logo.png?w=320&format=webp&quality=80";
 import suncityLogoSrcSet from "@/assets/suncity-logo.png?w=160;240;320&format=webp&quality=80&as=srcset";
 import suncityLogoPlaceholder from "@/assets/suncity-logo.png?w=32&blur=30&format=webp&as=base64";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -106,6 +106,20 @@ export const Footer = () => {
                     className="text-white/80 hover:text-accent transition-colors text-sm sm:text-base"
                   >
                     dos@suncitysolar.in
+                  </a>
+                </div>
+              </li>
+
+              <li className="flex">
+                <div className="flex-shrink-0 mt-1">
+                  <Phone className="h-5 w-5 text-accent" />
+                </div>
+                <div className="ml-3">
+                  <a
+                    href="tel:+911413611709"
+                    className="text-white/80 hover:text-accent transition-colors text-sm sm:text-base"
+                  >
+                    +91-1413611709
                   </a>
                 </div>
               </li>

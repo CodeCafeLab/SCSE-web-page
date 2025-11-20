@@ -1,9 +1,12 @@
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, PhoneIcon } from "lucide-react";
 import { EnquiryForm } from "./EnquiryForm";
 
 export const FinalCtaSection = () => {
   return (
-    <section id="enquiry-form" className="relative py-8 w-full bg-gradient-to-br from-blue-900 to-blue-800 text-white scroll-mt-28">
+    <section
+      id="enquiry-form"
+      className="relative py-8 w-full bg-gradient-to-br from-blue-900 to-blue-800 text-white scroll-mt-28"
+    >
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Column - Contact Information */}
@@ -34,21 +37,21 @@ export const FinalCtaSection = () => {
                 </div>
               </a>
 
-              {/* WhatsApp
-              <a 
-                href="https://wa.me/919587211700" 
-                target="_blank" 
+              {/* WhatsApp */}
+              <a
+                href="https://wa.me/919587211700"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300 group"
               >
                 <div className="bg-green-800/50 p-3 rounded-lg group-hover:bg-green-700/70 transition-colors">
-                  <Phone className="w-6 h-6 text-green-400" />
+                  <PhoneIcon className="w-6 h-6 text-green-400" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-lg">WhatsApp Us</h3>
-                  <p className="text-blue-100">+91 95872 11700</p>
+                  <h3 className="font-medium text-lg">Contact Us</h3>
+                  <p className="text-blue-100">+91-1413611709</p>
                 </div>
-              </a> */}
+              </a>
 
               {/* Address */}
               <a
