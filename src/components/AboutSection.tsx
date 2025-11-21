@@ -1,6 +1,6 @@
 import React from "react";
 import { LazyImage } from "./LazyImage";
-import swamijiSrc from "../assets/swami vivekanand ji.jpeg?w=200&format=webp&quality=75";
+import swamijiSrc from "../assets/swami-vivekanand.jpg";
 import swamijiSrcSet from "../assets/swami vivekanand ji.jpeg?w=100;150;200;260&format=webp&quality=75&as=srcset";
 import swamijiPlaceholder from "../assets/swami vivekanand ji.jpeg?w=32&blur=30&format=webp&as=base64";
 
@@ -157,7 +157,7 @@ export const AboutSection = () => {
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-amber-400 shadow-md">
                 <LazyImage
                   src={swamijiSrc}
-                  srcSet={swamijiSrcSet}
+                  srcSet={swamijiSrc}
                   sizes="80px"
                   placeholder={swamijiPlaceholder}
                   alt="Swami Vivekananda"
