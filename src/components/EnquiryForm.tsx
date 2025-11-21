@@ -61,6 +61,12 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
       return;
     }
 
+    if (name === "name" || name === "city") {
+      const text = value.replace(/[^A-Za-z\s]/g, "");
+      setFormData((prev) => ({ ...prev, [name]: text }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -83,6 +89,8 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
     // Name validation (required)
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.name.trim())) {
+      newErrors.name = "Name must contain only letters";
     }
 
     // Phone validation (required)
@@ -95,6 +103,8 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
     // City validation (required)
     if (!formData.city.trim()) {
       newErrors.city = "City name is required";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.city.trim())) {
+      newErrors.city = "City must contain only letters";
     }
 
     // Occupation validation (required)
