@@ -149,6 +149,8 @@ export const paymentWebhook = async (req: RawBodyRequest, res: Response) => {
     const payload = req.body as PhonePeWebhookPayload | undefined;
     const webhookData = payload?.data;
 
+    console.info("[PaymentController] Raw PhonePe webhook payload:", payload);
+
     if (!webhookData?.merchantOrderId) {
       return res.status(400).json({
         success: false,

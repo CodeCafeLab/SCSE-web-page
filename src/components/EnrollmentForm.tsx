@@ -795,26 +795,9 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         throw new Error("PhonePe redirect URL missing in response");
       }
 
-      const checkout = window.PhonePeCheckout;
-      if (checkout?.transact) {
-        checkout.transact({
-          tokenUrl: redirectUrl,
-          type: "IFRAME",
-          callback: (result) => {
-            console.log("[EnrollmentForm] PhonePe checkout callback:", result);
-            if (result === "USER_CANCEL") {
-              toast({
-                title: "Payment cancelled",
-                description: "You cancelled the PhonePe payment window.",
-                variant: "destructive",
-              });
-            }
-          },
-        });
-      } else {
-        console.info("[EnrollmentForm] PhonePe checkout script unavailable. Redirecting.");
-        window.location.href = redirectUrl;
-      }
+      // Always perform a full redirect so PhonePe can send users back to our callback URL.
+      console.info("[EnrollmentForm] Redirecting user to PhonePe checkout page.");
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error("Error redirecting to payment:", error);
       const errorMessage =
