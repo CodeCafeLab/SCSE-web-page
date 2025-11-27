@@ -751,7 +751,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         referral_code: formData.referralCode.trim(),
         source_of_knowledge: formData.sourceOfKnowledge,
         course: "Solar business training course",
-        amount: "1",
+        amount: "11700",
         currency: "INR",
       };
 
@@ -772,7 +772,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: 1,
+          amount: "11700",
           customer: {
             name: formData.first_name.trim(),
             email: formData.email.trim(),
