@@ -41,7 +41,7 @@ server {
     
     # Backend API proxy (ADD THIS BLOCK)
     location /api {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5002;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -53,7 +53,7 @@ server {
     
     # Health check endpoint
     location /health {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5002;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
     }
@@ -78,12 +78,9 @@ nano .env
 
 **Add to `server/.env`:**
 ```env
-PORT=5000
+PORT=5002
 NODE_ENV=production
 APP_URL=https://dos.suncitysolar.in
-CASHFREE_APP_ID=2010284e3f0d145901db313a3b820102
-CASHFREE_SECRET_KEY=your_secret_key_here
-CASHFREE_API_URL=https://api.cashfree.com/pg/orders
 ```
 
 **Start backend server:**
@@ -107,20 +104,20 @@ pm2 startup  # Auto-start on reboot
 
 2. **Update frontend `.env` for local testing:**
    ```env
-   VITE_API_URL=http://localhost:5000/api
+   VITE_API_URL=http://localhost:5002/api
    ```
 
 3. **Test if backend is working:**
    ```bash
-   curl http://localhost:5000/health
+   curl http://localhost:5002/health
    ```
    Should return: `{"status":"ok"}`
 
 ## Quick Checklist:
 
-- [ ] Backend server is running on port 5000
-- [ ] Backend `.env` file has `CASHFREE_SECRET_KEY`
-- [ ] Nginx is configured to proxy `/api` → `http://localhost:5000`
+- [ ] Backend server is running on port 5002
+- [ ] Backend `.env` file contains the required DB/email secrets
+- [ ] Nginx is configured to proxy `/api` → `http://localhost:5002`
 - [ ] Nginx config is reloaded: `sudo systemctl reload nginx`
 - [ ] Backend health check works: `curl https://dos.suncitysolar.in/health`
 
@@ -128,7 +125,7 @@ pm2 startup  # Auto-start on reboot
 
 ```bash
 # Test backend locally
-curl http://localhost:5000/health
+curl http://localhost:5002/health
 
 # Test backend via domain (should work after Nginx config)
 curl https://dos.suncitysolar.in/health
@@ -143,7 +140,7 @@ curl -X POST https://dos.suncitysolar.in/api/payment/create-session \
 
 Once backend is running and Nginx is configured:
 1. ✅ Frontend will call `/api/payment/create-session`
-2. ✅ Nginx will proxy to `http://localhost:5000/api/payment/create-session`
-3. ✅ Backend will create Cashfree order
-4. ✅ Payment will redirect to Cashfree checkout
+2. ✅ Nginx will proxy to `http://localhost:5002/api/payment/create-session`
+3. ✅ The endpoint will respond with HTTP 501 until the PhonePe integration is ready
+4. ✅ When PhonePe APIs are connected, this path will return an order reference instead of a 404
 

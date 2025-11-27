@@ -31,7 +31,9 @@ export const PaymentCallback = () => {
 
   // Function to check if payment is verified
   const isPaymentVerified = (status: string | null) => {
-    return status === "PAID" || status === "SUCCESS" || status === "success";
+    if (!status) return false;
+    const normalized = status.toUpperCase();
+    return normalized === "PAID" || normalized === "SUCCESS" || normalized === "COMPLETED";
   };
 
   useEffect(() => {
@@ -43,9 +45,16 @@ export const PaymentCallback = () => {
       console.log("[PaymentCallback] Current URL:", window.location.href);
       console.log("[PaymentCallback] Location state:", location.state);
       const orderIdParam =
-        searchParams.get("order_id") || searchParams.get("cf_payment_id");
+        searchParams.get("merchantOrderId") ||
+        searchParams.get("order_id") ||
+        searchParams.get("cf_payment_id");
       const paymentStatus =
-        searchParams.get("payment_status") || searchParams.get("txStatus");
+        searchParams.get("payment_status") ||
+        searchParams.get("txStatus") ||
+        searchParams.get("state");
+      const normalizedStatus = paymentStatus
+        ? paymentStatus.toUpperCase()
+        : null;
       const paymentMessage = searchParams.get("payment_message");
 
       console.log("[PaymentCallback] Parsed query params:", {
@@ -91,7 +100,11 @@ export const PaymentCallback = () => {
       console.log("[PaymentCallback] Stored orderId in state:", orderIdParam);
 
       // If payment status is in URL, use it
-      if (paymentStatus === "SUCCESS" || paymentStatus === "PAYMENT_SUCCESS") {
+      if (
+        normalizedStatus === "SUCCESS" ||
+        normalizedStatus === "PAYMENT_SUCCESS" ||
+        normalizedStatus === "COMPLETED"
+      ) {
         setStatus("success");
         console.log(
           "[PaymentCallback] Payment status in URL indicates success. Preparing thank-you redirect."
@@ -125,9 +138,9 @@ export const PaymentCallback = () => {
           replace: true,
         });
       } else if (
-        paymentStatus === "FAILED" ||
-        paymentStatus === "PAYMENT_ERROR" ||
-        paymentStatus === "CANCELLED"
+        normalizedStatus === "FAILED" ||
+        normalizedStatus === "PAYMENT_ERROR" ||
+        normalizedStatus === "CANCELLED"
       ) {
         setStatus("failed");
         console.warn(
@@ -165,22 +178,26 @@ export const PaymentCallback = () => {
             apiUrl: `${API_BASE_URL}/api/payments/verify/${orderIdParam}`,
           });
           const response = await fetch(
-            `${API_BASE_URL}/api/payments/verify/${orderIdParam}`
+            `${API_BASE_URL}/api/payments/verify/${orderIdParam}?details=false&errorContext=true`
           );
 
           if (response.ok) {
             const { data: paymentData } = await response.json();
             console.log("[PaymentCallback] Verification API response:", paymentData);
-            if (isPaymentVerified(paymentData?.order_status)) {
+
+            const orderState =
+              paymentData?.state ||
+              paymentData?.paymentDetails?.[0]?.state ||
+              null;
+
+            if (isPaymentVerified(orderState)) {
               setStatus("success");
               console.log(
                 "[PaymentCallback] Backend confirmed payment success. Navigating to thank-you page."
               );
 
-              // Store payment success in localStorage
               localStorage.setItem(`payment_${orderIdParam}`, "success");
 
-              // Get form data from state or localStorage
               const formDataToSend =
                 location.state?.formData ||
                 (localStorage.getItem("enrollmentFormData")
@@ -189,50 +206,48 @@ export const PaymentCallback = () => {
                     )
                   : {});
 
-              // Create a URLSearchParams object with the form data
               const params = new URLSearchParams();
-
-              // Add all form data to URL parameters
               Object.entries(formDataToSend).forEach(([key, value]) => {
                 if (value) {
                   params.append(key, String(value));
                 }
               });
 
-              // Add payment details
-              params.append("payment_id", orderIdParam);
+              params.append("payment_id", paymentData?.orderId || orderIdParam);
               params.append("payment_status", "success");
+              params.append("payment_state", orderState || "COMPLETED");
+              params.append(
+                "amount_paid",
+                paymentData?.amount
+                  ? (paymentData.amount / 100).toString()
+                  : ""
+              );
 
-              // Only navigate to thank you page if payment is verified
               navigate(`/thank-you?${params.toString()}`, {
                 state: {
                   paymentVerified: true,
                   formData: formDataToSend,
+                  paymentDetails: paymentData,
                 },
                 replace: true,
               });
-            } else if (
-              paymentData?.payment_status === "FAILED" ||
-              paymentData?.payment_status === "PAYMENT_ERROR"
-            ) {
+            } else if (orderState === "FAILED") {
               setStatus("failed");
               console.warn(
                 "[PaymentCallback] Backend indicates payment failure. Redirecting to enrollment form."
               );
 
-              // Store payment failure in localStorage
               localStorage.setItem(`payment_${orderIdParam}`, "failed");
 
-              // Show error message
               toast({
                 title: "Payment Failed",
                 description:
-                  paymentData?.message ||
+                  paymentData?.errorContext?.description ||
+                  paymentData?.errorCode ||
                   "We couldn't process your payment. Please try again.",
                 variant: "destructive",
               });
 
-              // Redirect back to form with error state
               setTimeout(() => {
                 navigate("/", {
                   state: { paymentError: true },
@@ -245,7 +260,6 @@ export const PaymentCallback = () => {
                 "[PaymentCallback] Backend response pending. Scheduling retry."
               );
 
-              // Check again after delay if still pending
               setTimeout(() => {
                 verifyPayment();
               }, 2000);
@@ -257,7 +271,6 @@ export const PaymentCallback = () => {
               statusText: response.statusText,
             });
 
-            // Retry after delay if there was an error
             setTimeout(() => {
               verifyPayment();
             }, 2000);
@@ -267,7 +280,6 @@ export const PaymentCallback = () => {
           setStatus("pending");
           console.warn("[PaymentCallback] Verification threw an error. Retrying soon.");
 
-          // Retry after delay on error
           setTimeout(() => {
             verifyPayment();
           }, 2000);

@@ -4,10 +4,12 @@ import path from 'path';
 // Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-// Support both naming conventions for Cashfree credentials
-const cashfreeClientId = process.env.CASHFREE_CLIENT_ID || process.env.CASHFREE_APP_ID;
-const cashfreeClientSecret = process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET_KEY;
-const cashfreeEnv = process.env.CASHFREE_ENV || (process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX');
+const phonePeClientId = process.env.PHONEPE_CLIENT_ID;
+const phonePeClientSecret = process.env.PHONEPE_CLIENT_SECRET;
+const phonePeClientVersion = process.env.PHONEPE_CLIENT_VERSION || '1';
+const phonePeEnv = (process.env.PHONEPE_ENV || 'SANDBOX').toUpperCase();
+const phonePeWebhookSaltKey = process.env.PHONEPE_WEBHOOK_SALT_KEY;
+const phonePeWebhookSaltIndex = process.env.PHONEPE_WEBHOOK_SALT_INDEX;
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -23,26 +25,16 @@ const requiredEnvVars = [
   'EMAIL_FROM',
 ];
 
-// Make Cashfree credentials optional during validation (they'll be checked separately)
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.warn(`Warning: Missing environment variable: ${envVar}`);
   }
 }
 
-// Validate Cashfree credentials separately
-if (!cashfreeClientId || !cashfreeClientSecret) {
-  console.error('ERROR: Missing Cashfree credentials!');
-  console.error('Please set either:');
-  console.error('  - CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET, OR');
-  console.error('  - CASHFREE_APP_ID and CASHFREE_SECRET_KEY');
-  throw new Error('Missing required Cashfree credentials');
-}
-
 // Export configuration
 export const config = {
   // Server configuration
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 5002,
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // Database configuration
@@ -68,11 +60,14 @@ export const config = {
     from: process.env.EMAIL_FROM!,
   },
   
-  // Cashfree configuration
-  cashfree: {
-    clientId: cashfreeClientId,
-    clientSecret: cashfreeClientSecret,
-    env: cashfreeEnv,
+  // PhonePe configuration
+  phonepe: {
+    clientId: phonePeClientId,
+    clientSecret: phonePeClientSecret,
+    clientVersion: phonePeClientVersion,
+    env: phonePeEnv,
+    webhookSaltKey: phonePeWebhookSaltKey,
+    webhookSaltIndex: phonePeWebhookSaltIndex,
   },
   
   // App configuration

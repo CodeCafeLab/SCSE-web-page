@@ -1,44 +1,32 @@
-import {
-  Zap,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Zap, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
-import { toast } from "sonner";
 
 // Get the base URL from Vite's environment variables
 const baseUrl = import.meta.env.BASE_URL || "/";
 
-// Video paths from public folder - using base URL for proper resolution in production
-const video1 = `${baseUrl}BamwariVaishnav17Nov.mp4`;
-const video2 = `${baseUrl}JitendraPatel17Nov.mp4`;
-const video3 = `${baseUrl}JitendraSharma17Nov.mp4`;
-const video4 = `${baseUrl}M.R.Lega17Nov.mp4`;
-const video5 = `${baseUrl}Mr.RatanlalManjhu.mp4`;
-const video6 = `${baseUrl}Nathulal17Nov.mp4`;
-const video7 = `${baseUrl}RajmalTank17Nov.mp4`;
-const video8 = `${baseUrl}RakeshKumarBairagi17Nov.mp4`;
-const video9 = `${baseUrl}RakeshMohan17Nov.mp4`;
-const video10 = `${baseUrl}jitendrasaini17Nov.mp4`;
+const videoFolder = `${baseUrl}wetransfer_banwari-vaishnav-mp4_2025-11-26_1032/`;
 
-const videoSources = [
-  video4,
-  video3,
-  video6,
-  video7,
-  video8,
-  video9,
-  video10,
-  video2,
-  video1,
-  video5,
+const videoFiles = [
+  "M.R. Lega.mp4",
+  "Jitendra Sharma.mp4",
+  "Banwari Vaishnav.mp4",
+  "Ratan Lal Manjhu.mp4",
+  "Rakesh Mohan.mp4",
+  "Rakesh Kumar Bairagi.mp4",
+  "Rajmal Tank.mp4",
+  "Nathulal Kachhawaha.mp4",
+  "Mr. Jitendra patel.mp4",
+  "Jitendra Kumar Saini.mp4",
 ];
+
+const videoSources = videoFiles.map(
+  (fileName) => `${videoFolder}${encodeURIComponent(fileName)}`
+);
+
+const FALLBACK_ASPECT_RATIO = 9 / 16;
 
 const getItemsPerView = () => {
   if (typeof window === "undefined") return 1;
@@ -51,7 +39,12 @@ export const TestimonialSection = () => {
   const [itemsPerView, setItemsPerView] = useState(getItemsPerView);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentPlayingVideo, setCurrentPlayingVideo] = useState<string | null>(null);
+  const [currentPlayingVideo, setCurrentPlayingVideo] = useState<string | null>(
+    null
+  );
+  const [videoDimensions, setVideoDimensions] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
   const totalSlides = Math.max(
     1,
     Math.ceil(videoSources.length / itemsPerView)
@@ -61,19 +54,46 @@ export const TestimonialSection = () => {
 
   const handleVideoPlay = (videoSrc: string) => {
     // Pause all other videos when a new video starts playing
-    const videos = document.querySelectorAll('video');
+    const videos = document.querySelectorAll("video");
     videos.forEach((video) => {
       const videoElement = video as HTMLVideoElement;
       // Compare the current video src with the playing video src
-      if (videoElement.src && !videoElement.src.includes(videoSrc.split('/').pop() || '') && !videoElement.paused) {
+      if (
+        videoElement.src &&
+        !videoElement.src.includes(videoSrc.split("/").pop() || "") &&
+        !videoElement.paused
+      ) {
         videoElement.pause();
       }
     });
     setCurrentPlayingVideo(videoSrc);
   };
 
-  const handleVideoPause = (videoSrc: string) => {
+  const handleVideoPause = () => {
     setCurrentPlayingVideo(null);
+  };
+
+  const handleLoadedMetadata = (
+    videoSrc: string,
+    event: React.SyntheticEvent<HTMLVideoElement>
+  ) => {
+    const element = event.currentTarget;
+    const width = element.videoWidth;
+    const height = element.videoHeight;
+
+    if (!width || !height) return;
+
+    setVideoDimensions((prev) => {
+      const existing = prev[videoSrc];
+      if (existing && existing.width === width && existing.height === height) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [videoSrc]: { width, height },
+      };
+    });
   };
 
   const nextSlide = useCallback(() => {
@@ -111,7 +131,7 @@ export const TestimonialSection = () => {
   }, [isPaused, nextSlide, currentPlayingVideo]);
 
   return (
-    <section className="py-14 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-14 md:py-20 ">
       <div className="container mx-auto px-4">
         {/* HEADER */}
         <div className="text-center mb-16">
@@ -131,7 +151,7 @@ export const TestimonialSection = () => {
 
         {/* SLIDER */}
         <div
-          className="relative group "
+          className="relative group p-6"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -139,10 +159,10 @@ export const TestimonialSection = () => {
           <button
             onClick={prevSlide}
             disabled={!!currentPlayingVideo}
-            className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200 ${
-              currentPlayingVideo 
-                ? 'opacity-50 cursor-not-allowed hover:scale-100' 
-                : 'hover:scale-110'
+            className={`absolute left-4 top-1/2 -translate-y-1/2 hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200 ${
+              currentPlayingVideo
+                ? "opacity-50 cursor-not-allowed hover:scale-100"
+                : "hover:scale-110"
             }`}
           >
             <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -152,9 +172,9 @@ export const TestimonialSection = () => {
             onClick={nextSlide}
             disabled={!!currentPlayingVideo}
             className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md hover:bg-white shadow-xl p-4 rounded-full z-10 transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-gray-200 ${
-              currentPlayingVideo 
-                ? 'opacity-50 cursor-not-allowed hover:scale-100' 
-                : 'hover:scale-110'
+              currentPlayingVideo
+                ? "opacity-50 cursor-not-allowed hover:scale-100"
+                : "hover:scale-110"
             }`}
           >
             <ChevronRight className="w-6 h-6 text-gray-700" />
@@ -186,34 +206,41 @@ export const TestimonialSection = () => {
                   )}
                   style={{ width: `${100 / totalSlides}%` }}
                 >
-                  {slideVideos.map((src, i) => (
-                    <div
-                      key={i}
-                      className="rounded-2xl  shadow-lg bg-white border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-                    >
-                      <div className="relative   h-full md:h-[76vh] lg:h-[80vh]  w-72 overflow-hidden rounded-xl bg-black aspect-[10/16] sm:aspect-[4/3] lg:aspect-video">
-                        <video
-                          src={src}
-                          controls
-                          preload="metadata"
-                          className="absolute inset-0 h-full w-full object-cover"
-                          playsInline
-                          muted={false}
-                          onPlay={(e) => {
-                            console.log('Video playing:', src);
-                            handleVideoPlay(src);
-                          }}
-                          onPause={(e) => {
-                            console.log('Video paused:', src);
-                            handleVideoPause(src);
-                          }}
-                          onError={(e) => {
-                            console.error('Video error:', src, e);
-                          }}
-                        />
+                  {slideVideos.map((src) => {
+                    const dimensions = videoDimensions[src];
+                    const aspectRatio = dimensions
+                      ? dimensions.width / dimensions.height
+                      : FALLBACK_ASPECT_RATIO;
+
+                    return (
+                      <div
+                        key={`${slideIndex}-${src}`}
+                        className="flex h-full flex-col rounded-3xl p-3"
+                      >
+                        <div
+                          className="relative w-full overflow-hidden rounded-2xl"
+                          style={{ aspectRatio }}
+                        >
+                          <video
+                            src={src}
+                            controls
+                            preload="metadata"
+                            className="h-full w-full object-contain"
+                            playsInline
+                            muted={false}
+                            onPlay={() => handleVideoPlay(src)}
+                            onPause={handleVideoPause}
+                            onError={(e) => {
+                              console.error("Video error:", src, e);
+                            }}
+                            onLoadedMetadata={(event) =>
+                              handleLoadedMetadata(src, event)
+                            }
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}

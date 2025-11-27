@@ -97,7 +97,6 @@ export const ImageCarousel = ({
                 className="w-full h-full object-cover"
                 loading={isActive ? "eager" : "lazy"}
                 decoding="async"
-                fetchPriority={isActive ? "high" : "low"}
                 width={image.width ?? 1200}
                 height={image.height ?? 675}
                 onLoad={() => handleImageLoad(index)}

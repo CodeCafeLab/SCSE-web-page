@@ -50,7 +50,7 @@ export class Enrollment extends BaseEntity {
 
   @ManyToOne('User', 'enrollments', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user!: any; // Using 'any' as a temporary workaround for circular dependency
+  user!: Relation<User>;
 
   // Add any additional enrollment-specific fields here
   @Column({ type: 'varchar', length: 100, nullable: true })

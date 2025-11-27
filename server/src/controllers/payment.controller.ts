@@ -1,183 +1,190 @@
-import { Request, Response } from "express";
-import { Cashfree, CFEnvironment } from "cashfree-pg";
+import type { Request } from "express";
+import { Response } from "express";
 import { config } from "../config";
+import {
+  createPhonePeCheckout,
+  fetchPhonePeAccessToken,
+  fetchPhonePeOrderStatus,
+  verifyPhonePeWebhookSignature,
+} from "../services/phonepe.service";
+type RawBodyRequest = Request & { rawBody?: string };
 
-// Debug: Log the config when the file loads
-console.log('Payment controller loaded with config:', {
-  cashfreeEnv: config.cashfree?.env,
-  nodeEnv: config.nodeEnv,
-  clientId: config.cashfree?.clientId ? '***' : 'missing',
-  clientSecret: config.cashfree?.clientSecret ? '***' : 'missing'
-});
-
-// Initialize Cashfree instance with better error handling
-const isProduction = config.cashfree?.env === 'PRODUCTION' || process.env.CASHFREE_ENV === 'PRODUCTION';
-
-if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
-  console.error('FATAL ERROR: Cashfree credentials are missing!');
-  console.error('Please check your .env file and ensure CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET are set');
+interface PhonePeWebhookPayload {
+  code?: string;
+  success?: boolean;
+  message?: string;
+  data?: {
+    merchantId?: string;
+    merchantOrderId?: string;
+    transactionId?: string;
+    amount?: number;
+    state?: "PENDING" | "FAILED" | "COMPLETED";
+    paymentDetails?: Array<Record<string, unknown>>;
+    error?: {
+      code?: string;
+      message?: string;
+    };
+  };
 }
 
-const cashfree = new Cashfree(
-  isProduction ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
-  config.cashfree?.clientId || '',
-  config.cashfree?.clientSecret || ''
-);
-
-console.log(`Cashfree initialized in ${isProduction ? 'PRODUCTION' : 'SANDBOX'} mode`);
-
-// ✅ Create order API
-export const createOrder = async (req: Request, res: Response) => {
+export const getPhonePeToken = async (_req: Request, res: Response) => {
   try {
-    const { amount, customer, orderId } = req.body;
-
-    if (!amount || !customer?.phone) {
+    if (!config.phonepe?.clientId || !config.phonepe?.clientSecret) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: amount or customer.phone",
+        message: "PhonePe credentials are not configured on the server.",
       });
     }
 
-    // Validate Cashfree credentials
-    if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
-      console.error('Cashfree credentials missing in createOrder');
-      return res.status(500).json({
-        success: false,
-        message: "Payment gateway configuration error. Please contact support.",
-      });
-    }
-
-    // Always use HTTPS for production, HTTP for local development
-    const isProduction = config.cashfree?.env === 'PRODUCTION' || process.env.CASHFREE_ENV === 'PRODUCTION';
-    const baseUrl = isProduction 
-      ? 'https://dos.suncitysolar.in' 
-      : 'http://localhost:8080';
-      
-    console.log(`Using base URL: ${baseUrl}, isProduction: ${isProduction}`);
-
-    // Ensure we're using HTTPS for production
-    const returnUrl = isProduction
-      ? 'https://dos.suncitysolar.in/payment/callback?order_id={order_id}'
-      : `${baseUrl}/payment/callback?order_id={order_id}`;
-      
-    const notifyUrl = isProduction
-      ? 'https://dos.suncitysolar.in/api/payments/webhook'
-      : `${baseUrl}/api/payments/webhook`;
-
-    const orderRequest = {
-      order_amount: amount.toString(),
-      order_currency: "INR",
-      order_id: orderId || "order_" + Date.now(),
-      customer_details: {
-        customer_id: customer.id || "cust_" + Math.random().toString(36).slice(2, 10),
-        customer_name: customer.name || "User",
-        customer_email: customer.email || "noemail@example.com",
-        customer_phone: customer.phone,
-      },
-      order_meta: {
-        return_url: returnUrl,
-        notify_url: notifyUrl
-      },
-      order_note: "Payment for Suncity Enrollment",
-    };
-    
-    console.log('Order request details:', {
-      ...orderRequest,
-      order_meta: {
-        return_url: returnUrl,
-        notify_url: notifyUrl
-      },
-      customer_details: {
-        ...orderRequest.customer_details,
-        customer_phone: orderRequest.customer_details.customer_phone ? '***' : 'missing'
-      }
-    });
-
-    const response = await cashfree.PGCreateOrder(orderRequest);
-    const sessionId = response.data?.payment_session_id;
-
-    if (!sessionId) {
-      console.error('No payment session ID received from Cashfree:', response);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to create payment session",
-      });
-    }
+    const tokenResponse = await fetchPhonePeAccessToken();
 
     return res.status(200).json({
       success: true,
-      data: response.data,
-      paymentLink: `https://payments.cashfree.com/checkout/pay/${sessionId}`,
+      data: {
+        access_token: tokenResponse.access_token,
+        expires_at: tokenResponse.expires_at,
+        issued_at: tokenResponse.issued_at,
+        token_type: tokenResponse.token_type,
+        environment: config.phonepe?.env ?? "SANDBOX",
+      },
     });
-  } catch (error: any) {
-    console.error(
-      "Error creating order:",
-      {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-        }
-      }
-    );
-    
-    // More detailed error response
-    const statusCode = error.response?.status || 500;
-    const errorMessage = error.response?.data?.message || error.message || 'Failed to create order';
-    
-    // Log full error in development, sanitized in production
-    const errorDetails = process.env.NODE_ENV === 'development' 
-      ? {
-          message: error.message,
-          stack: error.stack,
-          code: error.code,
-          response: error.response?.data
-        }
-      : undefined;
-    
-    res.status(statusCode).json({
-      success: false,
-      message: errorMessage,
-      ...(errorDetails && { error: errorDetails })
-    });
-  }
-};
-
-// ✅ Payment Webhook (server-to-server)
-export const paymentWebhook = async (req: Request, res: Response) => {
-  try {
-    const { data } = req.body;
-    const orderId = data?.order?.order_id;
-    const paymentStatus = data?.payment?.payment_status;
-
-    console.log(`Webhook received for order ${orderId} → ${paymentStatus}`);
-
-    // ⚠️ Verify signature for security (mandatory for production)
-    // const signature = req.headers['x-webhook-signature'] as string;
-    // const isValid = cashfree.PGVerifyWebhookSignature(signature, req.body);
-    // if (!isValid) {
-    //   return res.status(401).json({ success: false, message: 'Invalid signature' });
-    // }
-
-    // Update DB logic here → e.g., update order/payment status
-
-    return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("Error processing webhook:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Error processing webhook" });
+    console.error("[PaymentController] PhonePe token fetch failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch PhonePe access token";
+    return res.status(500).json({
+      success: false,
+      message,
+    });
   }
 };
 
-// ✅ Verify Payment (manual check)
-export const verifyPayment = async (req: Request, res: Response) => {
+export const createOrder = async (_req: Request, res: Response) => {
   try {
-    const { orderId } = req.params;
+    const { amount, customer, formData } = _req.body as {
+      amount: number;
+      customer?: { name?: string; email?: string; phone?: string };
+      formData?: Record<string, string>;
+    };
 
+    if (!amount || Number.isNaN(amount) || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Amount is required and must be greater than zero.",
+      });
+    }
+
+    if (!config.phonepe?.clientId || !config.phonepe?.clientSecret) {
+      return res.status(500).json({
+        success: false,
+        message: "PhonePe credentials are not configured on the server.",
+      });
+    }
+
+    const merchantOrderId = `SCSE_${Date.now()}`;
+    const redirectBase = config.app?.frontendUrl || "http://localhost:8080";
+    const sanitizedRedirectBase = redirectBase.endsWith("/")
+      ? redirectBase.slice(0, -1)
+      : redirectBase;
+    const redirectUrl = `${sanitizedRedirectBase}/payment/callback?merchantOrderId=${merchantOrderId}`;
+
+    const amountInPaisa = Math.round(amount * 100);
+    const metaInfo: Record<string, string> = {
+      udf1: customer?.name || "",
+      udf2: customer?.email || "",
+      udf3: customer?.phone || "",
+    };
+
+    if (formData) {
+      Object.entries(formData).forEach(([key, value], index) => {
+        if (value && index < 12) {
+          metaInfo[`udf${index + 4}`] = String(value);
+        }
+      });
+    }
+
+    const checkoutResponse = await createPhonePeCheckout({
+      merchantOrderId,
+      amount: amountInPaisa,
+      expireAfter: 1200,
+      redirectUrl,
+      metaInfo,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        redirectUrl: checkoutResponse.redirectUrl,
+        merchantOrderId,
+        phonePeOrderId: checkoutResponse.orderId,
+        state: checkoutResponse.state,
+        expireAt: checkoutResponse.expireAt,
+      },
+    });
+  } catch (error) {
+    console.error("[PaymentController] createOrder failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to create PhonePe payment order";
+    return res.status(500).json({
+      success: false,
+      message,
+    });
+  }
+};
+
+export const paymentWebhook = async (req: RawBodyRequest, res: Response) => {
+  try {
+    const rawBody = req.rawBody;
+    const providedSignature = req.headers["x-verify"];
+    const signatureValid = verifyPhonePeWebhookSignature(rawBody, providedSignature);
+
+    if (!signatureValid) {
+      console.warn("[PaymentController] PhonePe webhook signature validation failed.");
+      return res.status(401).json({
+        success: false,
+        message: "Invalid webhook signature",
+      });
+    }
+
+    const payload = req.body as PhonePeWebhookPayload | undefined;
+    const webhookData = payload?.data;
+
+    if (!webhookData?.merchantOrderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid webhook payload: merchantOrderId missing",
+      });
+    }
+
+    console.info("[PaymentController] PhonePe webhook received", {
+      merchantOrderId: webhookData.merchantOrderId,
+      merchantId: webhookData.merchantId,
+      state: webhookData.state,
+      amount: webhookData.amount,
+      transactionId: webhookData.transactionId,
+      error: webhookData.error,
+    });
+
+    // TODO: Persist payment status to database when schema is ready.
+
+    return res.status(200).json({
+      success: true,
+      message: "Webhook processed",
+    });
+  } catch (error) {
+    console.error("[PaymentController] paymentWebhook failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to process webhook";
+    return res.status(500).json({
+      success: false,
+      message,
+    });
+  }
+};
+
+export const verifyPayment = async (_req: Request, res: Response) => {
+  try {
+    const { orderId } = _req.params;
     if (!orderId) {
       return res.status(400).json({
         success: false,
@@ -185,60 +192,36 @@ export const verifyPayment = async (req: Request, res: Response) => {
       });
     }
 
-    // Validate Cashfree credentials
-    if (!config.cashfree?.clientId || !config.cashfree?.clientSecret) {
-      console.error('Cashfree credentials missing in verifyPayment');
+    if (!config.phonepe?.clientId || !config.phonepe?.clientSecret) {
       return res.status(500).json({
         success: false,
-        message: "Payment gateway configuration error. Please contact support.",
+        message: "PhonePe credentials are not configured on the server.",
       });
     }
 
-    const response = await cashfree.PGFetchOrder(orderId);
-    const orderData = response.data as any;
+    const detailsParam = _req.query.details;
+    const errorContextParam = _req.query.errorContext;
+    const details =
+      typeof detailsParam !== "undefined" ? detailsParam === "true" : false;
+    const errorContext =
+      typeof errorContextParam !== "undefined" ? errorContextParam === "true" : true;
 
-    if (!orderData) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
+    const statusResponse = await fetchPhonePeOrderStatus(orderId, {
+      details,
+      errorContext,
+    });
 
     return res.status(200).json({
       success: true,
-      data: {
-        order_id: orderData.order_id,
-        order_amount: orderData.order_amount,
-        order_status: orderData.order_status,
-        payment_status: orderData.payment_status,
-        cf_payment_id: orderData.cf_payment_id,
-        payment_method: orderData.payment_method,
-        payment_group: orderData.payment_group,
-      },
+      data: statusResponse,
     });
-  } catch (error: any) {
-    console.error(
-      "Payment verification error:",
-      {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status,
-      }
-    );
-    
-    const statusCode = error.response?.status || 500;
-    const errorMessage = error.response?.data?.message || error.message || "Failed to verify payment";
-    
-    res.status(statusCode).json({
+  } catch (error) {
+    console.error("[PaymentController] verifyPayment failed:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to verify PhonePe order status";
+    return res.status(500).json({
       success: false,
-      message: errorMessage,
-      ...(process.env.NODE_ENV === 'development' && {
-        error: {
-          message: error.message,
-          code: error.code
-        }
-      })
+      message,
     });
   }
 };

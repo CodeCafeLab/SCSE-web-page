@@ -85,8 +85,7 @@ This project is a web application for enrolling in the SunCity program. It inclu
 
     - `SUPABASE_URL`: The URL of your Supabase project.
     - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase project's service role key.
-    - `CASHFREE_APP_ID`: Your Cashfree application ID.
-    - `CASHFREE_SECRET_KEY`: Your Cashfree secret key.
+    - PhonePe-specific secrets will be documented once the gateway is integrated.
 
 ### Running the Application
 

@@ -1,6 +1,6 @@
 // Update payment.routes.ts
 import { Router } from 'express';
-import { createOrder, paymentWebhook, verifyPayment } from '../controllers/payment.controller';
+import { createOrder, paymentWebhook, verifyPayment, getPhonePeToken } from '../controllers/payment.controller';
 
 const router = Router();
 
@@ -12,5 +12,8 @@ router.get('/verify/:orderId', verifyPayment);
 
 // Webhook endpoint for payment status updates
 router.post('/webhook', paymentWebhook);
+
+// PhonePe helper endpoints
+router.post('/phonepe/token', getPhonePeToken);
 
 export default router;

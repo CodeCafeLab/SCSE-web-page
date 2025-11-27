@@ -1,5 +1,11 @@
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useParams,
+  type RouteObject,
+} from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -20,87 +26,67 @@ const IndexWithAdvisor = () => {
 
 const queryClient = new QueryClient();
 
+const withLayout = (node: ReactNode, className?: string) => (
+  <Layout className={className}>{node}</Layout>
+);
+
+const routes: RouteObject[] = [
+  {
+    path: "/",
+    element: withLayout(<Index />),
+  },
+  {
+    path: "/:advisorId",
+    element: withLayout(<IndexWithAdvisor />),
+  },
+  {
+    path: "/terms",
+    element: withLayout(<Terms />, "bg-gray-50"),
+  },
+  {
+    path: "/refund-policy",
+    element: withLayout(<RefundPolicy />, "bg-gray-50"),
+  },
+  {
+    path: "/terms-of-use",
+    element: withLayout(<TermsOfUse />, "bg-gray-50"),
+  },
+  {
+    path: "/privacy-policy",
+    element: withLayout(<PrivacyPolicy />, "bg-gray-50"),
+  },
+  {
+    path: "/thank-you",
+    element: withLayout(<ThankYou />, "bg-gray-50"),
+  },
+  {
+    path: "/enquiry/thank-you",
+    element: withLayout(<EnquiryThankYou />, "bg-gray-50"),
+  },
+  {
+    path: "/payment/callback",
+    element: <PaymentCallback />,
+  },
+  {
+    path: "*",
+    element: withLayout(<NotFound />),
+  },
+];
+
+const router = createBrowserRouter(routes, {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  },
+});
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <EnquiryFormProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Layout>
-                <Index />
-              </Layout>
-            }
-          />
-          <Route
-            path="/:advisorId"
-            element={
-              <Layout>
-                <IndexWithAdvisor />
-              </Layout>
-            }
-          />
-          <Route
-            path="/terms"
-            element={
-              <Layout className="bg-gray-50">
-                <Terms />
-              </Layout>
-            }
-          />
-          <Route
-            path="/refund-policy"
-            element={
-              <Layout className="bg-gray-50">
-                <RefundPolicy />
-              </Layout>
-            }
-          />
-          <Route
-            path="/terms-of-use"
-            element={
-              <Layout className="bg-gray-50">
-                <TermsOfUse />
-              </Layout>
-            }
-          />
-          <Route
-            path="/privacy-policy"
-            element={
-              <Layout className="bg-gray-50">
-                <PrivacyPolicy />
-              </Layout>
-            }
-          />
-          <Route path="/payment/callback" element={<PaymentCallback />} />
-          <Route
-            path="/thank-you"
-            element={
-              <Layout className="bg-gray-50">
-                <ThankYou />
-              </Layout>
-            }
-          />
-          <Route
-            path="/enquiry/thank-you"
-            element={
-              <Layout className="bg-gray-50">
-                <EnquiryThankYou />
-              </Layout>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route
-            path="*"
-            element={
-              <Layout>
-                <NotFound />
-              </Layout>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <RouterProvider
+        router={router}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      />
     </EnquiryFormProvider>
   </QueryClientProvider>
 );

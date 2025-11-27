@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const config = {
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 5002,
   nodeEnv: process.env.NODE_ENV || "development",
   db: {
     host: process.env.DB_HOST || "localhost",
@@ -15,11 +15,6 @@ export const config = {
     synchronize: process.env.NODE_ENV !== "production",
     logging: process.env.NODE_ENV !== "production",
   },
-  cashfree: {
-    clientId: process.env.CASHFREE_CLIENT_ID || "",
-    clientSecret: process.env.CASHFREE_CLIENT_SECRET || "",
-    env: process.env.CASHFREE_ENV || (process.env.NODE_ENV === "production" ? "PRODUCTION" : "SANDBOX"),
-  },
   email: {
     host: process.env.EMAIL_HOST || "",
     port: parseInt(process.env.EMAIL_PORT || "465", 10),
@@ -27,6 +22,14 @@ export const config = {
     user: process.env.EMAIL_USER || "",
     password: process.env.EMAIL_PASSWORD || "",
     from: process.env.EMAIL_FROM || "",
+  },
+  phonepe: {
+    clientId: process.env.PHONEPE_CLIENT_ID || "",
+    clientSecret: process.env.PHONEPE_CLIENT_SECRET || "",
+    clientVersion: process.env.PHONEPE_CLIENT_VERSION || "1",
+    env: (process.env.PHONEPE_ENV || "SANDBOX").toUpperCase(),
+    webhookSaltKey: process.env.PHONEPE_WEBHOOK_SALT_KEY || "",
+    webhookSaltIndex: process.env.PHONEPE_WEBHOOK_SALT_INDEX || "",
   },
 };
 

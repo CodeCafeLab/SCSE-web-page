@@ -6,7 +6,7 @@ import otpRoutes from './routes/otp.routes';
 import paymentRoutes from './routes/payment.routes';
 
 const app = express();
-const PORT = config.port || 5000;
+const PORT = config.port || 5002;
 
 // CORS configuration - Allow both www and non-www versions
 const allowedOrigins = [
@@ -43,7 +43,11 @@ app.use(cors({
 // Pre-flight requests
 app.options('*', cors());
 
-app.use(express.json());
+app.use(express.json({
+  verify: (req: express.Request & { rawBody?: string }, _res, buf) => {
+    req.rawBody = buf.toString();
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware (for debugging)
@@ -70,26 +74,29 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: config.nodeEnv,
-    cashfreeConfigured: !!(config.cashfree?.clientId && config.cashfree?.clientSecret)
+    environment: config.nodeEnv
   });
 });
 
 // Error handling middleware - must be last
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const normalizedError = err instanceof Error ? err : new Error('Unknown error');
+  const statusCandidate = (err as { status?: number })?.status;
+  const status = typeof statusCandidate === 'number' ? statusCandidate : 500;
+
   console.error('Unhandled error:', {
-    message: err.message,
-    stack: err.stack,
+    message: normalizedError.message,
+    stack: normalizedError.stack,
     path: req.path,
     method: req.method
   });
   
-  res.status(err.status || 500).json({ 
+  res.status(status).json({ 
     success: false, 
     message: process.env.NODE_ENV === 'production' 
       ? 'Something went wrong!' 
-      : err.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+      : normalizedError.message,
+    ...(process.env.NODE_ENV === 'development' && { stack: normalizedError.stack })
   });
 });
 
@@ -119,7 +126,6 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`\n✅ Server is running on: http://localhost:${PORT}`);
       console.log(`Environment: ${config.nodeEnv}`);
-      console.log(`Cashfree Mode: ${config.cashfree?.env || 'NOT CONFIGURED'}`);
       console.log(`Allowed Origins: ${allowedOrigins.join(', ')}\n`);
     });
   } catch (error) {

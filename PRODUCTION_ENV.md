@@ -1,74 +1,39 @@
 # Production .env Configuration for https://dos.suncitysolar.in/
 
-## ⚠️ Important: CORS Restriction
+Cashfree has been removed from the stack. Configure only the shared infrastructure variables until PhonePe details are available.
 
-Cashfree API **CANNOT** be called directly from browser due to CORS. 
-You **MUST** use a backend server (even if minimal) for payment order creation.
+## Frontend variables (`.env.production`)
 
-## Required Environment Variables
-
-### Frontend .env (for build):
 ```env
-# Line 1: Cashfree Client ID
-VITE_CASHFREE_APP_ID=your_production_cashfree_client_id
-
-# Line 2: Backend API URL (Required - must point to your backend)
-VITE_API_URL=https://dos.suncitysolar.in/api
-
-# Line 3: Application URL
-VITE_API_BASE_URL=https://dos.suncitysolar.in
-
-# Line 4: Node Environment
 NODE_ENV=production
-```
-
-### Backend .env (on server - separate file):
-```env
-# Line 1: Port
-PORT=5000
-
-# Line 2: Environment
-NODE_ENV=production
-
-# Line 3: Production Domain
 APP_URL=https://dos.suncitysolar.in
-
-# Line 4: Cashfree Client ID
-CASHFREE_APP_ID=your_production_cashfree_client_id
-
-# Line 5: Cashfree Secret Key (Keep Secret!)
-CASHFREE_SECRET_KEY=your_production_cashfree_secret_key
-
-# Line 6: Cashfree API URL
-CASHFREE_API_URL=https://api.cashfree.com/pg/orders
+VITE_API_BASE_URL=https://dos.suncitysolar.in
+VITE_API_URL=https://dos.suncitysolar.in/api
+PHONEPE_ENV=PRODUCTION
+PHONEPE_CLIENT_ID=SU2511201540330730273312
+PHONEPE_CLIENT_SECRET=22b18d20-93ce-4533-8a4b-938c16d26c37
+PHONEPE_CLIENT_VERSION=1
 ```
 
-## Minimal Backend Setup
+## Backend variables (`server/.env.production`)
 
-The backend server is **minimal** - only handles Cashfree API calls:
-- 1 endpoint: `/api/payment/create-session`
-- Very lightweight
-- Can be deployed as serverless function
+```env
+PORT=5002
+NODE_ENV=production
+APP_URL=https://dos.suncitysolar.in
+FRONTEND_URL=https://dos.suncitysolar.in
+DB_HOST=...
+DB_PORT=3306
+DB_USERNAME=...
+DB_PASSWORD=...
+DB_NAME=...
+EMAIL_HOST=...
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=...
+EMAIL_PASSWORD=...
+EMAIL_FROM=no-reply@dos.suncitysolar.in
+```
 
-## Deployment Options
-
-### Option 1: Same Server
-- Deploy frontend (`dist/`) and backend (`server/`) on same server
-- Configure Nginx to route `/api` to backend
-
-### Option 2: Serverless Function
-- Use Vercel Functions, Netlify Functions, or AWS Lambda
-- Deploy just the payment endpoint
-
-### Option 3: Separate API Subdomain
-- Deploy backend at `https://api.dos.suncitysolar.in`
-- Update `VITE_API_URL=https://api.dos.suncitysolar.in`
-
-## Why Backend is Required
-
-- Browser CORS prevents direct Cashfree API calls
-- Secret key must be kept secure (server-side only)
-- Industry standard security practice
-
-This is the **only secure way** to integrate Cashfree payments.
+> PhonePe credentials, callbacks, and webhook secrets will be documented once the payment gateway contract is finalized. Delete any legacy `CASHFREE_*` variables from your production secrets.
 

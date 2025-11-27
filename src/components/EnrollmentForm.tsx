@@ -361,11 +361,13 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
     }
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     // Only validate if form has been submitted
-    if (!isSubmitted) return true;
+    if (!isSubmitted) {
+      return { isValid: true, errors: newErrors };
+    }
 
     const requiredFields = [
       {
@@ -474,7 +476,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
   };
 
   // Send WhatsApp OTP
@@ -718,12 +720,10 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
     }
 
     // First validate the form
-    const isValid = validateForm();
+    const { isValid, errors: validationErrors } = validateForm();
 
-    // If there are errors, show them and don't proceed with submission
-    if (Object.keys(errors).length > 0) {
-      // Find the first field with an error and scroll to it
-      const firstErrorField = Object.keys(errors)[0];
+    if (!isValid) {
+      const firstErrorField = Object.keys(validationErrors)[0];
       if (firstErrorField) {
         document.getElementById(firstErrorField)?.scrollIntoView({
           behavior: "smooth",
@@ -736,8 +736,6 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
     setIsLoading(true);
 
     try {
-      // Prepare form data for URL parameters
-      const formDataForUrl = new URLSearchParams();
       const formPayload = {
         first_name: formData.first_name.trim(),
         email: formData.email.trim(),
@@ -757,35 +755,7 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         currency: "INR",
       };
 
-      // Add form data to URL parameters
-      Object.entries(formPayload).forEach(([key, value]) => {
-        if (value) formDataForUrl.append(key, value);
-      });
-
-      // Create redirect URL with form data as query parameters
-      const baseUrl = `${window.location.origin}/thank-you`;
-      const redirectUrl = `${baseUrl}?${formDataForUrl.toString()}`;
-
-      // Redirect to Cashfree payment page with the redirect URL
-      const cashfreeUrl = new URL(
-        "https://payments.cashfree.com/forms/solar-training-jan2026"
-      );
-      cashfreeUrl.searchParams.append("redirect", "true");
-      cashfreeUrl.searchParams.append("redirectUrl", redirectUrl);
-
-      // Add any additional parameters required by Cashfree
-      cashfreeUrl.searchParams.append(
-        "customerName",
-        formData.first_name.trim()
-      );
-      cashfreeUrl.searchParams.append("customerEmail", formData.email.trim());
-      cashfreeUrl.searchParams.append(
-        "customerPhone",
-        formData.mobile_no.replace(/\D/g, "")
-      );
-      cashfreeUrl.searchParams.append("amount", "11700");
-
-      // Save form data to localStorage before redirecting
+      // Save form data to localStorage before initiating payment
       const formDataForStorage = {
         ...formPayload,
         timestamp: new Date().toISOString(),
@@ -796,8 +766,55 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
       );
       console.log("Form data saved to localStorage");
 
-      // Redirect to Cashfree payment page
-      window.location.href = cashfreeUrl.toString();
+      console.log("[EnrollmentForm] Validation passed. Initiating PhonePe checkout...");
+
+      const response = await fetch(`${API_BASE_URL}/api/payments/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: 11700,
+          customer: {
+            name: formData.first_name.trim(),
+            email: formData.email.trim(),
+            phone: formData.mobile_no.replace(/\D/g, ""),
+          },
+          formData: formPayload,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create payment order");
+      }
+
+      const responseData = await response.json();
+      console.log("[EnrollmentForm] PhonePe order response:", responseData);
+
+      const redirectUrl = responseData?.data?.redirectUrl;
+      if (!redirectUrl) {
+        throw new Error("PhonePe redirect URL missing in response");
+      }
+
+      const checkout = window.PhonePeCheckout;
+      if (checkout?.transact) {
+        checkout.transact({
+          tokenUrl: redirectUrl,
+          type: "IFRAME",
+          callback: (result) => {
+            console.log("[EnrollmentForm] PhonePe checkout callback:", result);
+            if (result === "USER_CANCEL") {
+              toast({
+                title: "Payment cancelled",
+                description: "You cancelled the PhonePe payment window.",
+                variant: "destructive",
+              });
+            }
+          },
+        });
+      } else {
+        console.info("[EnrollmentForm] PhonePe checkout script unavailable. Redirecting.");
+        window.location.href = redirectUrl;
+      }
     } catch (error) {
       console.error("Error redirecting to payment:", error);
       const errorMessage =

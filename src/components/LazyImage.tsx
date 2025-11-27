@@ -4,6 +4,7 @@ interface LazyImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   placeholder?: string;
   rootMargin?: string;
   eager?: boolean;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export const LazyImage = ({
@@ -14,10 +15,16 @@ export const LazyImage = ({
   rootMargin = "200px",
   eager = false,
   loading,
+  fetchPriority,
   ...props
 }: LazyImageProps) => {
   const imageRef = useRef<HTMLImageElement>(null);
   const [isVisible, setIsVisible] = useState(eager);
+  const normalizedFetchPriority = fetchPriority?.toLowerCase() as
+    | "high"
+    | "low"
+    | "auto"
+    | undefined;
 
   useEffect(() => {
     if (eager || isVisible) return;
@@ -56,6 +63,9 @@ export const LazyImage = ({
       loading={loading ?? (eager ? "eager" : "lazy")}
       decoding="async"
       {...props}
+      {...(normalizedFetchPriority
+        ? { fetchpriority: normalizedFetchPriority }
+        : {})}
     />
   );
 };

@@ -5,7 +5,6 @@ import "./index.css";
 const runtimeInfo = {
   viteMode: import.meta.env.MODE,
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-  cashfreeEnv: import.meta.env.VITE_CASHFREE_MODE ?? "sandbox (default)",
   location: window.location.href,
 };
 

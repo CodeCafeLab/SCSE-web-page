@@ -27,7 +27,7 @@ var vite_config_default = defineConfig(({ mode }) => {
       proxy: {
         // Proxy API requests to the backend server in development
         "/api": {
-          target: "http://localhost:5000",
+          target: "http://localhost:5002",
           changeOrigin: true,
           secure: false,
           rewrite: (path2) => path2.replace(/^\/api/, ""),

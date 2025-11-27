@@ -1,74 +1,37 @@
 # Environment Variables Setup
 
-Create a `.env` file in the root directory with the following variables:
+The Cashfree-specific instructions have been removed. PhonePe credentials are not required yet because the new payment flow is still being built.
 
-## For Development (Local)
+Create a `.env` file in the root directory with the common variables that are still needed today:
 
 ```env
 # Server Configuration
-PORT=5000
+PORT=5002
 NODE_ENV=development
 
-# Frontend URL (for callback URLs)
-VITE_API_BASE_URL=http://localhost:8080
-VITE_API_URL=http://localhost:5000
+# Frontend URLs
 APP_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8080
+VITE_API_URL=http://localhost:5002
 
-# Cashfree Payment Gateway Configuration
-# Get these from: https://dashboard.cashfree.com/
-# For testing, use Sandbox credentials
+# Email / Database secrets
+EMAIL_HOST=...
+EMAIL_PORT=...
+EMAIL_USER=...
+EMAIL_PASSWORD=...
+EMAIL_FROM=...
+DB_HOST=...
+DB_PORT=...
+DB_USERNAME=...
+DB_PASSWORD=...
+DB_NAME=...
 
-# Cashfree App ID (Client ID) - Frontend Safe
-VITE_CASHFREE_APP_ID=your_cashfree_app_id_here
-
-# Cashfree API URL
-# Sandbox: https://sandbox.cashfree.com/pg/orders
-# Production: https://api.cashfree.com/pg/orders
-VITE_CASHFREE_API_URL=https://sandbox.cashfree.com/pg/orders
-
-# Cashfree API URL
-# Sandbox: https://sandbox.cashfree.com/pg/orders
-# Production: https://api.cashfree.com/pg/orders
-CASHFREE_API_URL=https://sandbox.cashfree.com/pg/orders
+# PhonePe sandbox credentials
+PHONEPE_ENV=SANDBOX
+PHONEPE_CLIENT_ID=M23GUHJ84OK0Y_2511271235
+PHONEPE_CLIENT_SECRET=NTRjZTRlM2ItMWRhZS00ZDk0LTkyY2EtN2ZkZDUyYTg5ODhm
+PHONEPE_CLIENT_VERSION=1
 ```
 
-## For Production (https://dos.suncitysolar.in/)
-
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=production
-
-# Production Domain - IMPORTANT: Use your actual production domain
-APP_URL=https://dos.suncitysolar.in
-VITE_API_BASE_URL=https://dos.suncitysolar.in
-VITE_API_URL=https://dos.suncitysolar.in/api
-
-# Cashfree Payment Gateway Configuration
-# Use PRODUCTION credentials from Cashfree dashboard
-
-# Cashfree App ID (Client ID) - Production
-CASHFREE_APP_ID=your_production_cashfree_app_id
-
-# Cashfree Secret Key (Client Secret) - Production
-CASHFREE_SECRET_KEY=your_production_cashfree_secret_key
-
-# Cashfree API URL - Production
-CASHFREE_API_URL=https://api.cashfree.com/pg/orders
-```
-
-## How to get Cashfree Credentials:
-
-1. Go to https://dashboard.cashfree.com/
-2. Sign up or login to your account
-3. Navigate to Developers → API Keys
-4. For testing, use Sandbox credentials
-5. For production, switch to Production mode and use Production credentials
-
-## Important Notes:
-
-- Never commit your `.env` file to git
-- The `.env` file is already in `.gitignore`
-- For production, update `CASHFREE_API_URL` to production URL
-- Update `VITE_API_BASE_URL` to your production domain when deploying
+> These are the sandbox credentials shared by PhonePe. When you move to production, switch `PHONEPE_ENV=PRODUCTION` and replace the client ID/secret with the live pair.
 
