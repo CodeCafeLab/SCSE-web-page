@@ -755,16 +755,20 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
         currency: "INR",
       };
 
+      // Get button ID from localStorage (set when user clicks enrollment button)
+      const clickedButtonId = localStorage.getItem("enrollment_button_id") || undefined;
+      
       // Save form data to localStorage before initiating payment
       const formDataForStorage = {
         ...formPayload,
+        custom_button_id: clickedButtonId,
         timestamp: new Date().toISOString(),
       };
       localStorage.setItem(
         "enrollmentFormData",
         JSON.stringify(formDataForStorage)
       );
-      console.log("Form data saved to localStorage");
+      console.log("[EnrollmentForm] Form data saved to localStorage with button ID:", clickedButtonId);
 
       console.log("[EnrollmentForm] Validation passed. Initiating PhonePe checkout...");
 

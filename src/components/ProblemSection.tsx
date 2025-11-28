@@ -6,7 +6,8 @@ export const ProblemSection = () => {
   const { openDialog } = useEnquiryForm();
 
   const scrollToForm = () => {
-    openDialog();
+    localStorage.setItem("enrollment_button_id", "BTN-PROBLEM");
+    openDialog("BTN-PROBLEM");
   };
 
   return (

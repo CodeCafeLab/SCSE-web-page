@@ -32,7 +32,8 @@ export const Index = ({ advisorId }: IndexProps) => {
 
   // Open enquiry form dialog instead of scrolling
   const scrollToForm = () => {
-    openDialog();
+    localStorage.setItem("enrollment_button_id", "BTN-CURRICULUM");
+    openDialog("BTN-CURRICULUM");
   };
 
   // Calculate remaining time for the offer (until December 12th, 2025, 11:59:59 PM)

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { EnquiryForm } from "./EnquiryForm";
 import { X, Sparkles } from "lucide-react";
+import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 
 interface EnquiryFormDialogProps {
   open: boolean;
@@ -17,6 +18,8 @@ export const EnquiryFormDialog = ({
   open,
   onOpenChange,
 }: EnquiryFormDialogProps) => {
+  const { currentButtonId } = useEnquiryForm();
+  
   const handleSuccess = () => {
     // Close dialog after successful submission
     setTimeout(() => {
@@ -61,7 +64,7 @@ export const EnquiryFormDialog = ({
         {/* Form Content with scrollable area */}
         <div className="px-6 md:px-8 py-6 overflow-y-auto max-h-[calc(95vh-180px)] custom-scrollbar">
           <div className="rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 md:p-8">
-            <EnquiryForm onSuccess={handleSuccess} />
+            <EnquiryForm onSuccess={handleSuccess} buttonId={currentButtonId} />
           </div>
         </div>
 

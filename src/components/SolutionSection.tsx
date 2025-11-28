@@ -13,7 +13,8 @@ export const SolutionSection = () => {
   const { openDialog } = useEnquiryForm();
 
   const scrollToForm = () => {
-    openDialog();
+    localStorage.setItem("enrollment_button_id", "BTN-SOLUTION");
+    openDialog("BTN-SOLUTION");
   };
 
   const features = [

@@ -1,7 +1,7 @@
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -26,41 +26,104 @@ type FormData = {
   course?: string;
   amount?: string;
   currency?: string;
+  advisor_id?: string;
+  custom_button_id?: string;
+  referral_code?: string;
+};
+
+type PaymentDetails = {
+  orderId?: string;
+  transactionId?: string;
+  paymentMode?: string;
+  amount?: number;
+  state?: string;
 };
 
 export const ThankYou = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(true);
   const [formData, setFormData] = useState<FormData | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Helper function to format date from YYYY-MM-DD to DD-MM-YYYY
+  const formatDate = (dateStr: string | undefined): string => {
+    if (!dateStr) return "";
+    try {
+      // If already in DD-MM-YYYY format, return as is
+      if (dateStr.includes("-") && dateStr.split("-")[0].length === 2) {
+        return dateStr;
+      }
+      // If in YYYY-MM-DD format, convert to DD-MM-YYYY
+      const [year, month, day] = dateStr.split("-");
+      return `${day}-${month}-${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Helper function to get payment mode from PhonePe response
+  const getPaymentMode = (paymentDetails: PaymentDetails | undefined): string => {
+    if (!paymentDetails?.paymentMode) return "UPI";
+    const mode = paymentDetails.paymentMode;
+    // Map PhonePe payment modes to simpler format
+    if (mode.includes("UPI")) return "UPI";
+    if (mode.includes("CARD")) return "CARD";
+    if (mode.includes("NETBANKING")) return "NETBANKING";
+    return mode;
+  };
+
   useEffect(() => {
     const processEnrollment = async () => {
       try {
         console.log("Processing enrollment...");
+        console.log("[ThankYou] URL search params:", Object.fromEntries(searchParams.entries()));
+        console.log("[ThankYou] Location state:", location.state);
 
-        // Get form data from localStorage
-        const storedFormData = localStorage.getItem("enrollmentFormData");
+        // Get payment details from location state (passed from PaymentCallback)
+        const paymentDetails = location.state?.paymentDetails as PaymentDetails | undefined;
+        const paymentId = searchParams.get("payment_id") || paymentDetails?.orderId || `enrollment_${Date.now()}`;
+        const amountPaid = searchParams.get("amount_paid") || (paymentDetails?.amount ? (paymentDetails.amount / 100).toString() : "");
+
+        // Get form data from URL params, location state, or localStorage
         let formData: FormData;
+        const stateFormData = location.state?.formData as FormData | undefined;
+        const storedFormData = localStorage.getItem("enrollmentFormData");
 
-        if (storedFormData) {
+        if (stateFormData) {
+          console.log("Using form data from location state");
+          formData = stateFormData;
+        } else if (storedFormData) {
           console.log("Using form data from localStorage");
           formData = JSON.parse(storedFormData);
-          // Clean up by removing the stored data after using it
           localStorage.removeItem("enrollmentFormData");
         } else {
-          console.log("No form data found, using default values");
+          // Try to reconstruct from URL params
           formData = {
-            first_name: "Student",
-            email: "no-email@example.com",
-            course: "Solar business training course fee",
-            amount: "11700",
-            currency: "INR",
+            first_name: searchParams.get("first_name") || undefined,
+            email: searchParams.get("email") || undefined,
+            gender: searchParams.get("gender") || undefined,
+            birth_date: searchParams.get("birth_date") || undefined,
+            mobile_no: searchParams.get("mobile_no") || undefined,
+            address: searchParams.get("address") || undefined,
+            city: searchParams.get("city") || undefined,
+            state: searchParams.get("state") || undefined,
+            pincode: searchParams.get("pincode") || undefined,
+            qualification: searchParams.get("qualification") || undefined,
+            present_occupation: searchParams.get("present_occupation") || undefined,
+            course: searchParams.get("course") || "Solar business training course",
+            amount: searchParams.get("amount") || amountPaid || "11700",
+            currency: searchParams.get("currency") || "INR",
+            advisor_id: searchParams.get("advisor_id") || undefined,
+            custom_button_id: searchParams.get("custom_button_id") || undefined,
+            referral_code: searchParams.get("referral_code") || undefined,
           };
         }
 
-        console.log("Form Data:", formData);
+        console.log("[ThankYou] Form Data:", formData);
+        console.log("[ThankYou] Payment Details:", paymentDetails);
         setFormData(formData);
 
         // Validate required fields before proceeding
@@ -75,35 +138,33 @@ export const ThankYou = () => {
           );
         }
 
-        // Create the API payload
+        // Get payment transaction ID and mode from PhonePe response
+        const transactionId = paymentDetails?.transactionId || paymentId;
+        const paymentMode = getPaymentMode(paymentDetails);
+
+        // Create the API payload matching ERP API format
         const apiPayload = {
-          first_name: formData.first_name || "Not Provided",
-          email: formData.email || "not-provided@example.com",
-          course: formData.course || "Solar business training course fee",
+          first_name: formData.first_name.trim(),
+          email: formData.email.trim(),
+          course: formData.course || "Solar business training course",
           gender: formData.gender || "Not Specified",
-          birth_date: formData.birth_date || "",
+          bith_date: formatDate(formData.birth_date) || "", // Note: API expects "bith_date" (typo in API)
           mobile_no: formData.mobile_no
             ? formData.mobile_no.replace(/\D/g, "")
             : "",
-          advisor_id: "advisor1",
-          amount: formData.amount ? parseInt(formData.amount) : 11700,
+          advisor_id: formData.advisor_id || searchParams.get("advisor_id") || undefined, // Only include if present
+          amount: formData.amount ? parseInt(formData.amount) : (amountPaid ? parseInt(amountPaid) : 11700),
           currency: formData.currency || "INR",
-          payment_id: `enrollment_${Date.now()}`,
-          payment_status: "success",
           address: formData.address ? formData.address.trim() : "Not Provided",
           city: formData.city ? formData.city.trim() : "Not Specified",
-          state: formData.state || "Not Specified",
-          pincode: formData.pincode || "000000",
-          qualification: formData.qualification || "Not Specified",
-          present_occupation: formData.present_occupation || "Not Specified",
           address_type: "Billing",
-          country: "India",
-          source: "Website",
-          enrollment_date: new Date().toISOString().split("T")[0],
+          custom_transaction_id: transactionId,
+          custom_mode_of_payment: paymentMode,
+          custom_button_id: formData.custom_button_id || searchParams.get("custom_button_id") || undefined, // Only include if present
         };
 
         console.log(
-          "Sending payload to API:",
+          "[ThankYou] Sending payload to ERP API:",
           JSON.stringify(apiPayload, null, 2)
         );
 
@@ -118,12 +179,18 @@ export const ThankYou = () => {
           }
         );
 
+        const responseData = await response.json();
+        console.log("[ThankYou] ERP API Response:", responseData);
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to process enrollment");
+          throw new Error(
+            responseData.message?.message || 
+            responseData.message || 
+            "Failed to process enrollment"
+          );
         }
 
-        console.log("Enrollment successful");
+        console.log("[ThankYou] Enrollment successful");
       } catch (error) {
         console.error("Error processing enrollment:", error);
         const errorMessage =

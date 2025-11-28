@@ -20,13 +20,15 @@ interface EnquiryFormData {
   occupation: string;
   batchPreference: string;
   message?: string;
+  custom_button_id?: string;
 }
 
 interface EnquiryFormProps {
   onSuccess?: () => void;
+  buttonId?: string;
 }
 
-export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
+export const EnquiryForm = ({ onSuccess, buttonId }: EnquiryFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +39,7 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
     occupation: "",
     batchPreference: "",
     message: "",
+    custom_button_id: buttonId || undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -138,6 +141,18 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
     setIsLoading(true);
 
     try {
+      const payload = {
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        city: formData.city.trim(),
+        occupation: formData.occupation,
+        batchPreference: formData.batchPreference,
+        message: formData.message.trim() || undefined,
+        ...(formData.custom_button_id && { custom_button_id: formData.custom_button_id }),
+      };
+
+      console.log("[EnquiryForm] Sending payload to ERP API:", payload);
+
       const response = await fetch(
         "https://erp.suncitysolar.in/api/method/create_website_lead",
         {
@@ -145,18 +160,12 @@ export const EnquiryForm = ({ onSuccess }: EnquiryFormProps) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            name: formData.name.trim(),
-            phone: formData.phone.trim(),
-            city: formData.city.trim(),
-            occupation: formData.occupation,
-            batchPreference: formData.batchPreference,
-            message: formData.message.trim() || undefined,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       const data = await response.json();
+      console.log("[EnquiryForm] ERP API Response:", data);
 
       if (response.ok && data.message?.success) {
         toast({

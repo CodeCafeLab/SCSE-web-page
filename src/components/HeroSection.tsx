@@ -61,7 +61,8 @@ export const HeroSection = ({ timeLeft, offerEnded }: HeroSectionProps) => {
   }, []);
 
   const scrollToEnrollmentForm = () => {
-    openDialog();
+    localStorage.setItem("enrollment_button_id", "BTN-HERO");
+    openDialog("BTN-HERO");
   };
 
   const features = [

@@ -275,7 +275,10 @@ export const TestimonialSection = () => {
           </p>
 
           <Button
-            onClick={openDialog}
+            onClick={() => {
+              localStorage.setItem("enrollment_button_id", "BTN-TESTIMONIAL");
+              openDialog("BTN-TESTIMONIAL");
+            }}
             size="lg"
             className="group bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 px-10 rounded-full shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1 font-bold"
           >
