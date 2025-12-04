@@ -1,0 +1,65 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Uncomment to require CI to pass before deployment
+    # needs: [build-frontend, build-backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify deployment script exists
+        run: |
+          if [ ! -f "deploy.sh" ]; then
+            echo "ERROR: deploy.sh not found"
+            exit 1
+          fi
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 72.60.218.240
+          username: root
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            cd /var/www/SCSE-web-page
+            bash deploy.sh
+          envs: DEPLOY_TIMESTAMP
+        env:
+          DEPLOY_TIMESTAMP: ${{ github.run_number }}-${{ github.sha }}
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 72.60.218.240
+          username: root
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            # Check PM2 processes
+            pm2 list
+            
+            # Verify frontend dist exists
+            if [ ! -d "/var/www/SCSE-web-page/dist" ]; then
+              echo "ERROR: Frontend dist directory not found"
+              exit 1
+            fi
+            
+            # Verify backend dist exists
+            if [ ! -f "/var/www/SCSE-web-page/server/dist/index.js" ]; then
+              echo "ERROR: Backend dist/index.js not found"
+              exit 1
+            fi
+            
+            echo "✅ Deployment verification successful"
+
