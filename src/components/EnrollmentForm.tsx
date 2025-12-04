@@ -759,62 +759,6 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
       const clickedButtonId =
         localStorage.getItem("enrollment_button_id") || undefined;
 
-      // Create enrollment in ERP before redirecting to payment (payment fields empty)
-      try {
-        const erpPayload = {
-          first_name: formPayload.first_name,
-          email: formPayload.email,
-          course: formPayload.course,
-          gender: formPayload.gender || "Not Specified",
-          bith_date: formPayload.birth_date || "",
-          mobile_no: formPayload.mobile_no,
-          advisor_id: formPayload.referral_code || undefined,
-          amount: 0,
-          currency: formPayload.currency || "INR",
-          address: formPayload.address || "Not Provided",
-          city: formPayload.city || "Not Specified",
-          address_type: "Billing",
-          custom_transaction_id: "",
-          custom_mode_of_payment: "",
-          custom_button_id: clickedButtonId,
-        };
-
-        console.log(
-          "[EnrollmentForm] Sending payload to ERP API before payment:",
-          JSON.stringify(erpPayload, null, 2)
-        );
-
-        const erpResponse = await fetch(
-          "https://erp.suncitysolar.in/api/method/lms_enrollment_api",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(erpPayload),
-          }
-        );
-
-        const erpData = await erpResponse.json();
-        console.log("[EnrollmentForm] ERP API response:", erpData);
-
-        if (!erpResponse.ok) {
-          console.error(
-            "[EnrollmentForm] ERP enrollment failed before payment:",
-            erpData
-          );
-        } else {
-          console.log(
-            "[EnrollmentForm] Enrollment created successfully in ERP before payment"
-          );
-        }
-      } catch (erpError) {
-        console.error(
-          "[EnrollmentForm] Error creating enrollment in ERP before payment:",
-          erpError
-        );
-      }
-
       // Save form data to localStorage before initiating payment
       const formDataForStorage = {
         ...formPayload,
