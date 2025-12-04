@@ -14,6 +14,7 @@ import { Layout } from "./components/Layout";
 import { PaymentCallback } from "./components/PaymentCallback";
 import ThankYou from "./pages/ThankYou";
 import EnquiryThankYou from "./pages/EnquiryThankYou";
+import { EnrollmentPage } from "./pages/EnrollmentPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { Index } from "./pages/Index";
 import { EnquiryFormProvider } from "./contexts/EnquiryFormContext";
@@ -22,6 +23,12 @@ import { EnquiryFormProvider } from "./contexts/EnquiryFormContext";
 const IndexWithAdvisor = () => {
   const { advisorId } = useParams<{ advisorId?: string }>();
   return <Index advisorId={advisorId} />;
+};
+
+// Wrapper component for enrollment route with advisorId
+const EnrollmentPageWithAdvisor = () => {
+  const { advisorId } = useParams<{ advisorId?: string }>();
+  return <EnrollmentPage advisorId={advisorId} />;
 };
 
 const queryClient = new QueryClient();
@@ -38,6 +45,14 @@ const routes: RouteObject[] = [
   {
     path: "/:advisorId",
     element: withLayout(<IndexWithAdvisor />),
+  },
+  {
+    path: "/enrolment",
+    element: withLayout(<EnrollmentPage />),
+  },
+  {
+    path: "/enrolment/:advisorId",
+    element: withLayout(<EnrollmentPageWithAdvisor />),
   },
   {
     path: "/terms",
