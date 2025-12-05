@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { LazyImage } from "./LazyImage";
 import suncityLogoSrc from "../assets/suncity-logo.png";
-import { Button } from "@/components/ui/button";
-import { useEnquiryForm } from "@/contexts/EnquiryFormContext";
 import { cn } from "@/lib/utils";
 
 const scrollToSelector = (selector: string) => {
@@ -20,7 +18,6 @@ const scrollToSelector = (selector: string) => {
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
-  const { openDialog } = useEnquiryForm();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,38 +72,67 @@ export const Header = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-8">
-            <Button
-              onClick={() => {
-                localStorage.setItem(
-                  "enrollment_button_id",
-                  "BTN-HEADER-DESKTOP"
-                );
-                openDialog("BTN-HEADER-DESKTOP");
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm sm:text-base px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap"
-              aria-label="Book Your Seat"
-            >
-              Book Your Seat
-            </Button>
+            {/* Pricing Box */}
+            <div className="ml-4 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-right">
+                  <div className="flex items-center justify-end">
+                    <span className="mr-1 text-xs text-gray-500 line-through sm:text-sm">
+                      ₹15,700
+                    </span>
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
+                      25% OFF
+                    </span>
+                  </div>
+                  <div className="text-lg font-bold text-gray-900 sm:text-xl">
+                    ₹11,700
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    localStorage.setItem("enrollment_button_id", "BTN-HEADER-DESKTOP");
+                    scrollToSelector("#enrollment-form");
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors whitespace-nowrap"
+                  aria-label="Enroll Now"
+                >
+                  Enroll Now
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Mobile CTA - Improved Layout with Button Inside Box */}
           <div className="md:hidden flex-shrink-0">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg px-2.5 py-1.5 border border-blue-200/50 shadow-sm flex justify-center">
-              <Button
-                onClick={() => {
-                  localStorage.setItem(
-                    "enrollment_button_id",
-                    "BTN-HEADER-MOBILE"
-                  );
-                  openDialog("BTN-HEADER-MOBILE");
-                }}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs xs:text-sm px-4 xs:px-5 py-2 xs:py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 whitespace-nowrap"
-                aria-label="Book Your Seat"
-              >
-                Book Your Seat
-              </Button>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg px-2.5 py-1.5 border border-blue-200/50 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                {/* Pricing Info */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] xs:text-xs text-gray-500 line-through font-medium">
+                      ₹15,700
+                    </span>
+                    <span className="rounded-full bg-red-500 text-white px-1.5 py-0.5 text-[9px] xs:text-[10px] font-bold leading-none shadow-sm">
+                      25% OFF
+                    </span>
+                  </div>
+                  <div className="text-base xs:text-lg font-bold text-gray-900 leading-tight">
+                    ₹11,700
+                  </div>
+                </div>
+
+                {/* Enhanced Enroll Button */}
+                <button
+                  onClick={() => {
+                    localStorage.setItem("enrollment_button_id", "BTN-HEADER-MOBILE");
+                    scrollToSelector("#enrollment-form");
+                  }}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs xs:text-sm px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
+                  aria-label="Enroll Now"
+                >
+                  Enroll Now
+                </button>
+              </div>
             </div>
           </div>
         </div>
