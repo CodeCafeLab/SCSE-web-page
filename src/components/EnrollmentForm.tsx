@@ -241,6 +241,46 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Helper function to validate age (18+)
+  const validateAge = (birthDateString: string): string | null => {
+    if (!birthDateString) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const birthDate = new Date(birthDateString);
+
+    if (isNaN(birthDate.getTime())) {
+      return "Please enter a valid date of birth";
+    }
+
+    if (birthDate >= today) {
+      return "Date of birth cannot be in the future";
+    }
+
+    // Check minimum valid date
+    const minValidDate = new Date("1900-01-01");
+    if (birthDate < minValidDate) {
+      return "Please enter a valid date of birth";
+    }
+
+    // Calculate age
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 18) {
+      return "You must be at least 18 years old to enroll";
+    }
+
+    return null; // No error
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -278,7 +318,26 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
       setEmailOtp("");
     }
 
+    // Update form data
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Validate age immediately when date of birth is selected
+    if (name === "birth_date" && value) {
+      const ageError = validateAge(value);
+      if (ageError) {
+        setErrors((prev) => ({
+          ...prev,
+          birth_date: ageError,
+        }));
+      } else {
+        // Clear birth_date error if age is valid
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.birth_date;
+          return newErrors;
+        });
+      }
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -445,33 +504,9 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
 
     // Date of birth validation
     if (formData.birth_date) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const birthDate = new Date(formData.birth_date);
-
-      if (isNaN(birthDate.getTime())) {
-        newErrors.birth_date = "Please enter a valid date of birth";
-      } else if (birthDate >= today) {
-        newErrors.birth_date = "Date of birth cannot be in the future";
-      } else {
-        const minValidDate = new Date("1900-01-01");
-        if (birthDate < minValidDate) {
-          newErrors.birth_date = "Please enter a valid date of birth";
-        } else {
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const monthDiff = today.getMonth() - birthDate.getMonth();
-
-          if (
-            monthDiff < 0 ||
-            (monthDiff === 0 && today.getDate() < birthDate.getDate())
-          ) {
-            age--;
-          }
-
-          if (age < 18) {
-            newErrors.birth_date = "You must be at least 18 years old";
-          }
-        }
+      const ageError = validateAge(formData.birth_date);
+      if (ageError) {
+        newErrors.birth_date = ageError;
       }
     }
 
@@ -1062,7 +1097,24 @@ export const EnrollmentForm = ({ advisorId }: EnrollmentFormProps) => {
               type="date"
               value={formData.birth_date}
               onChange={handleInputChange}
-              onBlur={() => validateForm()}
+              onBlur={(e) => {
+                if (e.target.value) {
+                  const ageError = validateAge(e.target.value);
+                  if (ageError) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      birth_date: ageError,
+                    }));
+                  } else {
+                    setErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors.birth_date;
+                      return newErrors;
+                    });
+                  }
+                }
+                validateForm();
+              }}
               className={errors.birth_date ? "border-red-500" : ""}
               max={new Date().toISOString().split("T")[0]}
             />
